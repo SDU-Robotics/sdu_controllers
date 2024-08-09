@@ -11,7 +11,7 @@ repos:
     hooks:
       - id: clang-format
         args:
-        - --style=Mozilla
+          - --style=Google
         exclude: ^ext/
 
   # Add some general purpose useful hooks

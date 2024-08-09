@@ -1,6 +1,7 @@
 #pragma once
 
-namespace sdu_controllers {
+namespace sdu_controllers
+{
 
 /** @brief A very interesting function!
  *
@@ -11,7 +12,6 @@ namespace sdu_controllers {
  * @param x The number to increase
  * @returns the successor of x
  */
-int
-add_one(int x);
+int add_one(int x);
 
-} // namespace sdu_controllers
+}  // namespace sdu_controllers

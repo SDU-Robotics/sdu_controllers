@@ -16,10 +16,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sdu_controllers"
 version = "0.0.1"
-description = "Add short description here"
+description = "A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU)."
 readme = "README.md"
 maintainers = [
-    { name = "Anders Prier Lindvig", email = "your@email.com" },
+    { name = "Anders Prier Lindvig", email = "anpl@mmmi.sdu.dk" },
 ]
 requires-python = ">=3.8"
 license = { text = "MIT" }

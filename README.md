@@ -1,4 +1,6 @@
-# Welcome to sdu_controllers
+# sdu_controllers
+
+A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SDU-Robotics/sdu_controllers/ci.yml?branch=main)](https://github.com/SDU-Robotics/sdu_controllers/actions/workflows/ci.yml)
@@ -6,16 +8,16 @@
 [![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu_controllers.readthedocs.io/)
 
 
-
-# Prerequisites
+## Prerequisites
 
 Building sdu_controllers requires the following software installed:
 
 * A C++20-compliant compiler
 * CMake `>= 3.9`
-* Doxygen (optional, documentation building is skipped if missing)* Python `>= 3.8` for building Python bindings
+* Doxygen (optional, documentation building is skipped if missing)
+* Python `>= 3.8` for building Python bindings
 
-# Building sdu_controllers
+## Building sdu_controllers
 
 The following sequence of commands builds sdu_controllers.
 It assumes that your current working directory is the top-level directory
@@ -44,7 +46,7 @@ can do so using `pip` from the root directory:
 python -m pip install .
 ```
 
-# Testing sdu_controllers
+## Testing sdu_controllers
 
 When built according to the above explanation (with `-DBUILD_TESTING=ON`),
 the C++ test suite of `sdu_controllers` can be run using
@@ -63,7 +65,7 @@ python -m pip install .
 pytest
 ```
 
-# Documentation
+## Documentation
 
 sdu_controllers provides a Sphinx-based documentation, that can
 be browsed [online at readthedocs.org](https://sdu_controllers.readthedocs.io).

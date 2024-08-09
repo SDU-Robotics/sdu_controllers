@@ -5,7 +5,8 @@
 
 namespace py = pybind11;
 
-namespace sdu_controllers {
+namespace sdu_controllers
+{
 
 PYBIND11_MODULE(_sdu_controllers, m)
 {
@@ -13,4 +14,4 @@ PYBIND11_MODULE(_sdu_controllers, m)
   m.def("add_one", &add_one, "Increments an integer value");
 }
 
-} // namespace sdu_controllers
+}  // namespace sdu_controllers
