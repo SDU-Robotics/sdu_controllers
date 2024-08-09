@@ -68,7 +68,7 @@ pytest
 ## Documentation
 
 sdu_controllers provides a Sphinx-based documentation, that can
-be browsed [online at readthedocs.org](https://sdu_controllers.readthedocs.io).
+be browsed [online at readthedocs.org](https://sdu-controllers.readthedocs.io).
 To build it locally, first ensure the requirements are installed by running this command from the top-level source directory:
 
 ```
