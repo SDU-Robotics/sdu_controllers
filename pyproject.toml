@@ -1,0 +1,57 @@
+# This section describes the requirements of the build/installation
+# process itself. Being able to do this was the original reason to
+# introduce pyproject.toml
+[build-system]
+requires = [
+    "setuptools>=61",
+    "wheel",
+    "scikit-build",
+    "cmake>=3.9",
+]
+build-backend = "setuptools.build_meta"
+
+# This section provides general project metadata that is used across
+# a variety of build tools. Notably, the version specified here is the
+# single source of truth for sdu_controllers's version
+[project]
+name = "sdu_controllers"
+version = "0.0.1"
+description = "Add short description here"
+readme = "README.md"
+maintainers = [
+    { name = "Anders Prier Lindvig", email = "your@email.com" },
+]
+requires-python = ">=3.8"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = []
+
+# NB: Setuptools-specific build options are currently still stored
+#     in setup.py, as scikit-build is not (yet) supporting PEP621.
+#     Later on, these will be stored in [tool.setuptools]
+
+# The following is the configuration for the pytest test suite
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+
+# The next section configures building wheels in Continuous Integration
+# The cibuildwheel documentation covers the available options in detail:
+# https://cibuildwheel.readthedocs.io/en/stable/options/
+[tool.cibuildwheel]
+# The variables in this section allow you to customize the process how the wheels
+# for the Python packages are built. For a list of options, see this
+# page: https://cibuildwheel.readthedocs.io/en/stable/options/
+
+# Verbose output is helpful for understanding CI failures
+build-verbosity = 3
+
+# We restrict ourselves to recent Python versions
+skip = "pp* *p27-* cp35-* cp36-* cp37-* *musllinux*"
+
+# Testing commands for our wheels
+test-command = "pytest {package}/tests/python"
+test-requires = ["pytest"]

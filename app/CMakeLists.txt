@@ -1,0 +1,2 @@
+add_executable(sdu_controllers_app sdu_controllers_app.cpp)
+target_link_libraries(sdu_controllers_app PRIVATE sdu_controllers)
