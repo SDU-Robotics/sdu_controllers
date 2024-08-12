@@ -5,7 +5,7 @@ A C++ library containing robot controllers and algorithms developed at Universit
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SDU-Robotics/sdu_controllers/ci.yml?branch=main)](https://github.com/SDU-Robotics/sdu_controllers/actions/workflows/ci.yml)
 [![PyPI Release](https://img.shields.io/pypi/v/sdu_controllers.svg)](https://pypi.org/project/sdu_controllers)
-[![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu_controllers.readthedocs.io/)
+[![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu-controllers.readthedocs.io/)
 
 
 ## Prerequisites
@@ -68,7 +68,7 @@ pytest
 ## Documentation
 
 sdu_controllers provides a Sphinx-based documentation, that can
-be browsed [online at readthedocs.org](https://sdu_controllers.readthedocs.io).
+be browsed [online at readthedocs.org](https://sdu-controllers.readthedocs.io).
 To build it locally, first ensure the requirements are installed by running this command from the top-level source directory:
 
 ```
