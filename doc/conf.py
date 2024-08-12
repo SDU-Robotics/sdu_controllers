@@ -20,7 +20,7 @@ import subprocess
 # -- Project information -----------------------------------------------------
 
 project = "sdu_controllers"
-copyright = "2024, Anders Prier Lindvig"
+copyright = "2024, SDU Robotics, University of Southern Denmark"
 author = "Anders Prier Lindvig"
 
 # -- General configuration ---------------------------------------------------
