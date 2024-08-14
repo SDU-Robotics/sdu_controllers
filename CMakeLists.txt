@@ -38,11 +38,19 @@ if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 if(BUILD_PYTHON)
-  # Add Python bindings
-  add_subdirectory(ext/pybind11)
+  if (CMAKE_VERSION VERSION_LESS 3.18)
+    set(DEV_MODULE Development)
+  else()
+    set(DEV_MODULE Development.Module)
+  endif()
 
-  # Compile the Pybind11 module
-  pybind11_add_module(_sdu_controllers
+  find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+  # Add Python bindings
+  add_subdirectory(ext/nanobind)
+
+  # Compile the nanobind module
+  nanobind_add_module(_sdu_controllers
                       python/sdu_controllers/_sdu_controllers.cpp)
   target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "sdu_controllers/sdu_controllers.hpp"
+#include <sdu_controllers/sdu_controllers.hpp>
 
 int main()
 {
