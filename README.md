@@ -4,14 +4,14 @@
     <img width=35% src="doc/_static/sdu_controllers-logo-graph.png">
 </div>
 <div align="center">
+<p>
+</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SDU-Robotics/sdu_controllers/ci.yml?branch=main)](https://github.com/SDU-Robotics/sdu_controllers/actions/workflows/ci.yml)
 [![PyPI Release](https://img.shields.io/pypi/v/sdu_controllers.svg)](https://pypi.org/project/sdu_controllers)
 [![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu-controllers.readthedocs.io/)
 </div>
-
-# sdu_controllers
 
 A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU).
 
