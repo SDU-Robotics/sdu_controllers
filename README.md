@@ -13,7 +13,7 @@
 
 # sdu_controllers
 
-A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU).
+A C++ library containing robot controllers developed at University of Southern Denmark (SDU).
 
 ## Prerequisites
 

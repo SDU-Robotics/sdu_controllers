@@ -30,6 +30,8 @@ author = "Anders Prier Lindvig"
 # ones.
 extensions = [
     "breathe",
+    "sphinx_copybutton",
+    "sphinx_inline_tabs",
     "sphinx_rtd_theme",
 ]
 
@@ -40,6 +42,9 @@ templates_path = []
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+# The master toctree document.
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 
