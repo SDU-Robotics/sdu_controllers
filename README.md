@@ -4,6 +4,8 @@
     <img width=35% src="doc/_static/sdu_controllers-logo-graph.png">
 </div>
 <div align="center">
+<p>
+</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SDU-Robotics/sdu_controllers/ci.yml?branch=main)](https://github.com/SDU-Robotics/sdu_controllers/actions/workflows/ci.yml)
