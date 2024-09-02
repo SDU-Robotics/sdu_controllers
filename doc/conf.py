@@ -41,7 +41,7 @@ templates_path = []
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The master toctree document.
 master_doc = 'index'
@@ -60,6 +60,9 @@ html_static_path = ["_static"]
 
 # Logo
 html_logo = "_static/sdu_controllers-logo-graph-white-notext.png"
+
+# The default language to highlight source code.
+highlight_language = 'cpp'
 
 # Breathe Configuration: Breathe is the bridge between the information extracted
 # from the C++ sources by Doxygen and Sphinx.

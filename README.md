@@ -23,6 +23,7 @@ Building sdu_controllers requires the following software installed:
 
 * A C++20-compliant compiler
 * CMake `>= 3.9`
+* Eigen3 `>= 3.3` for linear algebra.
 * Doxygen (optional, documentation building is skipped if missing)
 * Python `>= 3.8` for building Python bindings
 

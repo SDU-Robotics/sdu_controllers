@@ -15,17 +15,17 @@ class Controller
 public:
 
   /**
-   * \brief Step the execution of the controller (must be called in a loop externally).
+   * @brief Step the execution of the controller (must be called in a loop externally).
    */
   virtual void step();
 
   /**
-   * \brief Get the state of the controller. Updates when the step function is called.
+   * @brief Get the state of the controller. Updates when the step function is called.
    */
   virtual void get_state();
 
   /**
-   * \brief Reset internal controller variables.
+   * @brief Reset internal controller variables.
    */
   virtual void reset();
 

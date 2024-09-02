@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set a name and a version number for your project:
 project(
@@ -19,11 +20,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_PYTHON "Enable building of Python bindings" ON)
 option(BUILD_DOCS "Enable building of documentation" ON)
 
+# find dependencies
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
 # compile the library
 add_subdirectory(src)
 
-# compile the application
-add_subdirectory(app)
+# compile the examples
+add_subdirectory(examples)
 
 # compile the tests
 include(CTest)
