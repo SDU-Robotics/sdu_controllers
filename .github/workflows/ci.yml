@@ -36,8 +36,8 @@ jobs:
           brew: eigen
         windows: |
           github:
-            - path: libeigen/eigen
-              ref: 3.3.9
+            - path: eigenteam/eigen-git-mirror
+              ref: 3.3.7
 
     - name: make build directory
       run: cmake -E make_directory ${{ github.workspace }}/build
