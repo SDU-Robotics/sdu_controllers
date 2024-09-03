@@ -11,8 +11,8 @@ sdu_controllers needs to be used in conjunction with either a robot simulator or
 Typically the controllers are part of a control loop that sends target positions to a robot with
 a given frequency.
 
-Example with simulated UR robot
-===============================
+Example with Breeding Blanket Handling Robot
+============================================
 
 .. tab:: C++
 
