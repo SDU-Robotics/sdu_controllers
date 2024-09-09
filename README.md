@@ -9,10 +9,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SDU-Robotics/sdu_controllers/ci.yml?branch=main)](https://github.com/SDU-Robotics/sdu_controllers/actions/workflows/ci.yml)
-[![PyPI Release](https://img.shields.io/pypi/v/sdu_controllers.svg)](https://pypi.org/project/sdu_controllers)
+[![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu-controllers.readthedocs.io/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SDU-Robotics_sdu_controllers&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SDU-Robotics_sdu_controllers)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=SDU-Robotics_sdu_controllers&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=SDU-Robotics_sdu_controllers)
-[![Documentation Status](https://readthedocs.org/projects/sdu_controllers/badge/)](https://sdu-controllers.readthedocs.io/)
+<!-- [![PyPI Release](https://img.shields.io/pypi/v/sdu_controllers.svg)](https://pypi.org/project/sdu_controllers) -->
+
 </div>
 
 # sdu_controllers
