@@ -11,7 +11,7 @@ project(
 include(GNUInstallDirs)
 
 # Define the minimum C++ standard that is required
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -21,7 +21,7 @@ option(BUILD_PYTHON "Enable building of Python bindings" ON)
 option(BUILD_DOCS "Enable building of documentation" ON)
 
 # find dependencies
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # compile the library
 add_subdirectory(src)

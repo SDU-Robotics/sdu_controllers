@@ -19,7 +19,6 @@ namespace sdu_controllers::controllers
     Mo_ = Mo_vec.asDiagonal();
     Ko_ = Ko_vec.asDiagonal();
     Do_ = Do_vec.asDiagonal();
-
   }
 
   AdmittanceControllerPosition::~AdmittanceControllerPosition() = default;

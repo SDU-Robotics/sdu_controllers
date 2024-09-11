@@ -21,7 +21,7 @@ A C++ library containing robot controllers developed at University of Southern D
 
 Building sdu_controllers requires the following software installed:
 
-* A C++20-compliant compiler
+* A C++17-compliant compiler
 * CMake `>= 3.9`
 * Eigen3 `>= 3.3` for linear algebra.
 * Doxygen (optional, documentation building is skipped if missing)
