@@ -21,7 +21,7 @@ namespace sdu_controllers::math
     }
     virtual ~InverseDynamics() = default;
 
-   protected:
+   private:
     models::RobotModel robot_model_;
   };
 

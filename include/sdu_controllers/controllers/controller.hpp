@@ -15,17 +15,17 @@ namespace sdu_controllers::controllers
     /**
      * @brief Step the execution of the controller (must be called in a loop externally).
      */
-    virtual void step();
+    virtual void step() = 0;
 
     /**
      * @brief Get the state of the controller. Updates when the step function is called.
      */
-    virtual void get_state();
+    virtual void get_state() = 0;
 
     /**
      * @brief Reset internal controller variables.
      */
-    virtual void reset();
+    virtual void reset() = 0;
 
     virtual ~Controller() = default;
   };
