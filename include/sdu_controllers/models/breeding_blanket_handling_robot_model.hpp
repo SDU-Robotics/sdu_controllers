@@ -6,6 +6,8 @@
 #include <Eigen/Dense>
 #include <sdu_controllers/models/robot_model.hpp>
 
+constexpr uint16_t ROBOT_DOF = 7;
+
 namespace sdu_controllers::models
 {
 
@@ -16,7 +18,7 @@ namespace sdu_controllers::models
 class BreedingBlanketHandlingRobotModel : public RobotModel
 {
 public:
-  explicit BreedingBlanketHandlingRobotModel();
+  BreedingBlanketHandlingRobotModel();
 
   ~BreedingBlanketHandlingRobotModel() override;
 
@@ -39,6 +41,11 @@ public:
    * @brief Get gravity term \f$ \tau_{g} \f$
    */
   Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
+
+  uint16_t get_dof() const;
+
+private:
+  uint16_t dof_{ROBOT_DOF};
 
 };
 

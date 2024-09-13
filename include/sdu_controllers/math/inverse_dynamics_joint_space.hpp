@@ -16,7 +16,7 @@ namespace sdu_controllers::math
   class InverseDynamicsJointSpace : public InverseDynamics
   {
    public:
-    explicit InverseDynamicsJointSpace(const models::RobotModel &robot_model);
+    explicit InverseDynamicsJointSpace(std::shared_ptr<models::RobotModel> robot_model);
     ~InverseDynamicsJointSpace() override;
 
     /**
@@ -29,14 +29,13 @@ namespace sdu_controllers::math
      *
      * @param y auxiliary control input.
      * @param q robot joint positions.
-     * @param qd robot joint velocities.
+     * @param dq robot joint velocities.
      * @returns the computed torques for the joint actuators \f$ \tau \f$
      */
-    Eigen::VectorXd inverse_dynamics(
+    [[nodiscard]] Eigen::VectorXd inverse_dynamics(
         const Eigen::VectorXd &y,
         const Eigen::VectorXd &q,
-        const Eigen::VectorXd &qd);
-
+        const Eigen::VectorXd &dq) const;
   };
 
 }  // namespace sdu_controllers::math

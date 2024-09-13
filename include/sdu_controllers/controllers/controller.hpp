@@ -13,14 +13,9 @@ namespace sdu_controllers::controllers
   {
    public:
     /**
-     * @brief Step the execution of the controller (must be called in a loop externally).
+     * @brief Get the output of the controller. Should be updated when the controller step function is called.
      */
-    virtual void step() = 0;
-
-    /**
-     * @brief Get the state of the controller. Updates when the step function is called.
-     */
-    virtual void get_state() = 0;
+    virtual Eigen::VectorXd get_output() = 0;
 
     /**
      * @brief Reset internal controller variables.

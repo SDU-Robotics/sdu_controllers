@@ -13,7 +13,7 @@ namespace sdu_controllers::models
   class RobotModel
   {
    public:
-    explicit RobotModel();
+    explicit RobotModel() = default;
 
     virtual ~RobotModel() = default;
 
@@ -22,7 +22,7 @@ namespace sdu_controllers::models
      * @param q the robot joint configuration.
      * @returns the inertia matrix.
      */
-    virtual Eigen::MatrixXd get_inertia_matrix(const Eigen::VectorXd &q);
+    virtual Eigen::MatrixXd get_inertia_matrix(const Eigen::VectorXd &q) = 0;
 
     /**
      * @brief Get coriolis matrix \f$ \mathbf{C}(q, \dot{q}) \f$
@@ -30,12 +30,12 @@ namespace sdu_controllers::models
      * @param qd the robot joint configuration.
      * @returns the coriolis matrix.
      */
-    virtual Eigen::MatrixXd get_coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &qd);
+    virtual Eigen::MatrixXd get_coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &qd) = 0;
 
     /**
      * @brief Get gravity term \f$ \tau_{g} \f$
      */
-    virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q);
+    virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
   };
 
 }  // namespace sdu_controllers::models

@@ -63,12 +63,12 @@ namespace sdu_controllers::controllers
     /**
      * @brief Step the execution of the controller.
      */
-    void step() override;
+    void step();
 
     /**
-     * @brief Get the state of the controller. Updates when the step() function is called.
+     * @brief Get the output of the controller. Updates when the step() function is called.
      */
-    void get_state() override;
+    Eigen::VectorXd get_output() override;
 
     /**
      * @brief Reset internal controller variables.

@@ -31,7 +31,7 @@ namespace sdu_controllers::controllers
   {
   }
 
-  void AdmittanceControllerPosition::get_state()
+  VectorXd AdmittanceControllerPosition::get_output()
   {
   }
 

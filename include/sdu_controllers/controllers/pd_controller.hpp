@@ -10,25 +10,32 @@ namespace sdu_controllers::controllers
   class PDController : public Controller
   {
    public:
-    explicit PDController();
+    explicit PDController(const Eigen::VectorXd &Kp, const Eigen::VectorXd &Kd);
     ~PDController() override;
 
     /**
      * @brief Step the execution of the controller.
      */
-    void step() override;
+    void step(
+        const Eigen::VectorXd &q_d,
+        const Eigen::VectorXd &dq_d,
+        const Eigen::VectorXd &ddq_d,
+        const Eigen::VectorXd &q,
+        const Eigen::VectorXd &dq);
 
     /**
-     * @brief Get the state of the controller. Updates when the step() function is called.
+     * @brief Get the output of the controller. Updates when the step() function is called.
      */
-    void get_state() override;
+    Eigen::VectorXd get_output() override;
 
     /**
      * @brief Reset internal controller variables.
      */
     void reset() override;
-  };
-}
 
+   private:
+    Eigen::VectorXd u_, Kp_, Kd_;
+  };
+}  // namespace sdu_controllers::controllers
 
 #endif  // SDU_CONTROLLERS_PD_CONTROLLER_HPP
