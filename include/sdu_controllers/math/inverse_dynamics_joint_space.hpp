@@ -17,7 +17,6 @@ namespace sdu_controllers::math
   {
    public:
     explicit InverseDynamicsJointSpace(std::shared_ptr<models::RobotModel> robot_model);
-    ~InverseDynamicsJointSpace() override;
 
     /**
      * @brief Calculate the inverse dynamics.
@@ -32,10 +31,10 @@ namespace sdu_controllers::math
      * @param dq robot joint velocities.
      * @returns the computed torques for the joint actuators \f$ \tau \f$
      */
-    [[nodiscard]] Eigen::VectorXd inverse_dynamics(
+    Eigen::VectorXd inverse_dynamics(
         const Eigen::VectorXd &y,
         const Eigen::VectorXd &q,
-        const Eigen::VectorXd &dq) const;
+        const Eigen::VectorXd &dq);
   };
 
 }  // namespace sdu_controllers::math

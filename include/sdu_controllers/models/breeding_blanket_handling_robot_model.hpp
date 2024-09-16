@@ -20,8 +20,6 @@ class BreedingBlanketHandlingRobotModel : public RobotModel
 public:
   BreedingBlanketHandlingRobotModel();
 
-  ~BreedingBlanketHandlingRobotModel() override;
-
   /**
    * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
    * @param q the robot joint configuration.

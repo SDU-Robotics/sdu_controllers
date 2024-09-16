@@ -1,4 +1,3 @@
-#include <iostream>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 
 using namespace Eigen;
@@ -8,8 +7,6 @@ namespace sdu_controllers::models
   BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel() : RobotModel()
   {
   }
-
-  BreedingBlanketHandlingRobotModel::~BreedingBlanketHandlingRobotModel() = default;
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
   {

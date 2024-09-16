@@ -1,4 +1,5 @@
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <stdexcept>
 
 using namespace Eigen;
 
@@ -25,14 +26,17 @@ namespace sdu_controllers::controllers
 
   void AdmittanceControllerPosition::step()
   {
+    throw std::logic_error("step() is not implemented yet");
   }
 
   void AdmittanceControllerPosition::reset()
   {
+    throw std::logic_error("reset() is not implemented yet");
   }
 
   VectorXd AdmittanceControllerPosition::get_output()
   {
+    throw std::logic_error("get_output() is not implemented yet");
   }
 
 }  // namespace sdu_controllers::controllers

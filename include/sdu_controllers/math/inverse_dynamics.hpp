@@ -23,7 +23,12 @@ namespace sdu_controllers::math
     }
     virtual ~InverseDynamics() = default;
 
-   protected:
+    std::shared_ptr<models::RobotModel> get_robot_model()
+    {
+      return robot_model_;
+    }
+
+   private:
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 

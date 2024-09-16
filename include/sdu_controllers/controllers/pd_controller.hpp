@@ -11,7 +11,6 @@ namespace sdu_controllers::controllers
   {
    public:
     explicit PDController(const Eigen::VectorXd &Kp, const Eigen::VectorXd &Kd);
-    ~PDController() override;
 
     /**
      * @brief Step the execution of the controller.

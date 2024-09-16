@@ -22,8 +22,7 @@ int main()
   VectorXd ddq_d(7);
   ddq_d << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
 
-  std::shared_ptr<models::BreedingBlanketHandlingRobotModel> robot_model =
-      std::make_shared<models::BreedingBlanketHandlingRobotModel>();
+  auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
   double Kp_value = 0.1;
   double Kd_value = sqrt(Kp_value);
   VectorXd Kp = VectorXd::Ones(robot_model->get_dof()) * Kp_value;

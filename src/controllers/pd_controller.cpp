@@ -1,17 +1,12 @@
 #include <sdu_controllers/controllers/pd_controller.hpp>
-#include <iostream>
 
 using namespace Eigen;
 
 namespace sdu_controllers::controllers
 {
-  PDController::PDController(const VectorXd &Kp, const VectorXd &Kd)
+  PDController::PDController(const VectorXd &Kp, const VectorXd &Kd) : Kp_(Kp), Kd_(Kd)
   {
-    Kp_ = Kp;
-    Kd_ = Kd;
   }
-
-  PDController::~PDController() = default;
 
   void
   PDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &ddq_d, const VectorXd &q, const VectorXd &dq)
