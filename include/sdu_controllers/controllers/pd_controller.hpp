@@ -10,7 +10,7 @@ namespace sdu_controllers::controllers
   class PDController : public Controller
   {
    public:
-    explicit PDController(Eigen::MatrixXd Kp, Eigen::MatrixXd Kd);
+    explicit PDController(Eigen::MatrixXd Kp, Eigen::MatrixXd Kd, Eigen::MatrixXd N);
 
     /**
      * @brief Step the execution of the controller.
@@ -34,7 +34,7 @@ namespace sdu_controllers::controllers
 
    private:
     Eigen::VectorXd u_;
-    Eigen::MatrixXd Kp_, Kd_;
+    Eigen::MatrixXd Kp_, Kd_, N_;
   };
 }  // namespace sdu_controllers::controllers
 

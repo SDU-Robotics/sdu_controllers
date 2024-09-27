@@ -25,12 +25,14 @@ int main()
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
   double Kp_value = 0.1;
   double Kd_value = sqrt(Kp_value);
+  double N_value = 1;
   VectorXd Kp_vec = VectorXd::Ones(robot_model->get_dof()) * Kp_value;
   VectorXd Kd_vec = VectorXd::Ones(robot_model->get_dof()) * Kd_value;
+  VectorXd N_vec = VectorXd::Ones(robot_model->get_dof()) * N_value;
 
-  controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal());
+  controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(),N_vec.asDiagonal());
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  pd_controller.step(q_d, dq_d, ddq_d, q, q_d);
+  pd_controller.step(q_d, dq_d, ddq_d, q, dq);
   VectorXd y = pd_controller.get_output();
   std::cout << "y: " << y << std::endl;
   VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q, dq);

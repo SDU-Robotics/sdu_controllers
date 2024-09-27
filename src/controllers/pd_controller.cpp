@@ -5,7 +5,7 @@ using namespace Eigen;
 
 namespace sdu_controllers::controllers
 {
-  PDController::PDController(MatrixXd Kp, MatrixXd Kd) : Kp_(std::move(Kp)), Kd_(std::move(Kd))
+  PDController::PDController(MatrixXd Kp, MatrixXd Kd, MatrixXd N) : Kp_(std::move(Kp)), Kd_(std::move(Kd)), N_(std::move(N))
   {
   }
 
@@ -14,7 +14,8 @@ namespace sdu_controllers::controllers
   {
     const VectorXd Kp_e = Kp_ * (q_d - q);
     const VectorXd Kd_e = Kd_ * (dq_d - dq);
-    u_ = ddq_d + Kp_e + Kd_e;
+    const VectorXd u_ff = N_ * ddq_d;
+    u_ = u_ff + Kp_e + Kd_e;
   }
 
   void PDController::reset()
