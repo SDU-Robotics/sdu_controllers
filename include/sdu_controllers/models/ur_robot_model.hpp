@@ -1,24 +1,26 @@
 #pragma once
-#ifndef SDU_CONTROLLERS_BLEEDING_BLANKET_ROBOT_MODEL_HPP
-#define SDU_CONTROLLERS_BLEEDING_BLANKET_ROBOT_MODEL_HPP
+#ifndef SDU_CONTROLLERS_UR_ROBOT_MODEL_HPP
+#define SDU_CONTROLLERS_UR_ROBOT_MODEL_HPP
 
-#include <vector>
 #include <Eigen/Dense>
+#include <memory>
 #include <sdu_controllers/models/robot_model.hpp>
+#include <sdu_controllers/models/ur_robot.hpp>
+#include <vector>
 
-constexpr uint16_t ROBOT_DOF = 7;
+constexpr uint16_t ROBOT_DOF = 6;
 
 namespace sdu_controllers::models
 {
 
 /**
- * This class provides a robot model for the EUROfusion breeding blanket handling robot.
+ * This class provides a robot model for a UR robot.
  */
 
-class BreedingBlanketHandlingRobotModel : public RobotModel
+class URRobotModel : public RobotModel
 {
 public:
-  BreedingBlanketHandlingRobotModel();
+  URRobotModel(RobotType robot_type);
 
   /**
    * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
@@ -44,9 +46,10 @@ public:
 
 private:
   uint16_t dof_{ROBOT_DOF};
+  URRobot ur_robot_;
 
 };
 
 } // namespace sdu_controllers::models
 
-#endif  // SDU_CONTROLLERS_BLEEDING_BLANKET_ROBOT_MODEL_HPP
+#endif  // SDU_CONTROLLERS_UR_ROBOT_MODEL_HPP

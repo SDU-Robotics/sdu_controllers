@@ -22,6 +22,7 @@ namespace sdu_controllers::controllers
   {
     Kp_.setZero();
     Kd_.setZero();
+    N_.setIdentity();
     u_.setZero();
   }
 

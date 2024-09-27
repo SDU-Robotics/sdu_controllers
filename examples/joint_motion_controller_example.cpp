@@ -2,7 +2,8 @@
 #include <iostream>
 #include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
+#include <sdu_controllers/models/ur_robot_model.hpp>
+#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 
 using namespace Eigen;
@@ -10,19 +11,26 @@ using namespace sdu_controllers;
 
 int main()
 {
-  VectorXd q(7);
-  q << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-  VectorXd dq(7);
-  dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+  // TODO: Load trajectory from csv file.
 
-  VectorXd q_d(7);
-  q_d << 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7;
-  VectorXd dq_d(7);
-  dq_d << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
-  VectorXd ddq_d(7);
-  ddq_d << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+  // Desired
+  VectorXd q_d(6);
+  q_d << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
+  VectorXd dq_d(6);
+  dq_d << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
+  VectorXd ddq_d(6);
+  ddq_d << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
 
-  auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
+  // TODO: Get measured from simulated robot using ur_rtde
+  
+  // Measured
+  VectorXd q(6);
+  q << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+  VectorXd dq(6);
+  dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+
+
+  auto robot_model = std::make_shared<models::URRobotModel>(UR5e);
   double Kp_value = 0.1;
   double Kd_value = sqrt(Kp_value);
   double N_value = 1;
