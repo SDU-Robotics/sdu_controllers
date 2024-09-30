@@ -41,32 +41,56 @@ namespace sdu_controllers::controllers
     ~AdmittanceControllerPosition() override;
 
     /**
-     * @brief Set the input force as a 3-dimensional vector \f$[x\, y\, z]\f$.
+     * @brief
+     * Set the positional mass matrix
      */
-    void set_input_force(const Eigen::Vector3d &force);
+    void set_mass_matrix_position(const Eigen::Matrix3d &mass);
 
     /**
-     * @brief Set the input torque. as a 3-dimensional vector \f$[\tau_{x}\, \tau_{y}\, \tau_{z}]\f$.
+     * @brief
+     * Set the positional stiffness matrix
      */
-    void set_input_torque(const Eigen::Vector3d &torque);
+    void set_stiffness_matrix_position(const Eigen::Matrix3d &stiffness);
 
     /**
-     * @brief Set the input position as a 3-dimensional vector \f$[x\, y\, z]\f$.
+     * @brief
+     * Set the positional damping matrix
      */
-    void set_input_position(const Eigen::Vector3d &position);
+    void set_damping_matrix_position(const Eigen::Matrix3d &damping);
 
     /**
-     * @brief Set the input orientation as a quaternion \f$[w\, x\, y\, z]\f$ (scalar-first).
+     * @brief
+     * Set the orientational mass matrix
      */
-    void set_input_orientation(const Eigen::Quaterniond &orientation);
+    void set_mass_matrix_orientation(const Eigen::Matrix3d &mass);
+
+    /**
+     * @brief
+     * Set the orientational stiffness matrix
+     */
+    void set_stiffness_matrix_orientation(const Eigen::Matrix3d &stiffness);
+
+    /**
+     * @brief
+     * Set the orientational damping matrix
+     */
+    void set_damping_matrix_orientation(const Eigen::Matrix3d &damping);
+
+
+    /**
+     * @brief
+     * Set the time interval betweens steps (used for integration, -> 1./control frequency)
+     */
+    void set_time_interval(double dt);
 
     /**
      * @brief Step the execution of the controller.
      */
-    void step();
+    void step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Quaterniond &quat_desired);
 
     /**
      * @brief Get the output of the controller. Updates when the step() function is called.
+     * Returns the new pose as \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
      */
     Eigen::VectorXd get_output() override;
 
@@ -82,6 +106,21 @@ namespace sdu_controllers::controllers
     Eigen::Matrix3d Mo_;
     Eigen::Matrix3d Ko_;
     Eigen::Matrix3d Do_;
+
+    // Control variables
+    double dt_;
+    Eigen::VectorXd u_;
+
+    // Error terms position
+    Eigen::Vector3d x_e_;
+    Eigen::Vector3d dx_e_;
+
+    // Error terms orientation
+    Eigen::Quaterniond quat_e_;
+    Eigen::Vector3d omega_e_;
+
+    // Helper variables
+    Eigen::Matrix3d rot_identity_;
   };
 }  // namespace sdu_controllers::controllers
 
