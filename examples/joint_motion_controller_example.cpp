@@ -15,7 +15,6 @@ using namespace sdu_controllers;
 int main()
 {
   std::vector<std::vector<std::string>> trajectory = utils::read_csv("../../examples/data/trajectory.csv");
-
   RTDEControlInterface rtde_c("192.168.56.101");
   RTDEReceiveInterface rtde_r("192.168.56.101");
 
@@ -39,20 +38,20 @@ int main()
     // Measured
     std::vector q_measured = rtde_r.getActualQ();
     std::vector qd_measured = rtde_r.getActualQd();
-    VectorXd q = Eigen::VectorXd::Map(&q_measured[0], q_measured.size());
-    VectorXd dq = Eigen::VectorXd::Map(&qd_measured[0], qd_measured.size());
+    VectorXd q = VectorXd::Map(&q_measured[0], q_measured.size());
+    VectorXd dq = VectorXd::Map(&qd_measured[0], qd_measured.size());
 
     // Desired
     VectorXd q_d(6);
     VectorXd dq_d(6);
     VectorXd ddq_d(6);
 
-    for (size_t i = 0; i < 6; i++)
-      q_d << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
-    for (size_t i = 6; i < 12; i++)
-      dq_d << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
-    for (size_t i = 12; i < 18; i++)
-      ddq_d << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
+    for (Index i = 0; i < q_d.size(); i++)
+    {
+      q_d[i] = stod(row[i]);
+      dq_d[i] = stod(row[i+6]);
+      ddq_d[i] = stod(row[i+12]);
+    }
 
     pd_controller.step(q_d, dq_d, ddq_d, q, dq);
     VectorXd y = pd_controller.get_output();

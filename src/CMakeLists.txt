@@ -15,6 +15,8 @@ add_library(sdu_controllers
         ../include/sdu_controllers/controllers/pd_controller.hpp
         ../include/sdu_controllers/models/ur_robot.hpp
         ../include/sdu_controllers/utils/utility.hpp
+        ../include/sdu_controllers/math/forward_dynamics.hpp
+        math/forward_dynamics.cpp
 )
 target_link_libraries(sdu_controllers Eigen3::Eigen)
 target_include_directories(
