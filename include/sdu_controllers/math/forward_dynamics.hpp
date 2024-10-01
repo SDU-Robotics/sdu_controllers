@@ -15,7 +15,7 @@ namespace sdu_controllers::math
   class ForwardDynamics
   {
    public:
-    explicit ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model);
+    explicit ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model, double dt);
 
     ~ForwardDynamics() = default;
 
@@ -32,8 +32,7 @@ namespace sdu_controllers::math
      * @param tau joint torques of the robot
      * @returns the acceleration \f$ \ddot{q} \f$
      */
-    Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau,
-                                     const Eigen::VectorXd &q_d);
+    Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau);
 
     std::shared_ptr<models::RobotModel> get_robot_model()
     {
@@ -42,8 +41,6 @@ namespace sdu_controllers::math
 
    private:
     double dt_;
-    Eigen::VectorXd q_e_;
-    Eigen::VectorXd dq_e_;
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 

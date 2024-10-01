@@ -1,7 +1,7 @@
 import roboticstoolbox as rtb
 import numpy as np
 import math
-frequency = 10.0
+frequency = 500.0
 dt = 1 / frequency
 q_start = np.array([0.0, -math.pi/2, -math.pi/2, -math.pi/2, math.pi/2, 0])
 q_goal = np.array([math.radians(45.0), math.radians(-120.0), -math.pi/2, math.radians(-60.0), math.pi/2, math.radians(-45.0)])
