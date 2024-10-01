@@ -8,16 +8,19 @@ Controllers:
 
 * :ref:`Controller <controller-api>`
 * :ref:`AdmittanceControllerPosition <admittance-controller-position-api>`
+* :ref:`PDController <pd-controller-api>`
 
 Math:
 
+* :ref:`ForwardDynamics <forward-dynamics-api>`
 * :ref:`InverseDynamics <inverse-dynamics-api>`
 * :ref:`InverseDynamicsJointSpace <inverse-dynamics-joint-space-api>`
 
 Models:
 
-* :ref:`RobotModel <inverse-dynamics-api>`
-* :ref:`BreedingBlanketHandlingRobotModel <inverse-dynamics-joint-space-api>`
+* :ref:`RobotModel <robot-model-api>`
+* :ref:`BreedingBlanketHandlingRobotModel <breeding-blanket-handling-robot-model-api>`
+* :ref:`URRobotModel <ur-robot-model-api>`
 
 .. _controller-api:
 
@@ -28,6 +31,14 @@ Controller
     :project: sdu_controllers
     :members:
 
+.. _pd-controller-api:
+
+PDController
+============
+
+.. doxygenclass:: sdu_controllers::controllers::PDController
+    :project: sdu_controllers
+    :members:
 
 .. _admittance-controller-position-api:
 
@@ -38,6 +49,14 @@ AdmittanceControllerPosition
     :project: sdu_controllers
     :members:
 
+.. _forward-dynamics-api:
+
+ForwardDynamics
+===============
+
+.. doxygenclass:: sdu_controllers::math::ForwardDynamics
+    :project: sdu_controllers
+    :members:
 
 .. _inverse-dynamics-api:
 
@@ -58,7 +77,7 @@ InverseDynamicsJointSpace
     :members:
 
 
-.. _robot_model-api:
+.. _robot-model-api:
 
 RobotModel
 ==========
@@ -67,7 +86,16 @@ RobotModel
     :project: sdu_controllers
     :members:
 
-.. _breeding_blanket_handling_robot_model-api:
+.. _ur-robot-model-api:
+
+URRobotModel
+============
+
+.. doxygenclass:: sdu_controllers::models::URRobotModel
+    :project: sdu_controllers
+    :members:
+
+.. _breeding-blanket-handling-robot-model-api:
 
 BreedingBlanketHandlingRobotModel
 =================================

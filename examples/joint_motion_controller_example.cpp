@@ -65,11 +65,11 @@ int main()
 
     // Add noise to q and dq
     VectorXd q_mes = q;
-    for (auto& x : q_mes)
-      x = x + dist(generator);
+    for (Index i = 0; i < q_mes.size(); i++)
+      q_mes[i] += dist(generator);
     VectorXd dq_mes = dq;
-    for (auto& x : dq_mes)
-      x = x + dist(generator);
+    for (Index i = 0; i < dq_mes.size(); i++)
+      dq_mes[i] += dist(generator);
 
     // Controller
     pd_controller.step(q_d, dq_d, ddq_d, q_mes, dq_mes);
