@@ -32,7 +32,8 @@ namespace sdu_controllers::math
      * @param tau joint torques of the robot
      * @returns the acceleration \f$ \ddot{q} \f$
      */
-    Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau);
+    Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau,
+                                     const Eigen::VectorXd &q_d);
 
     std::shared_ptr<models::RobotModel> get_robot_model()
     {
