@@ -88,8 +88,6 @@ URRobot::URRobot(RobotType type)
   g[2] = -9.82;
 }
 
-URRobot::~URRobot() = default;
-
 Eigen::Matrix<double, 6, 1> URRobot::gravity(const Eigen::Matrix<double, 6, 1> & q)
 {
     std::vector<double> grav(6, 0.0);

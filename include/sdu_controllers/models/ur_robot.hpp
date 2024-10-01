@@ -13,8 +13,7 @@ enum RobotType
 class URRobot
 {
  public:
-  URRobot(RobotType type);
-  ~URRobot();
+  explicit URRobot(RobotType type);
   int N;
   Eigen::Matrix<double, 6, 1> gravity(const Eigen::Matrix<double, 6, 1>& q);
 

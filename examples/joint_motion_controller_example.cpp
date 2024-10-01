@@ -5,8 +5,6 @@
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/utils/csv.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-#include <ur_rtde/rtde_control_interface.h>
-#include <ur_rtde/rtde_receive_interface.h>
 #include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
@@ -14,7 +12,6 @@
 
 using namespace csv;
 using namespace Eigen;
-using namespace ur_rtde;
 using namespace sdu_controllers;
 
 int main()
@@ -22,8 +19,6 @@ int main()
   double freq = 500.0;
   double dt = 1.0 / freq;
   std::vector<std::vector<std::string>> trajectory = utils::read_csv("../../examples/data/trajectory.csv");
-  //RTDEControlInterface rtde_c("192.168.56.101", freq);
-  //RTDEReceiveInterface rtde_r("192.168.56.101", freq);
 
   auto robot_model = std::make_shared<models::URRobotModel>(UR5e);
   double Kp_value = 100.0;
@@ -37,19 +32,11 @@ int main()
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model, dt);
 
-  // Move simulated robot to initial position.
-  //rtde_c.moveJ({0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0});
-
   // Define random generator with Gaussian distribution
   const double mean = 0.0;
-  const double stddev = 0.02;
+  const double stddev = 0.2;
   std::default_random_engine generator;
   std::normal_distribution<double> dist(mean, stddev);
-
-  //std::vector q_init_measured = rtde_r.getActualQ();
-  //std::vector qd_init_measured = rtde_r.getActualQd();
-  //VectorXd q_init = VectorXd::Map(&q_init_measured[0], q_init_measured.size());
-  //VectorXd dq_init = VectorXd::Map(&qd_init_measured[0], qd_init_measured.size());
 
   std::ofstream output_filestream; // Can also use ofstream, etc.
   output_filestream.open("output.csv");
@@ -69,7 +56,6 @@ int main()
   {
     // Desired configuration
     assert(row.size() == q_d.size()+dq_d.size()+ddq_d.size());
-
     for (Index i = 0; i < q_d.size(); i++)
     {
       q_d[i] = stod(row[i]);
@@ -77,10 +63,13 @@ int main()
       ddq_d[i] = stod(row[i+12]);
     }
 
-    //std::cout << "q:" << q << std::endl;
-    //std::cout << "dq:" << dq << std::endl;
-    VectorXd q_mes = q; // + noise
-    VectorXd dq_mes = dq; // + noise
+    // Add noise to q and dq
+    VectorXd q_mes = q;
+    for (auto& x : q_mes)
+      x = x + dist(generator);
+    VectorXd dq_mes = dq;
+    for (auto& x : dq_mes)
+      x = x + dist(generator);
 
     // Controller
     pd_controller.step(q_d, dq_d, ddq_d, q_mes, dq_mes);
