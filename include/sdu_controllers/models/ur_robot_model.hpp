@@ -42,6 +42,8 @@ public:
    */
   Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
+  //std::pair<Eigen::VectorXd, Eigen::VectorXd> get_bounds();
+
   uint16_t get_dof() const;
 
 private:

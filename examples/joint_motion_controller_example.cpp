@@ -8,74 +8,68 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
-#include <random>
 
 using namespace csv;
 using namespace Eigen;
 using namespace sdu_controllers;
+using namespace sdu_controllers::utils;
 
 int main()
 {
+  // Setup reading of input trajectory from csv and writing of output trajectory to csv.
+  CSVReader reader("../../examples/data/trajectory.csv");
+  std::ofstream output_filestream;
+  output_filestream.open("output.csv");
+  auto csv_writer = make_csv_writer(output_filestream);
+
+  // Initialize robot model and parameters
+  auto robot_model = std::make_shared<models::URRobotModel>(UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
-  std::vector<std::vector<std::string>> trajectory = utils::read_csv("../../examples/data/trajectory.csv");
-
-  auto robot_model = std::make_shared<models::URRobotModel>(UR5e);
   double Kp_value = 100.0;
-  double Kd_value = 2*sqrt(Kp_value);
+  double Kd_value = 2 * sqrt(Kp_value);
   double N_value = 1;
-  VectorXd Kp_vec = VectorXd::Ones(robot_model->get_dof()) * Kp_value;
-  VectorXd Kd_vec = VectorXd::Ones(robot_model->get_dof()) * Kd_value;
-  VectorXd N_vec = VectorXd::Ones(robot_model->get_dof()) * N_value;
+  uint16_t ROBOT_DOF = robot_model->get_dof();
+  VectorXd Kp_vec = VectorXd::Ones(ROBOT_DOF) * Kp_value;
+  VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_value;
+  VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_value;
 
   controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), N_vec.asDiagonal());
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model, dt);
 
-  // Define random generator with Gaussian distribution
-  const double mean = 0.0;
-  const double stddev = 0.2;
-  std::default_random_engine generator;
-  std::normal_distribution<double> dist(mean, stddev);
+  VectorXd q_d(ROBOT_DOF);
+  VectorXd dq_d(ROBOT_DOF);
+  VectorXd ddq_d(ROBOT_DOF);
 
-  std::ofstream output_filestream; // Can also use ofstream, etc.
-  output_filestream.open("output.csv");
-  auto csv_writer = make_csv_writer(output_filestream);
-
-  VectorXd q_d(6);
-  VectorXd dq_d(6);
-  VectorXd ddq_d(6);
-
-  VectorXd q(6);
-  VectorXd dq(6);
+  VectorXd q(ROBOT_DOF);
+  VectorXd dq(ROBOT_DOF);
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
   // Control loop
-  for (const auto& row : trajectory)
+  for (const auto& row : reader)
   {
     // Desired configuration
     assert(row.size() == q_d.size()+dq_d.size()+ddq_d.size());
     for (Index i = 0; i < q_d.size(); i++)
     {
-      q_d[i] = stod(row[i]);
-      dq_d[i] = stod(row[i+6]);
-      ddq_d[i] = stod(row[i+12]);
+      q_d[i] = row[i].get<double>();
+      dq_d[i] = row[i+ROBOT_DOF].get<double>();
+      ddq_d[i] = row[i+(2*ROBOT_DOF)].get<double>();
     }
 
     // Add noise to q and dq
-    VectorXd q_mes = q;
-    for (Index i = 0; i < q_mes.size(); i++)
-      q_mes[i] += dist(generator);
-    VectorXd dq_mes = dq;
-    for (Index i = 0; i < dq_mes.size(); i++)
-      dq_mes[i] += dist(generator);
+    VectorXd q_meas = q;
+    VectorXd dq_meas = dq;
+    addNoiseToVector(q_meas, 0.0, 0.2);
+    addNoiseToVector(dq_meas, 0.0, 0.2);
 
     // Controller
-    pd_controller.step(q_d, dq_d, ddq_d, q_mes, dq_mes);
+    pd_controller.step(q_d, dq_d, ddq_d, q_meas, dq_meas);
     VectorXd y = pd_controller.get_output();
     std::cout << "y: " << y << std::endl;
-    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_mes, dq_mes);
+    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
     std::cout << "tau: " << tau << std::endl;
 
     // Simulation
@@ -86,8 +80,7 @@ int main()
     q += dq * dt;
 
     std::cout << "q:" << q << std::endl;
-    std::vector<double> q_std(q.data(), q.data() + q.size());
-    csv_writer << q_std;
+    csv_writer << eigenToStdVector(q);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
   }
   output_filestream.close();

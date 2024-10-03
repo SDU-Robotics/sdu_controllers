@@ -24,6 +24,10 @@ namespace sdu_controllers::models
     return ur_robot_.gravity(q);
   }
 
+  //std::pair<VectorXd, VectorXd> get_bounds()
+  //{
+  //}
+
   uint16_t URRobotModel::get_dof() const
   {
     return dof_;

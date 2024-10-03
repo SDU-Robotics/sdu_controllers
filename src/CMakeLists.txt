@@ -17,6 +17,7 @@ add_library(sdu_controllers
         ../include/sdu_controllers/utils/utility.hpp
         ../include/sdu_controllers/math/forward_dynamics.hpp
         math/forward_dynamics.cpp
+        ../include/sdu_controllers/safety/safety_verifier.hpp
 )
 target_link_libraries(sdu_controllers Eigen3::Eigen)
 target_include_directories(
