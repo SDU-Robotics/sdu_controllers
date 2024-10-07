@@ -34,8 +34,36 @@ namespace sdu_controllers::models
 
     /**
      * @brief Get gravity term \f$ \tau_{g} \f$
+     * @returns the gravity vector
      */
     virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
+
+    /**
+     * @brief Get joint position bounds.
+     * @returns the joint position bounds
+     */
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() const = 0;
+
+    /**
+     * @brief Get joint velocity bounds.
+     * @returns the joint velocity bounds
+     */
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() const = 0;
+
+    /**
+     * @brief Get joint acceleration bounds.
+     * @returns the joint acceleration bounds
+     */
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() const = 0;
+
+    /**
+     * @brief Get joint torque bounds.
+     * @returns the joint torque bounds
+     */
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() const = 0;
+
+
+    virtual uint16_t get_dof() const = 0;
   };
 
 }  // namespace sdu_controllers::models

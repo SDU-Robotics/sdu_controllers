@@ -712,7 +712,7 @@ J[35] = -((x0*x1 - x2*x3)*sin(q[3]) + (x0*x3 + x2*x1)*cos(q[3]))*sin(q[4]);
 }
 
 
-Eigen::Matrix<double, 6, 6> URRobot::jacobianDot(const Eigen::Matrix<double, 6, 1> & q, const Eigen::Matrix<double, 6, 1> & dq)
+Eigen::Matrix<double, 6, 6> URRobot::jacobian_dot(const Eigen::Matrix<double, 6, 1> & q, const Eigen::Matrix<double, 6, 1> & dq)
 {
     std::vector<double> J_dot(36, 0.0);
     double x0;

@@ -1,13 +1,14 @@
+#include <Eigen/Dense>
+#include <fstream>
+#include <iostream>
 #include <sdu_controllers/controllers/pd_controller.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
+#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
-#include <sdu_controllers/utils/csv.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-#include <Eigen/Dense>
-#include <iostream>
-#include <fstream>
+
+#include "sdu_controllers/safety/safety_verifier.hpp"
 
 using namespace csv;
 using namespace Eigen;
@@ -16,8 +17,7 @@ using namespace sdu_controllers::utils;
 
 int main()
 {
-  // Setup reading of input trajectory from csv and writing of output trajectory to csv.
-  CSVReader reader("../../examples/data/trajectory.csv");
+  // Setup writing of output trajectory to csv.
   std::ofstream output_filestream;
   output_filestream.open("output.csv");
   auto csv_writer = make_csv_writer(output_filestream);
@@ -47,41 +47,55 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  // Control loop
-  for (const auto& row : reader)
+  // Read input trajectory from file
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory.csv");
+
+  // Offline safety verification of the input trajectory.
+  //  - checks joint position, velocity and acceleration limits.
+  safety::SafetyVerifier safety_verifier(robot_model);
+  bool is_trajectory_safe = safety_verifier.verify_trajectory_safety(input_trajectory);
+
+  if (is_trajectory_safe)
   {
-    // Desired configuration
-    assert(row.size() == q_d.size()+dq_d.size()+ddq_d.size());
-    for (Index i = 0; i < q_d.size(); i++)
+    // Control loop
+    for (const std::vector<double>& trajectory_point : input_trajectory)
     {
-      q_d[i] = row[i].get<double>();
-      dq_d[i] = row[i+ROBOT_DOF].get<double>();
-      ddq_d[i] = row[i+(2*ROBOT_DOF)].get<double>();
+      // Desired
+      for (Index i = 0; i < q_d.size(); i++)
+      {
+        q_d[i] = trajectory_point[i];
+        dq_d[i] = trajectory_point[i+ROBOT_DOF];
+        ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
+      }
+
+      // Add noise to q and dq
+      VectorXd q_meas = q;
+      VectorXd dq_meas = dq;
+      add_noise_to_vector(q_meas, 0.0, 0.001);
+      add_noise_to_vector(dq_meas, 0.0, 0.001);
+
+      // Controller
+      pd_controller.step(q_d, dq_d, ddq_d, q_meas, dq_meas);
+      VectorXd y = pd_controller.get_output();
+      std::cout << "y: " << y << std::endl;
+      VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+      std::cout << "tau: " << tau << std::endl;
+
+      // Simulation
+      VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
+      // integrate to get velocity
+      dq += ddq * dt;
+      // integrate to get position
+      q += dq * dt;
+
+      std::cout << "q:" << q << std::endl;
+      csv_writer << eigen_to_std_vector(q);
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-
-    // Add noise to q and dq
-    VectorXd q_meas = q;
-    VectorXd dq_meas = dq;
-    addNoiseToVector(q_meas, 0.0, 0.2);
-    addNoiseToVector(dq_meas, 0.0, 0.2);
-
-    // Controller
-    pd_controller.step(q_d, dq_d, ddq_d, q_meas, dq_meas);
-    VectorXd y = pd_controller.get_output();
-    std::cout << "y: " << y << std::endl;
-    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
-    std::cout << "tau: " << tau << std::endl;
-
-    // Simulation
-    VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
-    // integrate to get velocity
-    dq += ddq * dt;
-    // integrate to get position
-    q += dq * dt;
-
-    std::cout << "q:" << q << std::endl;
-    csv_writer << eigenToStdVector(q);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    output_filestream.close();
   }
-  output_filestream.close();
+  else
+  {
+    std::cerr << "input trajectory is not safe!" << std::endl;
+  }
 }

@@ -20,12 +20,12 @@ namespace sdu_controllers::math
 
     //std::cout << "B:" << B << std::endl;
     //std::cout << "C:" << C << std::endl;
-    //std::cout << "tau_g:" << tau_g << std::endl;
+    std::cout << "tau_g:" << tau_g << std::endl;
     //std::cout << "q:" << q << std::endl;
     //std::cout << "dq:" << dq << std::endl;
 
     // Eq. (6.27) from page 141, Springer Handbook of Robotics 2008.
-    VectorXd tau = B * y + C * dq; //+ tau_g;
+    VectorXd tau = B * y + C * dq + tau_g;
 
     return tau;
   }

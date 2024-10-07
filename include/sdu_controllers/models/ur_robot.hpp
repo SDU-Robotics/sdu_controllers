@@ -19,7 +19,7 @@ class URRobot
 
   Eigen::Matrix<double, 6, 6> jacobian(const Eigen::Matrix<double, 6, 1>& q);
 
-  Eigen::Matrix<double, 6, 6> jacobianDot(const Eigen::Matrix<double, 6, 1>& q, const Eigen::Matrix<double, 6, 1>& dq);
+  Eigen::Matrix<double, 6, 6> jacobian_dot(const Eigen::Matrix<double, 6, 1>& q, const Eigen::Matrix<double, 6, 1>& dq);
 
   Eigen::Matrix<double, 6, 6> inertia(const Eigen::Matrix<double, 6, 1>& q);
 
