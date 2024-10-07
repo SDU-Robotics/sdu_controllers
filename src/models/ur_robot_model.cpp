@@ -1,7 +1,7 @@
-#include <cmath>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 
+constexpr double pi = 3.14159265358979323846;
 using namespace Eigen;
 
 namespace sdu_controllers::models
@@ -19,10 +19,10 @@ namespace sdu_controllers::models
 
     if (robot_type == UR5e)
     {
-      q_low << -2 * M_PI, -2 * M_PI, -2 * M_PI, -2 * M_PI, -2 * M_PI, -2 * M_PI;
-      q_high << 2 * M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI;
-      dq_low << -M_PI, -M_PI, -M_PI, -M_PI, -M_PI, -M_PI;
-      dq_high << M_PI, M_PI, M_PI, M_PI, M_PI, M_PI;
+      q_low << -2 * pi, -2 * pi, -2 * pi, -2 * pi, -2 * pi, -2 * pi;
+      q_high << 2 * pi, 2 * pi, 2 * pi, 2 * pi, 2 * pi, 2 * pi;
+      dq_low << -pi, -pi, -pi, -pi, -pi, -pi;
+      dq_high << pi, pi, pi, pi, pi, pi;
       ddq_low << -40.0, -40.0, -40.0, -40.0, -40.0, -40.0;
       ddq_high << 40.0, 40.0, 40.0, 40.0, 40.0, 40.0;
       torque_low << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -30,10 +30,10 @@ namespace sdu_controllers::models
     }
     else if (robot_type == UR3e)
     {
-      q_low << -2 * M_PI, -2 * M_PI, -2 * M_PI, -2 * M_PI, -2 * M_PI, -1000;
-      q_high << 2 * M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI, 1000;
+      q_low << -2 * pi, -2 * pi, -2 * pi, -2 * pi, -2 * pi, -1000;
+      q_high << 2 * pi, 2 * pi, 2 * pi, 2 * pi, 2 * pi, 1000;
       dq_low << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-      dq_high << M_PI, M_PI, M_PI, 2 * M_PI, 2 * M_PI, 2 * M_PI;
+      dq_high << pi, pi, pi, 2 * pi, 2 * pi, 2 * pi;
       ddq_low << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
       ddq_high << 40.0, 40.0, 40.0, 40.0, 40.0, 40.0;
       torque_low << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;

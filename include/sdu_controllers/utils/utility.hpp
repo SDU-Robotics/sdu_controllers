@@ -28,7 +28,7 @@ namespace sdu_controllers::utils
   template<typename T>
   bool is_within_bounds(const T& value, const T& low, const T& high)
   {
-    return !(value < low) && (value < high);
+    return (value < high) && (value > low);
   }
 
   template<typename T>

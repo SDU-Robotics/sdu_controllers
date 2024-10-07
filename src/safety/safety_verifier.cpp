@@ -19,6 +19,10 @@ namespace sdu_controllers::safety
 
     if (!trajectory.empty())
     {
+      bool pos_limits_violated = false;
+      bool vel_limits_violated = false;
+      bool acc_limits_violated = false;
+
       for (const auto &trajectory_point : trajectory)
       {
         // Desired
@@ -28,23 +32,28 @@ namespace sdu_controllers::safety
           dq_d[i] = trajectory_point[i+robot_model_->get_dof()];
           ddq_d[i] = trajectory_point[i+(2*robot_model_->get_dof())];
         }
+
         if (!check_joint_pos_limits(q_d))
         {
           std::cerr << "joint position bounds violated!" << std::endl;
-          return false;
+          pos_limits_violated = true;
         }
         if (!check_joint_vel_limits(dq_d))
         {
           std::cerr << "joint velocity bounds violated!" << std::endl;
-          return false;
+          vel_limits_violated = true;
         }
         if (!check_joint_acc_limits(ddq_d))
         {
           std::cerr << "joint acceleration bounds violated!" << std::endl;
-          return false;
+          acc_limits_violated = true;
         }
       }
-      return true;
+
+      if (pos_limits_violated or vel_limits_violated or acc_limits_violated)
+        return false;
+      else
+        return true;
     }
     else
     {
@@ -57,7 +66,14 @@ namespace sdu_controllers::safety
   {
     bool is_within_bounds = false;
     for (Index i = 0; i < vec.size(); i++)
+    {
       is_within_bounds = utils::is_within_bounds(vec[i], low_limit[i], high_limit[i]);
+      if (!is_within_bounds)
+      {
+        std::cerr << vec[i] << " is not within bounds [" << low_limit[i] << ", " << high_limit[i] << "]" << std::endl;
+        return false;
+      }
+    }
     return is_within_bounds;
   }
 

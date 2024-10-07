@@ -48,13 +48,12 @@ int main()
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory_unsafe.csv");
 
   // Offline safety verification of the input trajectory.
   //  - checks joint position, velocity and acceleration limits.
   safety::SafetyVerifier safety_verifier(robot_model);
   bool is_trajectory_safe = safety_verifier.verify_trajectory_safety(input_trajectory);
-
   if (is_trajectory_safe)
   {
     // Control loop
