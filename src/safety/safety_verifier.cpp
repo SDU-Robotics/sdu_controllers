@@ -50,7 +50,7 @@ namespace sdu_controllers::safety
         }
       }
 
-      if (pos_limits_violated or vel_limits_violated or acc_limits_violated)
+      if (pos_limits_violated || vel_limits_violated || acc_limits_violated)
         return false;
       else
         return true;
