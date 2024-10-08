@@ -6,7 +6,7 @@ using namespace Eigen;
 
 namespace sdu_controllers::math
 {
-  ForwardDynamics::ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model, double dt) : dt_(dt),
+  ForwardDynamics::ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model) :
         robot_model_(std::move(robot_model))
   {
   }

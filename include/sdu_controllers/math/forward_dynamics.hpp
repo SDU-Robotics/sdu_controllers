@@ -15,7 +15,7 @@ namespace sdu_controllers::math
   class ForwardDynamics
   {
    public:
-    explicit ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model, double dt);
+    explicit ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model);
 
     ~ForwardDynamics() = default;
 
@@ -40,7 +40,6 @@ namespace sdu_controllers::math
     }
 
    private:
-    double dt_;
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 

@@ -36,7 +36,7 @@ int main()
 
   controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), N_vec.asDiagonal());
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model, dt);
+  math::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
@@ -48,7 +48,7 @@ int main()
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory_unsafe.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory_safe.csv");
 
   // Offline safety verification of the input trajectory.
   //  - checks joint position, velocity and acceleration limits.
@@ -74,7 +74,9 @@ int main()
       add_noise_to_vector(dq_meas, 0.0, 0.001);
 
       // Controller
-      pd_controller.step(q_d, dq_d, ddq_d, q_meas, dq_meas);
+      VectorXd u_ff = ddq_d; // acceleration as feedforward.
+      //VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
+      pd_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
       VectorXd y = pd_controller.get_output();
       std::cout << "y: " << y << std::endl;
       VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
