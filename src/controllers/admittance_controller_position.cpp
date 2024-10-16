@@ -26,6 +26,9 @@ namespace sdu_controllers::controllers
     dt_ = 1. / 500.0;                           // Time step
 
     rot_identity_ = Matrix3d::Identity(); 
+
+    reset();
+
   }
 
   AdmittanceControllerPosition::~AdmittanceControllerPosition() = default;
@@ -56,12 +59,9 @@ namespace sdu_controllers::controllers
     Quaterniond omega_quat = exp(Quaterniond(0, half_omega_e_dt[0], half_omega_e_dt[1], half_omega_e_dt[2]));
     quat_e_ = omega_quat * quat_e_;
 
-
     // Calculate new position (Should be this in here or outside of sdu_controllers)
     Vector3d x_c_ = x_desired + x_e_;
     Quaterniond quat_c_ = quat_desired * quat_e_;
-
-    //u_ = {x_c_[0], x_c_[1], x_c_[2], quat_c_.w(), quat_c_.x(), quat_c_.y(), quat_c_.z()};
 
     u_ << x_c_[0], x_c_[1], x_c_[2], quat_c_.w(), quat_c_.x(), quat_c_.y(), quat_c_.z();
   }

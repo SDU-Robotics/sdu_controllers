@@ -1,0 +1,5 @@
+# example dependencies
+find_package(ur_rtde REQUIRED)
+
+add_executable(admittance_controller_trajectory_example admittance_controller_trajectory_example.cpp)
+target_link_libraries(admittance_controller_trajectory_example PRIVATE sdu_controllers ur_rtde::rtde)

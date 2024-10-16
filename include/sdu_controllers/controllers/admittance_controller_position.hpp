@@ -109,7 +109,7 @@ namespace sdu_controllers::controllers
 
     // Control variables
     double dt_;
-    Eigen::VectorXd u_;
+    Eigen::VectorXd u_{7};
 
     // Error terms position
     Eigen::Vector3d x_e_;

@@ -3,3 +3,5 @@ target_link_libraries(joint_motion_controller_example PRIVATE sdu_controllers)
 
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
+
+add_subdirectory(ur_examples)
