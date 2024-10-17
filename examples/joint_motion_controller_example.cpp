@@ -23,7 +23,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
   double Kp_value = 100.0;
@@ -66,6 +66,8 @@ int main()
         dq_d[i] = trajectory_point[i+ROBOT_DOF];
         ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
       }
+
+      std::cout << "q_d: " << q_d << std::endl;
 
       // Add noise to q and dq
       VectorXd q_meas = q;

@@ -20,7 +20,7 @@ namespace sdu_controllers::math
 
     //std::cout << "B:" << B << std::endl;
     //std::cout << "C:" << C << std::endl;
-    std::cout << "tau_g:" << tau_g << std::endl;
+    //std::cout << "tau_g:" << tau_g << std::endl;
     //std::cout << "q:" << q << std::endl;
     //std::cout << "dq:" << dq << std::endl;
 

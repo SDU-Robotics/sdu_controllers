@@ -13,6 +13,7 @@ namespace sdu_controllers::models
   class RobotModel
   {
    public:
+
     explicit RobotModel() = default;
 
     virtual ~RobotModel() = default;
@@ -42,25 +43,25 @@ namespace sdu_controllers::models
      * @brief Get joint position bounds.
      * @returns the joint position bounds
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() const = 0;
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() = 0;
 
     /**
      * @brief Get joint velocity bounds.
      * @returns the joint velocity bounds
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() const = 0;
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() = 0;
 
     /**
      * @brief Get joint acceleration bounds.
      * @returns the joint acceleration bounds
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() const = 0;
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() = 0;
 
     /**
      * @brief Get joint torque bounds.
      * @returns the joint torque bounds
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() const = 0;
+    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() = 0;
 
 
     virtual uint16_t get_dof() const = 0;
