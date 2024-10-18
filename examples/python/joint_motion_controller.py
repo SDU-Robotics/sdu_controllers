@@ -12,9 +12,9 @@ Kp_val = 100.0
 Kd_val = 2 * np.sqrt(Kp_val)
 N_val = 1
 
-Kp = np.diag([Kp_val, Kp_val, Kp_val])
-Kd = np.diag([Kd_val, Kd_val, Kd_val])
-N = np.diag([N_val, N_val, N_val])
+Kp = np.diag([Kp_val, Kp_val, Kp_val, Kp_val, Kp_val, Kp_val])
+Kd = np.diag([Kd_val, Kd_val, Kd_val, Kd_val, Kd_val, Kd_val])
+N = np.diag([N_val, N_val, N_val, N_val, N_val, N_val])
 
 ur_robot = sdu_controllers.URRobotModel()
 pd_controller = sdu_controllers.PDController(Kp, Kd, N)
