@@ -8,8 +8,6 @@
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <vector>
 
-constexpr uint16_t ROBOT_DOF = 6;
-
 namespace sdu_controllers::models
 {
 
@@ -20,7 +18,11 @@ namespace sdu_controllers::models
 class URRobotModel : public RobotModel
 {
 public:
-  URRobotModel(RobotType robot_type);
+  static constexpr uint16_t ROBOT_DOF = 6;
+
+  URRobotModel();
+
+  explicit URRobotModel(URRobot::RobotType robot_type);
 
   /**
    * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
@@ -39,13 +41,42 @@ public:
 
   /**
    * @brief Get gravity term \f$ \tau_{g} \f$
+   * @returns the gravity vector
    */
   Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
-  uint16_t get_dof() const;
+  /**
+ * @brief Get joint position bounds.
+ * @returns the joint position bounds
+ */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override;
+
+  /**
+   * @brief Get joint velocity bounds.
+   * @returns the joint velocity bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override;
+
+  /**
+   * @brief Get joint acceleration bounds.
+   * @returns the joint acceleration bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override;
+
+  /**
+   * @brief Get joint torque bounds.
+   * @returns the joint torque bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
+
+  uint16_t get_dof() const override;
 
 private:
   uint16_t dof_{ROBOT_DOF};
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
   URRobot ur_robot_;
 
 };

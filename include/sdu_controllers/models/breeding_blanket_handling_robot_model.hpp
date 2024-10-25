@@ -6,8 +6,6 @@
 #include <Eigen/Dense>
 #include <sdu_controllers/models/robot_model.hpp>
 
-constexpr uint16_t ROBOT_DOF = 7;
-
 namespace sdu_controllers::models
 {
 
@@ -18,6 +16,8 @@ namespace sdu_controllers::models
 class BreedingBlanketHandlingRobotModel : public RobotModel
 {
 public:
+  static constexpr uint16_t ROBOT_DOF = 7;
+
   BreedingBlanketHandlingRobotModel();
 
   /**
@@ -40,10 +40,38 @@ public:
    */
   Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
+  /**
+* @brief Get joint position bounds.
+* @returns the joint position bounds
+*/
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override;
+
+  /**
+   * @brief Get joint velocity bounds.
+   * @returns the joint velocity bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override;
+
+  /**
+   * @brief Get joint acceleration bounds.
+   * @returns the joint acceleration bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override;
+
+  /**
+   * @brief Get joint torque bounds.
+   * @returns the joint torque bounds
+   */
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
+
   uint16_t get_dof() const;
 
 private:
   uint16_t dof_{ROBOT_DOF};
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
 
 };
 

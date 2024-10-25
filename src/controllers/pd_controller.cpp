@@ -10,12 +10,9 @@ namespace sdu_controllers::controllers
   }
 
   void
-  PDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &ddq_d, const VectorXd &q, const VectorXd &dq)
+  PDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &u_ff, const VectorXd &q, const VectorXd &dq)
   {
-    const VectorXd Kp_e = Kp_ * (q_d - q);
-    const VectorXd Kd_e = Kd_ * (dq_d - dq);
-    const VectorXd u_ff = N_ * ddq_d;
-    u_ = u_ff + Kp_e + Kd_e;
+    u_ = N_ * u_ff + Kp_ * (q_d - q) + Kd_ * (dq_d - dq);
   }
 
   void PDController::reset()
