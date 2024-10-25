@@ -1,6 +1,7 @@
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <stdexcept>
+#include <iostream>
 
 using namespace Eigen;
 using namespace sdu_controllers::math;
@@ -104,12 +105,12 @@ namespace sdu_controllers::controllers
 
   void AdmittanceControllerPosition::set_stiffness_matrix_orientation(const Eigen::Matrix3d &stiffness)
   {
-    K_ = stiffness;
+    Ko_ = stiffness;
   }
 
   void AdmittanceControllerPosition::set_damping_matrix_orientation(const Eigen::Matrix3d &damping)
   {
-    D_ = damping;
+    Do_ = damping;
   }
 
   void AdmittanceControllerPosition::set_time_interval(double dt)
