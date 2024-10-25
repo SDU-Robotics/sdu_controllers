@@ -1,3 +1,6 @@
+add_executable(admittance_controller_example admittance_controller_example.cpp)
+target_link_libraries(admittance_controller_example PRIVATE sdu_controllers)
+
 add_executable(joint_motion_controller_example joint_motion_controller_example.cpp)
 target_link_libraries(joint_motion_controller_example PRIVATE sdu_controllers)
 
