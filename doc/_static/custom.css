@@ -1,0 +1,28 @@
+/* hyperlinks no underline */
+a {
+    text-decoration: none !important;
+}
+
+/* for the announcement link */
+.bd-header-announcement a,
+.bd-header-version-warning a {
+    color: #7FDBFF;
+}
+
+/* for the search box in the navbar */
+.form-control {
+    border-radius: 0 !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* reduce padding for logo */
+.navbar-brand {
+    padding-top: 0.0rem !important;
+    padding-bottom: 0.0rem !important;
+}
+
+.navbar-icon-links {
+    padding-top: 0.0rem !important;
+    padding-bottom: 0.0rem !important;
+}

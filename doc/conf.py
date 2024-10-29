@@ -20,8 +20,8 @@ import subprocess
 # -- Project information -----------------------------------------------------
 
 project = "sdu_controllers"
-copyright = "2024, SDU Robotics, University of Southern Denmark"
-author = "Anders Prier Lindvig"
+copyright = "2024, University of Southern Denmark"
+author = "SDU Robotics"
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,8 +32,14 @@ extensions = [
     "breathe",
     "sphinx_copybutton",
     "sphinx_inline_tabs",
-    "sphinx_rtd_theme",
+    "sphinx_book_theme",
+    "sphinx_design",
+    "sphinxcontrib.icon"
 ]
+
+# panels hacks
+panels_add_bootstrap_css = False
+panels_add_fontawesome_css = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -51,15 +57,25 @@ master_doc = 'index'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_theme_options = {
+    "repository_url": "https://github.com/SDU-Robotics/sdu_controllers",
+    "use_repository_button": True,
+    "show_toc_level": 1,
+    "use_sidenotes": True
+}
+
+# CSS
+html_css_files = ["custom.css"]
+
 # Logo
-html_logo = "_static/sdu_controllers-logo-graph-white-notext.png"
+html_logo = "_static/sdu_controllers-logo-graph-notext.png"
 
 # The default language to highlight source code.
 highlight_language = 'cpp'

@@ -1,4 +1,6 @@
 breathe
 sphinx-copybutton
+sphinx-icon
+sphinx_design
 sphinx-inline-tabs
-sphinx_rtd_theme
+sphinx_book_theme

@@ -1,6 +1,8 @@
 breathe==4.34.0
 cmake==3.18.4
 Jinja2<3.1
-sphinx_rtd_theme
+sphinx-icon
+sphinx_design
+sphinx_book_theme
 sphinx-copybutton
 sphinx-inline-tabs
