@@ -1,6 +1,7 @@
-breathe
+sphinx-book-theme
 sphinx-copybutton
 sphinx-icon
 sphinx_design
 sphinx-tabs
-sphinx_book_theme
+sphinx-multiversion==0.2.4
+breathe
