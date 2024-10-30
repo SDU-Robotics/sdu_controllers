@@ -14,25 +14,18 @@ a given frequency.
 Example with Breeding Blanket Handling Robot
 ============================================
 
-.. tab-set::
-   :sync-group: lang
+.. tabs::
 
-   .. tab-item:: C++
-      :sync: linux
+   .. code-tab:: c++
 
-      .. code:: c++
-
-         int main(const int argc, const char **argv)
-         {
-              return 0;
+         int main(const int argc, const char **argv) {
+           return 0;
          }
 
-   .. tab-item:: Python
-      :sync: windows
-
-      .. code:: python
+   .. code-tab:: py
 
          def main():
-            return
+             return
+
 
 see additional examples in the :ref:`Examples <examples>` section.
