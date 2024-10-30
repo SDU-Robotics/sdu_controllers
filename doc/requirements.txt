@@ -5,3 +5,5 @@ sphinx_design
 sphinx-tabs
 sphinx-multiversion==0.2.4
 breathe
+cmake==3.18.4
+Jinja2<3.1
