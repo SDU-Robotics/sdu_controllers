@@ -2,5 +2,5 @@ breathe
 sphinx-copybutton
 sphinx-icon
 sphinx_design
-sphinx-inline-tabs
+sphinx_tabs.tabs
 sphinx_book_theme

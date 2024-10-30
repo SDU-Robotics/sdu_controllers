@@ -31,7 +31,7 @@ author = "SDU Robotics"
 extensions = [
     "breathe",
     "sphinx_copybutton",
-    "sphinx_inline_tabs",
+    "sphinx_tabs.tabs",
     "sphinx_book_theme",
     "sphinx_design",
     "sphinxcontrib.icon"
