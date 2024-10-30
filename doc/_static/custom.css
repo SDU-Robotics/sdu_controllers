@@ -9,6 +9,11 @@ a {
     color: #7FDBFF;
 }
 
+#rtd-footer-container {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
 /* for the search box in the navbar */
 .form-control {
     border-radius: 0 !important;

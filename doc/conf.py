@@ -38,7 +38,7 @@ extensions = [
 ]
 
 # panels hacks
-panels_add_bootstrap_css = False
+#panels_add_bootstrap_css = False
 panels_add_fontawesome_css = True
 
 # Add any paths that contain templates here, relative to this directory.
