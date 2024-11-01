@@ -12,11 +12,11 @@ sdu_controllers
    :target: https://sdu-controllers.readthedocs.io/
 
 
-.. figure:: _static/sdu_controllers-simulink.png
+.. figure:: _static/sdu_controllers-simulink.svg
    :width: 100%
    :class: only-light
 
-.. figure:: _static/sdu_controllers-simulink-black.png
+.. figure:: _static/sdu_controllers-simulink-black.svg
    :width: 100%
    :class: only-dark
 
