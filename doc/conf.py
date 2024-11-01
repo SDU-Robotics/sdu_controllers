@@ -37,6 +37,8 @@ extensions = [
     "sphinxcontrib.icon"
 ]
 
+sphinx_tabs_valid_builders = ['linkcheck']
+
 # panels hacks
 #panels_add_bootstrap_css = False
 panels_add_fontawesome_css = True
