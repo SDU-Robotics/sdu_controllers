@@ -88,9 +88,19 @@ namespace sdu_controllers::controllers
     M_ = mass;
   }
 
+  void AdmittanceControllerPosition::set_mass_matrix_position(const Eigen::Vector3d &mass)
+  {
+    M_ = mass.asDiagonal();
+  }
+
   void AdmittanceControllerPosition::set_stiffness_matrix_position(const Eigen::Matrix3d &stiffness)
   {
     K_ = stiffness;
+  }
+
+  void AdmittanceControllerPosition::set_stiffness_matrix_position(const Eigen::Vector3d &stiffness)
+  {
+    K_ = stiffness.asDiagonal();
   }
 
   void AdmittanceControllerPosition::set_damping_matrix_position(const Eigen::Matrix3d &damping)
@@ -98,9 +108,19 @@ namespace sdu_controllers::controllers
     D_ = damping;
   }
 
+  void AdmittanceControllerPosition::set_damping_matrix_position(const Eigen::Vector3d &damping)
+  {
+    D_ = damping.asDiagonal();
+  }
+
   void AdmittanceControllerPosition::set_mass_matrix_orientation(const Eigen::Matrix3d &mass)
   {
     Mo_ = mass;
+  }
+
+  void AdmittanceControllerPosition::set_mass_matrix_orientation(const Eigen::Vector3d &mass)
+  {
+    Mo_ = mass.asDiagonal();
   }
 
   void AdmittanceControllerPosition::set_stiffness_matrix_orientation(const Eigen::Matrix3d &stiffness)
@@ -108,9 +128,19 @@ namespace sdu_controllers::controllers
     Ko_ = stiffness;
   }
 
+  void AdmittanceControllerPosition::set_stiffness_matrix_orientation(const Eigen::Vector3d &stiffness)
+  {
+    Ko_ = stiffness.asDiagonal();
+  }
+
   void AdmittanceControllerPosition::set_damping_matrix_orientation(const Eigen::Matrix3d &damping)
   {
     Do_ = damping;
+  }
+
+  void AdmittanceControllerPosition::set_damping_matrix_orientation(const Eigen::Vector3d &damping)
+  {
+    Do_ = damping.asDiagonal();
   }
 
   void AdmittanceControllerPosition::set_time_interval(double dt)

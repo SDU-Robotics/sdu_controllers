@@ -48,9 +48,21 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
+     * Set the positional mass matrix from a mass vector
+     */
+    void set_mass_matrix_position(const Eigen::Vector3d &mass);
+
+    /**
+     * @brief
      * Set the positional stiffness matrix
      */
     void set_stiffness_matrix_position(const Eigen::Matrix3d &stiffness);
+
+    /**
+     * @brief
+     * Set the positional stiffness matrix from a stiffness vector
+     */
+    void set_stiffness_matrix_position(const Eigen::Vector3d &stiffness);
 
     /**
      * @brief
@@ -60,9 +72,21 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
+     * Set the positional damping matrix from a damping vector
+     */
+    void set_damping_matrix_position(const Eigen::Vector3d &damping);
+
+    /**
+     * @brief
      * Set the orientational mass matrix
      */
     void set_mass_matrix_orientation(const Eigen::Matrix3d &mass);
+
+    /**
+     * @brief
+     * Set the orientational mass matrix from a mass vector
+     */
+    void set_mass_matrix_orientation(const Eigen::Vector3d &mass);
 
     /**
      * @brief
@@ -72,14 +96,25 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
+     * Set the orientational stiffness matrix from a stiffness vector
+     */
+    void set_stiffness_matrix_orientation(const Eigen::Vector3d &stiffness);
+
+    /**
+     * @brief
      * Set the orientational damping matrix
      */
     void set_damping_matrix_orientation(const Eigen::Matrix3d &damping);
 
+    /**
+     * @brief
+     * Set the orientational damping matrix from a damping vector
+     */
+    void set_damping_matrix_orientation(const Eigen::Vector3d &damping);
 
     /**
      * @brief
-     * Set the time interval betweens steps (used for integration, -> 1./control frequency)
+     * Set the time interval between steps (used for integration, -> 1./control frequency)
      */
     void set_time_interval(double dt);
 
