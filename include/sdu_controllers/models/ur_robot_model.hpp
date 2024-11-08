@@ -46,6 +46,18 @@ public:
   Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
   /**
+   * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
+   * @returns the jacobian
+   */
+  Eigen::MatrixXd get_jacobian(const Eigen::VectorXd &q) override;
+
+  /**
+   * @brief Get jacobian dot \f$ \mathbf{\dot{J(q, dq)}} \f$
+   * @returns the jacobian dot
+   */
+  Eigen::MatrixXd get_jacobian_dot(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) override;
+
+  /**
  * @brief Get joint position bounds.
  * @returns the joint position bounds
  */
@@ -70,6 +82,12 @@ public:
   std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
 
   uint16_t get_dof() const override;
+
+  std::vector<double> get_a() override;
+
+  std::vector<double> get_d() override;
+
+  std::vector<double> get_alpha() override;
 
 private:
   uint16_t dof_{ROBOT_DOF};

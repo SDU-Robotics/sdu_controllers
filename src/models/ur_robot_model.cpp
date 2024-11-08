@@ -95,6 +95,16 @@ namespace sdu_controllers::models
     //return ur_robot_.gravity(q);
   }
 
+  MatrixXd URRobotModel::get_jacobian(const VectorXd& q)
+  {
+    return ur_robot_.jacobian(q);
+  }
+
+  MatrixXd URRobotModel::get_jacobian_dot(const VectorXd& q, const VectorXd& dq)
+  {
+    return ur_robot_.jacobian_dot(q, dq);
+  }
+
   std::pair<VectorXd, VectorXd> URRobotModel::get_joint_pos_bounds()
   {
     return joint_pos_bounds_;
@@ -118,6 +128,19 @@ namespace sdu_controllers::models
   uint16_t URRobotModel::get_dof() const
   {
     return dof_;
+  }
+
+  std::vector<double> URRobotModel::get_a()
+  {
+    return ur_robot_.get_a();
+  }
+  std::vector<double> URRobotModel::get_d()
+  {
+    return ur_robot_.get_d();
+  }
+  std::vector<double> URRobotModel::get_alpha()
+  {
+    return ur_robot_.get_alpha();
   }
 
 }  // namespace sdu_controllers::models

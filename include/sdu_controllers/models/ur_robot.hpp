@@ -25,13 +25,25 @@ class URRobot
 
   Eigen::Matrix<double, 6, 6> coriolis(const Eigen::Matrix<double, 6, 1>& q, const Eigen::Matrix<double, 6, 1>& dq);
 
+  std::vector<double> get_a();
+
+  std::vector<double> get_d();
+
+  std::vector<double> get_alpha();
+
  private:
   double a2_;
   double a3_;
+
   double d1_;
   double d4_;
   double d5_;
   double d6_;
+
+  std::vector<double> a;
+  std::vector<double> d;
+  std::vector<double> alpha;
+
   double m_[6];
   double com_[6][3];
   double link_inertia_[6][3][3];

@@ -7,8 +7,9 @@ This page contains the API documentation of sdu_controllers. The following class
 Controllers:
 
 * :ref:`Controller <controller-api>`
-* :ref:`AdmittanceControllerPosition <admittance-controller-position-api>`
 * :ref:`PDController <pd-controller-api>`
+* :ref:`AdmittanceControllerPosition <admittance-controller-position-api>`
+* :ref:`OperationalSpaceController <operational-space-controller-api>`
 
 Math:
 
@@ -40,12 +41,22 @@ PDController
     :project: sdu_controllers
     :members:
 
+
 .. _admittance-controller-position-api:
 
 AdmittanceControllerPosition
 ============================
 
 .. doxygenclass:: sdu_controllers::controllers::AdmittanceControllerPosition
+    :project: sdu_controllers
+    :members:
+
+.. _operational-space-controller-api:
+
+OperationalSpaceController
+==========================
+
+.. doxygenclass:: sdu_controllers::controllers::OperationalSpaceController
     :project: sdu_controllers
     :members:
 

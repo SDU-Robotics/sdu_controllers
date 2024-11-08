@@ -30,6 +30,10 @@ namespace sdu_controllers::models
     joint_vel_bounds_ = { dq_low, dq_high};
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
+
+    a_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    alpha_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
@@ -48,6 +52,18 @@ namespace sdu_controllers::models
   {
     VectorXd v = VectorXd::Zero(ROBOT_DOF);
     return v;
+  }
+
+  MatrixXd BreedingBlanketHandlingRobotModel::get_jacobian(const VectorXd& q)
+  {
+    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
+    return I;
+  }
+
+  MatrixXd BreedingBlanketHandlingRobotModel::get_jacobian_dot(const VectorXd& q, const VectorXd& dq)
+  {
+    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
+    return I;
   }
 
   std::pair<VectorXd, VectorXd> BreedingBlanketHandlingRobotModel::get_joint_pos_bounds()
@@ -73,6 +89,19 @@ namespace sdu_controllers::models
   uint16_t BreedingBlanketHandlingRobotModel::get_dof() const
   {
     return dof_;
+  }
+
+  std::vector<double> BreedingBlanketHandlingRobotModel::get_a()
+  {
+    return a_;
+  }
+  std::vector<double> BreedingBlanketHandlingRobotModel::get_d()
+  {
+    return d_;
+  }
+  std::vector<double> BreedingBlanketHandlingRobotModel::get_alpha()
+  {
+    return alpha_;
   }
 
 }  // namespace sdu_controllers::math

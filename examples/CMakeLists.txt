@@ -1,5 +1,8 @@
-add_executable(joint_motion_controller_example joint_motion_controller_example.cpp)
-target_link_libraries(joint_motion_controller_example PRIVATE sdu_controllers)
+add_executable(joint_motion_controller joint_motion_controller.cpp)
+target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
+
+add_executable(cartesian_motion_controller cartesian_motion_controller.cpp)
+target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
 
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)

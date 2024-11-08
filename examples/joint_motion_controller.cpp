@@ -4,11 +4,11 @@
 #include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
+#include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-
-#include "sdu_controllers/safety/safety_verifier.hpp"
 
 using namespace csv;
 using namespace Eigen;
@@ -47,8 +47,10 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/trajectory_safe.csv");
+  MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+
+  /*// Read input trajectory from file
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe.csv");
 
   // Offline safety verification of the input trajectory.
   //  - checks joint position, velocity and acceleration limits.
@@ -77,7 +79,7 @@ int main()
 
       // Controller
       VectorXd u_ff = ddq_d; // acceleration as feedforward.
-      //VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
+      // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
       pd_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
       VectorXd y = pd_controller.get_output();
       std::cout << "y: " << y << std::endl;
@@ -100,5 +102,5 @@ int main()
   else
   {
     std::cerr << "input trajectory is not safe!" << std::endl;
-  }
+  }*/
 }

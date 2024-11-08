@@ -40,6 +40,18 @@ namespace sdu_controllers::models
     virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
 
     /**
+     * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
+     * @returns the jacobian
+     */
+    virtual Eigen::MatrixXd get_jacobian(const Eigen::VectorXd &q) = 0;
+
+    /**
+     * @brief Get jacobian dot \f$ \mathbf{\dot{J(q, dq)}} \f$
+     * @returns the jacobian dot
+     */
+    virtual Eigen::MatrixXd get_jacobian_dot(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) = 0;
+
+    /**
      * @brief Get joint position bounds.
      * @returns the joint position bounds
      */
@@ -65,6 +77,13 @@ namespace sdu_controllers::models
 
 
     virtual uint16_t get_dof() const = 0;
+
+    virtual std::vector<double> get_a() = 0;
+
+    virtual std::vector<double> get_d() = 0;
+
+    virtual std::vector<double> get_alpha() = 0;
+
   };
 
 }  // namespace sdu_controllers::models
