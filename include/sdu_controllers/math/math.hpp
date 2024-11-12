@@ -78,7 +78,6 @@ namespace sdu_controllers::math
     MatrixXd A_full = MatrixXd::Zero(6, 6);
     A_full.setIdentity();
     A_full.block<3, 3>(3,3) = A_inv;
-    std::cout << "Jdot:" << robot_model->get_jacobian_dot(q, dq) << std::endl;
     MatrixXd Jdot_A = A_full * robot_model->get_jacobian_dot(q, dq);
     return Jdot_A;
   }

@@ -25,9 +25,10 @@ namespace sdu_controllers::controllers
       const VectorXd &dq)
   {
     Matrix4d T = kinematics::forward_kinematics(q, robot_model_);
-    VectorXd pos = T.block<3, 1>(0,2);
+    VectorXd pos = T.block<3, 1>(0,3);
     std::cout << "pos: " << pos << std::endl;
     Matrix3d rot_mat = T.topLeftCorner(3, 3);
+    std::cout << "rot_mat: " << rot_mat << std::endl;
     VectorXd rot_zyz = rot_mat.eulerAngles(2, 1, 2); // ZYZ representation
     std::cout << "rot_zyz: " << rot_zyz << std::endl;
     VectorXd x_e(pos.size() + rot_zyz.size());

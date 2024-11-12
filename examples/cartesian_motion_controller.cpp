@@ -26,15 +26,30 @@ int main()
   auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
-  double Kp_value = 100.0;
-  double Kd_value = 2 * sqrt(Kp_value);
+
+  double Kp_pos_value = 500.0;
+  double Kp_orient_value = 100.0;
+  double Kd_pos_value = 2*sqrt(Kp_pos_value);
+  double Kd_orient_value = 2*sqrt(Kp_orient_value);
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
-  VectorXd Kp_vec = VectorXd::Ones(6) * Kp_value;
-  VectorXd Kd_vec = VectorXd::Ones(6) * Kd_value;
+
+  VectorXd Kp_pos_vec = VectorXd::Ones(3) * Kp_pos_value;
+  VectorXd Kp_orient_vec = VectorXd::Ones(3) * Kp_orient_value;
+  VectorXd Kd_pos_vec = VectorXd::Ones(3) * Kd_pos_value;
+  VectorXd Kd_orient_vec = VectorXd::Ones(3) * Kd_orient_value;
   VectorXd N_vec = VectorXd::Ones(6) * N_value;
 
-  controllers::OperationalSpaceController osc_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), robot_model);
+  MatrixXd Kp = MatrixXd::Zero(6, 6);
+  Kp.setIdentity();
+  Kp.block<3, 3>(0,0) = Kp_pos_vec.asDiagonal();
+  Kp.block<3, 3>(3,3) = Kp_orient_vec.asDiagonal();
+  MatrixXd Kd = MatrixXd::Zero(6, 6);
+  Kd.setIdentity();
+  Kd.block<3, 3>(0,0) = Kd_pos_vec.asDiagonal();
+  Kd.block<3, 3>(3,3) = Kd_orient_vec.asDiagonal();
+
+  controllers::OperationalSpaceController osc_controller(Kp, Kd, robot_model);
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model);
 
@@ -51,7 +66,7 @@ int main()
   std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/cartesian_trajectory_safe.csv");
 
   // Control loop
-  for (size_t j=0; j<10; j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
+  for (size_t j=0; j<input_trajectory.size(); j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
   {
     // Desired
     for (Index i = 0; i < x_d.size(); i++)
@@ -84,7 +99,15 @@ int main()
     q += dq * dt;
 
     std::cout << "q:" << q << std::endl;
-    csv_writer << eigen_to_std_vector(q);
+    MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+    VectorXd pos = T.block<3, 1>(0, 3);
+    std::cout << "pos:" << pos << std::endl;
+    Matrix3d rot_mat = T.topLeftCorner(3, 3);
+    Vector3d rpy_zyz = rot_mat.eulerAngles(2, 1, 2); // ZYZ representation
+    std::cout << "rpy_zyz:" << rpy_zyz << std::endl;
+    VectorXd temp(q.size()+pos.size()+rpy_zyz.size());
+    temp << q, pos, rpy_zyz;
+    csv_writer << eigen_to_std_vector(temp);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
   }
   output_filestream.close();
