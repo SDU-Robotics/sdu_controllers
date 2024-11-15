@@ -108,7 +108,7 @@ VectorXd wrench_trans(const Vector3d &torques, const Vector3d &forces, const Aff
   return wrench_in_B; 
 }
 
-Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius=0.075, double freq=0.5)
+Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius=0.075, double freq=0.35)
 {
   Vector3d circle_target;
   circle_target[0] = pose[0] + radius * cos(2 * M_PI * freq * timestep); 
@@ -129,6 +129,13 @@ int main(int argc, char* argv[])
   // Initialize admittance control
   VectorXd u;
   controllers::AdmittanceControllerPosition adm_controller;
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
+  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
+  adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200));
+
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10));
+  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5));
 
   string robot_ip = "127.0.0.1";
   if (argc > 1)
@@ -139,7 +146,7 @@ int main(int argc, char* argv[])
   RTDEReceiveInterface rtde_receive(robot_ip); 
   RTDEControlInterface rtde_control(robot_ip);
 
-  rtde_control.moveL({0.05, -0.5, 0.3, 0., 3.141, 0.}, 0.5, 0.2);
+  // rtde_control.moveL({0.05, -0.5, 0.3, 0., 3.141, 0.}, 0.5, 0.2);
   rtde_control.zeroFtSensor(); 
   std::this_thread::sleep_for(200ms);
 
