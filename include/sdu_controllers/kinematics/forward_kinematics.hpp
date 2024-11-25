@@ -50,7 +50,7 @@ namespace sdu_controllers::kinematics
         T *= A_i;
 
     }
-    std::cout << "T: " << T << std::endl;
+    // std::cout << "T: " << T << std::endl;
     return T;
   }
 }  // namespace sdu_controllers::kinematics

@@ -23,6 +23,8 @@ add_library(sdu_controllers
         ../include/sdu_controllers/utils/utility.hpp
         ../include/sdu_controllers/safety/safety_verifier.hpp
         ../include/sdu_controllers/controllers/operational_space_controller.hpp
+        controllers/force_control_inner_velocity_loop.cpp
+        ../include/sdu_controllers/controllers/force_control_inner_velocity_loop.hpp
 
 )
 target_link_libraries(sdu_controllers Eigen3::Eigen)
