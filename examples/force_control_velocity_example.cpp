@@ -70,10 +70,10 @@ int main()
   math::ForwardDynamics fwd_dyn(robot_model);
 
   Vector<double, 6> fd, fe;
-  fd << VectorXd::Ones(3) * 10,
-        VectorXd::Ones(3) * 1;
+  fd << VectorXd::Ones(3) * 100,
+        VectorXd::Ones(3) * 0;
 
-  double Kenv_el = 100;
+  double Kenv_el = 1000;
   VectorXd Kenv_vec = VectorXd::Ones(6) * Kenv_el;
   MatrixXd Kenv = Kenv_vec.asDiagonal();
   // double Denv = 20;
@@ -106,14 +106,14 @@ int main()
     xe << pos,
           VectorXd::Zero(3);
 
-    fe = -Kenv * xe;
+    fe = Kenv * xe;
 
     // Controller
     controller.step(fd, fe, q_meas, dq_meas);
     VectorXd y = controller.get_output();
-    // std::cout << "y: " << y << std::endl;
+    std::cout << "y: " << y << std::endl;
     VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
-    // std::cout << "tau: " << tau << std::endl;
+    std::cout << "tau: " << tau << std::endl;
 
     // Simulation
     VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);

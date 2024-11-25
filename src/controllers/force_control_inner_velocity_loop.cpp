@@ -42,15 +42,19 @@ namespace sdu_controllers::controllers
     // Matrix3d rot_mat = T.topLeftCorner(3, 3);
 
     MatrixXd Jac = robot_model_->get_jacobian(q);
+    std::cout << "Jac: " << Jac << std::endl;
+
     MatrixXd JacDot = robot_model_->get_jacobian_dot(q, dq);
 
     VectorXd vel = Jac * dq;
 
     VectorXd xf = Kf_ * (f_d - f_e);
 
-    std::cout << xf << std::endl;
+    std::cout << "Xf: " << xf << std::endl;
 
-    y_ = Jac.inverse() * Mdinv_ * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq);
+    y_ = Jac.inverse() * (Mdinv_ * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
+
+    std::cout << "y_: " << y_ << std::endl;
   }
 
   void ForceControlInnerVelocityLoop::reset()
