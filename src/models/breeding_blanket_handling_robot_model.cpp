@@ -34,6 +34,7 @@ namespace sdu_controllers::models
     a_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     alpha_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    is_joint_revolute_ = {false, false, true, true, true, true, true};
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)

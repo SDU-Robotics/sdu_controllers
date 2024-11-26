@@ -84,6 +84,10 @@ namespace sdu_controllers::models
 
     virtual std::vector<double> get_alpha() = 0;
 
+    virtual std::vector<double> get_theta() = 0;
+
+    virtual std::vector<bool> get_is_joint_revolute() = 0;
+
   };
 
 }  // namespace sdu_controllers::models

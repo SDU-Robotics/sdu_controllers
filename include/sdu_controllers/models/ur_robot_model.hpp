@@ -89,6 +89,11 @@ public:
 
   std::vector<double> get_alpha() override;
 
+  std::vector<double> get_theta() override;
+
+  std::vector<bool> get_is_joint_revolute() override;
+
+
 private:
   uint16_t dof_{ROBOT_DOF};
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
@@ -96,6 +101,9 @@ private:
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
   URRobot ur_robot_;
+
+  std::vector<double> theta;
+  std::vector<bool> is_joint_revolute;
 
 };
 

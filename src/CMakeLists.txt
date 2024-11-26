@@ -25,6 +25,8 @@ add_library(sdu_controllers
         ../include/sdu_controllers/controllers/operational_space_controller.hpp
         controllers/force_control_inner_velocity_loop.cpp
         ../include/sdu_controllers/controllers/force_control_inner_velocity_loop.hpp
+        ../include/sdu_controllers/math/rnea.hpp
+        math/rnea.cpp
 
 )
 target_link_libraries(sdu_controllers Eigen3::Eigen)

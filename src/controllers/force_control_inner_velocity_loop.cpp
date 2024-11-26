@@ -1,4 +1,3 @@
-
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/math/math.hpp>
