@@ -19,11 +19,16 @@ namespace sdu_controllers::math
         const Eigen::VectorXd &ddq, const Eigen::VectorXd &he);
 
     private:
-      Eigen::VectorXd forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq,
-        const std::vector<Eigen::Matrix4d> T);
+      void forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T);
 
-      Eigen::VectorXd backward(const Eigen::VectorXd &omega, const Eigen::VectorXd &domega,
-        const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);
+      void backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);
+
+      std::shared_ptr<models::RobotModel> robot_model;
+
+      Eigen::Matrix<double, 3, Eigen::Dynamic> omega, domega, ddp, ddpc, f, mu;
+      Eigen::VectorXd tau;
+      Eigen::Vector3d omega0, domega0, ddp0;
+      Eigen::Matrix<double, Eigen::Dynamic, 3> CoM;
   };
 }
 

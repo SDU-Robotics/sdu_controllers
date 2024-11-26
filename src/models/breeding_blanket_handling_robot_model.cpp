@@ -35,6 +35,8 @@ namespace sdu_controllers::models
     d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     alpha_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     is_joint_revolute_ = {false, false, true, true, true, true, true};
+
+    g << 0, 0, -9.82;
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
@@ -103,6 +105,18 @@ namespace sdu_controllers::models
   std::vector<double> BreedingBlanketHandlingRobotModel::get_alpha()
   {
     return alpha_;
+  }
+  Eigen::Vector3d BreedingBlanketHandlingRobotModel::get_g0()
+  {
+    return g;
+  }
+  Eigen::Matrix<double, Eigen::Dynamic, 3> BreedingBlanketHandlingRobotModel::get_CoM()
+  {
+    return com_;
+  }
+  std::vector<Eigen::Matrix3d> BreedingBlanketHandlingRobotModel::get_link_inertia()
+  {
+    return link_inertia_;
   }
 
 }  // namespace sdu_controllers::math

@@ -125,7 +125,8 @@ namespace sdu_controllers::kinematics
       else
         T *= A_i;
 
-      complete_T.at(i) = T;
+      // complete_T.at(i) = T;
+      complete_T.push_back(T);
     }
     // std::cout << "T: " << T << std::endl;
     return complete_T;

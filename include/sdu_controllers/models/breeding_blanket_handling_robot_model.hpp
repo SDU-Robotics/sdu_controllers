@@ -88,17 +88,27 @@ public:
 
   std::vector<bool> get_is_joint_revolute() override;
 
+  Eigen::Vector3d get_g0();
+
+  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
+
+  std::vector<Eigen::Matrix3d> get_link_inertia();
+
 private:
   uint16_t dof_{ROBOT_DOF};
   std::vector<double> a_;
   std::vector<double> d_;
   std::vector<double> alpha_;
   std::vector<double> theta_;
+  Eigen::Vector3d g;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
   std::vector<bool> is_joint_revolute_;
+
+  Eigen::Matrix<double, 7, 3> com_;
+  std::vector<Eigen::Matrix3d> link_inertia_;
 
 };
 

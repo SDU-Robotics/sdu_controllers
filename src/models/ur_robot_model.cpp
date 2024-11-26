@@ -156,5 +156,17 @@ namespace sdu_controllers::models
   {
     return is_joint_revolute;
   }
+  Eigen::Vector3d URRobotModel::get_g0()
+  {
+    return ur_robot_.get_g0();
+  }
+  Eigen::Matrix<double, Eigen::Dynamic, 3> URRobotModel::get_CoM()
+  {
+    return ur_robot_.get_CoM();
+  }
+  std::vector<Eigen::Matrix3d> URRobotModel::get_link_inertia()
+  {
+    return ur_robot_.get_link_inertia();
+  }
 
 }  // namespace sdu_controllers::models
