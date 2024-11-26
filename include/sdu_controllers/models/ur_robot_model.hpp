@@ -91,6 +91,8 @@ public:
 
   std::vector<double> get_theta() override;
 
+  std::vector<double> get_m() override;
+
   std::vector<bool> get_is_joint_revolute() override;
 
   Eigen::Vector3d get_g0();

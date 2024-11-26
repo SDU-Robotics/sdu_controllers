@@ -86,9 +86,11 @@ public:
 
  std::vector<double> get_theta() override;
 
+ std::vector<double> get_m() override;
+
   std::vector<bool> get_is_joint_revolute() override;
 
-  Eigen::Vector3d get_g0();
+  Eigen::Vector3d get_g0() override;
 
   Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
 
@@ -100,6 +102,7 @@ private:
   std::vector<double> d_;
   std::vector<double> alpha_;
   std::vector<double> theta_;
+ std::vector<double> m_;
   Eigen::Vector3d g;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;

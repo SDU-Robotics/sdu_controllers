@@ -86,6 +86,8 @@ namespace sdu_controllers::models
 
     virtual std::vector<double> get_theta() = 0;
 
+    virtual std::vector<double> get_m() = 0;
+
     virtual std::vector<bool> get_is_joint_revolute() = 0;
 
     virtual Eigen::Vector3d get_g0() = 0;

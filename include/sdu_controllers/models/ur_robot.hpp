@@ -31,6 +31,8 @@ class URRobot
 
   std::vector<double> get_alpha();
 
+  std::vector<double> get_m();
+
   Eigen::Vector3d get_g0();
 
   Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();

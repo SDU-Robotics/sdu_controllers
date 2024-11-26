@@ -29,6 +29,7 @@ namespace sdu_controllers::math
       Eigen::VectorXd tau;
       Eigen::Vector3d omega0, domega0, ddp0;
       Eigen::Matrix<double, Eigen::Dynamic, 3> CoM;
+      std::vector<Eigen::Matrix3d> link_inertia;
   };
 }
 

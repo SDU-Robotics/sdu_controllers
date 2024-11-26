@@ -152,6 +152,10 @@ namespace sdu_controllers::models
   {
     return theta;
   }
+  std::vector<double> URRobotModel::get_m()
+  {
+    return ur_robot_.get_m();
+  }
   std::vector<bool> URRobotModel::get_is_joint_revolute()
   {
     return is_joint_revolute;

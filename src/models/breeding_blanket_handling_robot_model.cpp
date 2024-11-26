@@ -106,6 +106,14 @@ namespace sdu_controllers::models
   {
     return alpha_;
   }
+  std::vector<double> BreedingBlanketHandlingRobotModel::get_theta()
+  {
+    return theta_;
+  }
+  std::vector<double> BreedingBlanketHandlingRobotModel::get_m()
+  {
+    return m_;
+  }
   Eigen::Vector3d BreedingBlanketHandlingRobotModel::get_g0()
   {
     return g;

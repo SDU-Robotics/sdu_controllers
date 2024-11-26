@@ -18,6 +18,7 @@ namespace sdu_controllers::math
     mu = Eigen::MatrixXd::Zero(3, N);
     ddp0 = -robot_model->get_g0();
     CoM = robot_model->get_CoM();
+    link_inertia = robot_model->get_link_inertia();
   }
 
   Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
@@ -113,8 +114,9 @@ namespace sdu_controllers::math
     Eigen::Vector3d r_, Rci, zi, z0;
     Eigen::Matrix3d R;
     Eigen::Matrix3d Ibase;
+    std::vector<double> m = robot_model->get_m();
 
-    for (int i = robot_model->get_dof(); i >= 0; --i)
+    for (int i = robot_model->get_dof() - 1; i >= 0; --i)
     {
       if (i > 0)
         r_ = T[i](Eigen::seqN(0, 3), 3) - T[i - 1](Eigen::seqN(0, 3), 3);
@@ -124,7 +126,52 @@ namespace sdu_controllers::math
       Rci = T[i].block<3, 3>(0, 0) * CoM(i, Eigen::all).transpose();
 
       R = T[i].block<3, 3>(0, 0);
-      // Ibase << R *
+      Ibase << R * link_inertia[i] * R.transpose();
+
+      if (i == robot_model->get_dof() - 1)
+      {
+        Eigen::Vector3d f_e = he(Eigen::seqN(0, 3));
+        Eigen::Vector3d mu_e = he(Eigen::seqN(3, 3));
+
+        f(Eigen::all, i) = f_e + m[i] * ddpc(Eigen::all, i);
+        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) +
+          mu_e + f_e.cross(Rci) +
+            Ibase * domega(Eigen::all, i) +
+              omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
+      }
+      else
+      {
+        f(Eigen::all, i) = f(Eigen::all, i + 1) + m[i] * ddpc(Eigen::all, i);
+        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) +
+          mu(Eigen::all, i + 1) + f(Eigen::all, i + 1).cross(Rci) +
+            Ibase * domega(Eigen::all, i) +
+              omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
+      }
+
+      if (robot_model->get_is_joint_revolute().at(i))
+      { // Revolute
+        if (i == 0)
+        {
+          tau(i) = mu(Eigen::all, i).transpose() * z0;
+        }
+        else
+        {
+          zi = T[i - 1].block<3, 1>(0, 2);
+          tau(i) = mu(Eigen::all, i).transpose() * zi;
+        }
+      }
+      else
+      { // Prismatic
+        if (i == 0)
+        {
+          tau(i) = f(Eigen::all, i).transpose() * z0;
+        }
+        else
+        {
+          zi = T[i - 1].block<3, 1>(0, 2);
+          tau(i) = f(Eigen::all, i).transpose() * zi;
+        }
+      }
     }
   }
 }
