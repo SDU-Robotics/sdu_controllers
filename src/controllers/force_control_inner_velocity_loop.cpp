@@ -27,7 +27,6 @@ namespace sdu_controllers::controllers
         Kf_(std::move(Kf)),
         robot_model_(std::move(robot_model))
   {
-    Mdinv_ = Md.inverse();
   }
 
   void ForceControlInnerVelocityLoop::step(
@@ -52,7 +51,10 @@ namespace sdu_controllers::controllers
 
     std::cout << "Xf: " << xf << std::endl;
 
-    y_ = Jac.inverse() * (Mdinv_ * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
+    // Mdinv_ << Md_.inverse();
+
+    // y_ = Jac.inverse() * (Mdinv_ * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
+    y_ = Jac.inverse() * (Md_.inverse() * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
 
     std::cout << "y_: " << y_ << std::endl;
   }

@@ -12,7 +12,8 @@ namespace sdu_controllers::controllers
   class ForceControlInnerVelocityLoop : public Controller
   {
   public:
-    explicit ForceControlInnerVelocityLoop(
+    explicit
+    ForceControlInnerVelocityLoop(
        Eigen::MatrixXd Kp,
        Eigen::MatrixXd Kd,
        Eigen::MatrixXd Md,

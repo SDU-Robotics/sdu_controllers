@@ -33,14 +33,12 @@ int main()
   double Kp_orient_value = 100.0;
   double Kd_pos_value = 2*sqrt(Kp_pos_value);
   double Kd_orient_value = 2*sqrt(Kp_orient_value);
-  double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
 
   VectorXd Kp_pos_vec = VectorXd::Ones(3) * Kp_pos_value;
   VectorXd Kp_orient_vec = VectorXd::Ones(3) * Kp_orient_value;
   VectorXd Kd_pos_vec = VectorXd::Ones(3) * Kd_pos_value;
   VectorXd Kd_orient_vec = VectorXd::Ones(3) * Kd_orient_value;
-  VectorXd N_vec = VectorXd::Ones(6) * N_value;
 
   MatrixXd Kp = MatrixXd::Zero(6, 6);
   Kp.setIdentity();
@@ -51,14 +49,14 @@ int main()
   Kd.block<3, 3>(0,0) = Kd_pos_vec.asDiagonal();
   Kd.block<3, 3>(3,3) = Kd_orient_vec.asDiagonal();
 
-  VectorXd Md_pos = VectorXd::Ones(3) * 1;
+  VectorXd Md_pos = VectorXd::Ones(3) * 10;
   VectorXd Md_rot = VectorXd::Ones(3) * 1;
   MatrixXd Md = MatrixXd::Zero(6, 6);
   Md.setIdentity();
   Md.block<3, 3>(0, 0) = Md_pos.asDiagonal();
   Md.block<3, 3>(3, 3) = Md_rot.asDiagonal();
 
-  VectorXd Kf_pos = VectorXd::Ones(3) * 1;
+  VectorXd Kf_pos = VectorXd::Ones(3) * 10;
   VectorXd Kf_rot = VectorXd::Ones(3) * 1;
   MatrixXd Kf = MatrixXd::Zero(6, 6);
   Kf.setIdentity();
@@ -70,8 +68,8 @@ int main()
   math::ForwardDynamics fwd_dyn(robot_model);
 
   Vector<double, 6> fd, fe;
-  fd << VectorXd::Ones(3) * 100,
-        VectorXd::Ones(3) * 0;
+  fd << 10,
+        VectorXd::Ones(5) * 0;
 
   double Kenv_el = 1000;
   VectorXd Kenv_vec = VectorXd::Ones(6) * Kenv_el;
@@ -86,10 +84,14 @@ int main()
   //
   Matrix4d T;
   VectorXd pos;
-  Vector<double, 6> xe;
+  Vector<double, 6> xe, xr;
+
+  T = kinematics::forward_kinematics(q, robot_model);
+  xr << T.block<3, 1>(0, 3),
+        VectorXd::Zero(3);
 
   // Control loop
-  double t_end = 5;
+  double t_end = 5; //dt * 5;
 
   for (size_t j = 0; j < t_end / dt; j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
   {
@@ -106,7 +108,7 @@ int main()
     xe << pos,
           VectorXd::Zero(3);
 
-    fe = Kenv * xe;
+    fe = Kenv * (xe - xr);
 
     // Controller
     controller.step(fd, fe, q_meas, dq_meas);
