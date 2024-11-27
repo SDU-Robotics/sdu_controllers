@@ -41,32 +41,96 @@ namespace sdu_controllers::controllers
     ~AdmittanceControllerPosition() override;
 
     /**
-     * @brief Set the input force as a 3-dimensional vector \f$[x\, y\, z]\f$.
+     * @brief
+     * Set the positional mass matrix \f$ \mathbf{M} \f$
      */
-    void set_input_force(const Eigen::Vector3d &force);
+    void set_mass_matrix_position(const Eigen::Matrix3d &mass);
 
     /**
-     * @brief Set the input torque. as a 3-dimensional vector \f$[\tau_{x}\, \tau_{y}\, \tau_{z}]\f$.
+     * @brief
+     * Set the positional mass matrix \f$ \mathbf{M} \f$ from a mass vector
      */
-    void set_input_torque(const Eigen::Vector3d &torque);
+    void set_mass_matrix_position(const Eigen::Vector3d &mass);
 
     /**
-     * @brief Set the input position as a 3-dimensional vector \f$[x\, y\, z]\f$.
+     * @brief
+     * Set the positional stiffness matrix \f$ \mathbf{K} \f$
      */
-    void set_input_position(const Eigen::Vector3d &position);
+    void set_stiffness_matrix_position(const Eigen::Matrix3d &stiffness);
 
     /**
-     * @brief Set the input orientation as a quaternion \f$[w\, x\, y\, z]\f$ (scalar-first).
+     * @brief
+     * Set the positional stiffness matrix \f$ \mathbf{K} \f$ from a stiffness vector
      */
-    void set_input_orientation(const Eigen::Quaterniond &orientation);
+    void set_stiffness_matrix_position(const Eigen::Vector3d &stiffness);
+
+    /**
+     * @brief
+     * Set the positional damping matrix \f$ \mathbf{D} \f$
+     */
+    void set_damping_matrix_position(const Eigen::Matrix3d &damping);
+
+    /**
+     * @brief
+     * Set the positional damping matrix \f$ \mathbf{D} \f$ from a damping vector
+     */
+    void set_damping_matrix_position(const Eigen::Vector3d &damping);
+
+    /**
+     * @brief
+     * Set the orientational mass matrix \f$ \mathbf{M}_{O} \f$
+     */
+    void set_mass_matrix_orientation(const Eigen::Matrix3d &mass);
+
+    /**
+     * @brief
+     * Set the orientational mass matrix \f$ \mathbf{M}_{O} \f$ from a mass vector
+     */
+    void set_mass_matrix_orientation(const Eigen::Vector3d &mass);
+
+    /**
+     * @brief
+     * Set the orientational stiffness matrix \f$ \mathbf{K}_{O} \f$
+     */
+    void set_stiffness_matrix_orientation(const Eigen::Matrix3d &stiffness);
+
+    /**
+     * @brief
+     * Set the orientational stiffness matrix \f$ \mathbf{K}_{O} \f$ from a stiffness vector
+     */
+    void set_stiffness_matrix_orientation(const Eigen::Vector3d &stiffness);
+
+    /**
+     * @brief
+     * Set the orientational damping matrix \f$ \mathbf{D}_{O} \f$
+     */
+    void set_damping_matrix_orientation(const Eigen::Matrix3d &damping);
+
+    /**
+     * @brief
+     * Set the orientational damping matrix \f$ \mathbf{D}_{O} \f$ from a damping vector
+     */
+    void set_damping_matrix_orientation(const Eigen::Vector3d &damping);
+
+    /**
+     * @brief
+     * Set the time interval between steps (used for integration, -> 1./control frequency)
+     */
+    void set_time_interval(double dt);
 
     /**
      * @brief Step the execution of the controller.
+     * Parameters:
+     * - input force \f$ [f_{x}, f_{y}, f_{z}] \f$
+     * - input torque \f$ [\mu_{x}, \mu_{y}, \mu_{z}] \f$
+     * - desired position \f$ [x, y, z] \f$
+     * - desired orientation in quaternion \f$ [q_{w}, q_{x}, q_{y}, q_{z}]\f$ (Note: Eigen stores quaternions internally as: [x, y, z, w])
      */
-    void step();
+    void step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Quaterniond &quat_desired);
 
     /**
      * @brief Get the output of the controller. Updates when the step() function is called.
+     * Returns the new pose as \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
      */
     Eigen::VectorXd get_output() override;
 
@@ -82,6 +146,21 @@ namespace sdu_controllers::controllers
     Eigen::Matrix3d Mo_;
     Eigen::Matrix3d Ko_;
     Eigen::Matrix3d Do_;
+
+    // Control variables
+    double dt_;
+    Eigen::VectorXd u_{7};
+
+    // Error terms position
+    Eigen::Vector3d x_e_;
+    Eigen::Vector3d dx_e_;
+
+    // Error terms orientation
+    Eigen::Quaterniond quat_e_;
+    Eigen::Vector3d omega_e_;
+
+    // Helper variables
+    Eigen::Matrix3d rot_identity_;
   };
 }  // namespace sdu_controllers::controllers
 
