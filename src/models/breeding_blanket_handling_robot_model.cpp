@@ -34,7 +34,16 @@ namespace sdu_controllers::models
     a_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     alpha_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    is_joint_revolute_ = {false, false, true, true, true, true, true};
+    is_joint_revolute_ = {false, true, false, true, true, true, true};
+
+    m_ = {65315.2552668712,
+          2741.42545562447,
+          10065.7834870542,
+          7165.97697748845,
+          2214.61694486676,
+          3222.02650315727,
+          1880.28170116907,
+          2180.39160250515};
 
     g << 0, 0, -9.82;
   }

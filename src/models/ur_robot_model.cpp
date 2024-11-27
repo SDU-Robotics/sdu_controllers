@@ -33,7 +33,7 @@ namespace sdu_controllers::models
     joint_acc_bounds_ = { ddq_low, ddq_high };
     joint_torque_bounds_ = { torque_low, torque_high };
 
-    is_joint_revolute = {1, 1, 1, 1, 1, 1};
+    is_joint_revolute = {true, true, true, true, true, true};
     theta = {0, 0, 0, 0, 0, 0};
   }
 
@@ -76,7 +76,7 @@ namespace sdu_controllers::models
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
 
-    is_joint_revolute = {1, 1, 1, 1, 1, 1};
+    is_joint_revolute = {true, true, true, true, true, true};
     theta = {0, 0, 0, 0, 0, 0};
   }
 

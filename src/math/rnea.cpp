@@ -19,6 +19,12 @@ namespace sdu_controllers::math
     ddp0 = -robot_model->get_g0();
     CoM = robot_model->get_CoM();
     link_inertia = robot_model->get_link_inertia();
+    z0 << 0, 0, 1;
+  }
+
+  void RecursiveNewtonEuler::set_z0(const Eigen::Vector3d &z0)
+  {
+    this->z0 = z0;
   }
 
   Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
@@ -32,15 +38,18 @@ namespace sdu_controllers::math
 
   void RecursiveNewtonEuler::forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T)
   {
-    Eigen::Vector3d r_, Rci, zi, z0;
-    z0 << 0, 0, 1;
+    Eigen::Vector3d r_, Rci, zi;
 
     for (int i = 0; i < robot_model->get_dof(); ++i)
     {
       if (i > 0)
+      {
         r_ = T[i](Eigen::seqN(0, 3), 3) - T[i - 1](Eigen::seqN(0, 3), 3);
+      }
       else
+      {
         r_ = T[i](Eigen::seqN(0, 3), 3);
+      }
 
       Rci = T[i].block<3, 3>(0, 0) * CoM(i, Eigen::all).transpose();
 
@@ -52,12 +61,12 @@ namespace sdu_controllers::math
           domega(Eigen::all, i) = domega0 + ddq(i) * z0 +
             dq(i) * omega0.cross(z0);
           ddp(Eigen::all, i) = ddp0 + domega0.cross(r_) +
-              omega(Eigen::all, i).cross(
-                omega(Eigen::all, i).cross(r_));
+              omega0.cross(omega0.cross(r_));
         }
         else
         {
-          zi = T[i - 1].block<3, 1>(0, 2);
+          // zi = T[i - 1].block<3, 1>(0, 2);
+          zi = T[i - 1](Eigen::seqN(0, 3), 2);
 
           // omega(:, i) = omega(:, i - 1) + dq(i) * zi;
           // domega(:, i) = domega(:, i - 1) + ddq(i) * zi + ...
@@ -85,7 +94,8 @@ namespace sdu_controllers::math
         }
         else
         {
-          zi = T[i - 1].block<3, 1>(0, 2);
+          // zi = T[i - 1].block<3, 1>(0, 2);
+          zi = T[i - 1](Eigen::seqN(0, 3), 2);
 
           // omega(:, i) = omega(:, i - 1);
           // domega(:, i) = domega(:, i - 1);
@@ -111,24 +121,30 @@ namespace sdu_controllers::math
 
   void RecursiveNewtonEuler::backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T)
   {
-    Eigen::Vector3d r_, Rci, zi, z0;
+    Eigen::Vector3d r_, Rci, zi;
     Eigen::Matrix3d R;
     Eigen::Matrix3d Ibase;
     std::vector<double> m = robot_model->get_m();
 
     for (int i = robot_model->get_dof() - 1; i >= 0; --i)
     {
-      if (i > 0)
-        r_ = T[i](Eigen::seqN(0, 3), 3) - T[i - 1](Eigen::seqN(0, 3), 3);
-      else
-        r_ = T[i](Eigen::seqN(0, 3), 3);
+      // std::cout << i << std::endl;
 
-      Rci = T[i].block<3, 3>(0, 0) * CoM(i, Eigen::all).transpose();
+      if (i > 0)
+      {
+        r_ = T[i](Eigen::seqN(0, 3), 3) - T[i - 1](Eigen::seqN(0, 3), 3);
+      }
+      else
+      {
+        r_ = T[i](Eigen::seqN(0, 3), 3);
+      }
 
       R = T[i].block<3, 3>(0, 0);
+      Rci = R * CoM(i, Eigen::all).transpose();
+
       Ibase << R * link_inertia[i] * R.transpose();
 
-      if (i == robot_model->get_dof() - 1)
+      if (i == (robot_model->get_dof() - 1))
       {
         Eigen::Vector3d f_e = he(Eigen::seqN(0, 3));
         Eigen::Vector3d mu_e = he(Eigen::seqN(3, 3));
@@ -153,12 +169,16 @@ namespace sdu_controllers::math
         if (i == 0)
         {
           tau(i) = mu(Eigen::all, i).transpose() * z0;
+          std::cout << "tau(" << i << ") " << tau(i) << std::endl;
+          std::cout << "z0 " << z0 << std::endl;
         }
         else
         {
-          zi = T[i - 1].block<3, 1>(0, 2);
+          // zi = T[i - 1].block<3, 1>(0, 2);
+          zi = T[i - 1](Eigen::seqN(0, 3), 2);
           tau(i) = mu(Eigen::all, i).transpose() * zi;
         }
+        std::cout << "tau(" << i << ") " << tau(i) << std::endl;
       }
       else
       { // Prismatic
@@ -168,7 +188,8 @@ namespace sdu_controllers::math
         }
         else
         {
-          zi = T[i - 1].block<3, 1>(0, 2);
+          // zi = T[i - 1].block<3, 1>(0, 2);
+          zi = T[i - 1](Eigen::seqN(0, 3), 2);
           tau(i) = f(Eigen::all, i).transpose() * zi;
         }
       }

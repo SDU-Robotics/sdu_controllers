@@ -42,7 +42,7 @@ int main()
   VectorXd q(ROBOT_DOF);
   VectorXd dq(ROBOT_DOF);
   VectorXd ddq(ROBOT_DOF);
-  q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
+  q << 1, 1, 1, 1, 1, 1; // 1.5707, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << q;
   ddq << q;
   // dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -51,7 +51,10 @@ int main()
   he.setZero();
 
   Eigen::VectorXd tau = rnea.inverse_dynamics(q, dq, ddq, he);
-  std::cout << "tau " << tau << std::endl;
+  std::cout << "tau\n" << tau << std::endl;
+
+  tau = rnea.inverse_dynamics(q, dq, ddq, he);
+  std::cout << "tau\n" << tau << std::endl;
 
   //  // Control loop
   //  for (const std::vector<double>& trajectory_point : input_trajectory)
