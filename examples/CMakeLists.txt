@@ -4,6 +4,9 @@ target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
 add_executable(rnea_test rnea_test.cpp)
 target_link_libraries(rnea_test PRIVATE sdu_controllers)
 
+add_executable(eurofusion_robot_rnea eurofusion_robot_rnea.cpp)
+target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
+
 add_executable(cartesian_motion_controller cartesian_motion_controller.cpp)
 target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
 

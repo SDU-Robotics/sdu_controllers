@@ -169,8 +169,8 @@ namespace sdu_controllers::math
         if (i == 0)
         {
           tau(i) = mu(Eigen::all, i).transpose() * z0;
-          std::cout << "tau(" << i << ") " << tau(i) << std::endl;
-          std::cout << "z0 " << z0 << std::endl;
+          // std::cout << "tau(" << i << ") " << tau(i) << std::endl;
+          // std::cout << "z0 " << z0 << std::endl;
         }
         else
         {
@@ -178,7 +178,7 @@ namespace sdu_controllers::math
           zi = T[i - 1](Eigen::seqN(0, 3), 2);
           tau(i) = mu(Eigen::all, i).transpose() * zi;
         }
-        std::cout << "tau(" << i << ") " << tau(i) << std::endl;
+        // std::cout << "tau(" << i << ") " << tau(i) << std::endl;
       }
       else
       { // Prismatic

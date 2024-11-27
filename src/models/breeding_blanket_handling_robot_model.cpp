@@ -31,9 +31,10 @@ namespace sdu_controllers::models
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
 
-    a_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    alpha_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    a_ = {0.0, 0.0, 0.0, 0.0, 0.39, 0.0, 0.0};
+    d_ = {-0.78, 0.0, 0.0, 0.0, 0.0, 3.05, 0.0};
+    alpha_ = {0.0, 0.0, pi/2., 0.0, pi/2., 0.0, pi/2.};
+    theta_ = {0.0, pi/2., 0.0, 0.0, 0.0, 0.0, 0.0};
     is_joint_revolute_ = {false, true, false, true, true, true, true};
 
     m_ = {2741.42545562447,
@@ -93,22 +94,26 @@ namespace sdu_controllers::models
                     };
 
     // all the inertial parameters above are taken from a URDF-file generated from the CAD model.
-    //
-    for (size_t i = 0; i < N; i++)
+    
+    // Eigen::Matrix<double, Eigen::Dynamic, 3>
+    com_ = Eigen::Matrix<double, Eigen::Dynamic, 3>::Zero(dof_, 3);
+    for (size_t i = 0; i < dof_; i++)
     {
       for (size_t j = 0; j < 3; j++)
       {
-        com_[i][j] = temp_com_[i][j];
+        com_(i, j) = temp_com_[i][j];
       }
     }
 
-    for (size_t i = 0; i < N; i++)
+    //  std::vector<Eigen::Matrix3d>
+    for (size_t i = 0; i < dof_; i++)
     {
+      link_inertia_.push_back(Eigen::Matrix3d::Zero());
       for (size_t j = 0; j < 3; j++)
       {
         for (size_t k = 0; k < 3; k++)
         {
-          link_inertia_[i][j][k] = temp_inertia_[i][j][k];
+          link_inertia_[i](j, k) = temp_inertia_[i][j][k];
         }
       }
     }
@@ -202,6 +207,10 @@ namespace sdu_controllers::models
   std::vector<Eigen::Matrix3d> BreedingBlanketHandlingRobotModel::get_link_inertia()
   {
     return link_inertia_;
+  }
+  std::vector<bool> BreedingBlanketHandlingRobotModel::get_is_joint_revolute() 
+  {
+    return is_joint_revolute_;
   }
 
 }  // namespace sdu_controllers::math
