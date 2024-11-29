@@ -25,7 +25,7 @@ int main()
   double frequency = 500;
   double dt = 1. / frequency;
 
-  int t_steps = 2 * int(frequency);
+  auto t_steps = static_cast<uint16_t>(2 * frequency);
 
   // Create file outputs
   std::ofstream output_filestream_ref;
@@ -46,7 +46,7 @@ int main()
 
   // Create reference trajectory (desired trajectory)
   vector<Vector3d> ref_traj;
-  for (int t = 0; t < t_steps; t++)
+  for (uint16_t t = 0; t < t_steps; t++)
   {
     x_desired = get_circle_target(start_position, t * dt);
     csv_writer_ref << eigen_to_std_vector(x_desired);
@@ -69,7 +69,7 @@ int main()
   Vector3d mu = Vector3d::Zero();
 
   vector<Vector3d> adm_traj;
-  for (int t = 0; t < t_steps; t++)
+  for (uint16_t t = 0; t < t_steps; t++)
   {
     x_desired = get_circle_target(start_position, t * dt);
     if (adm_pos[0] > 0.29 && adm_pos[0] < 0.31 && adm_pos[1] > 0.39 && adm_pos[1] < 0.41)

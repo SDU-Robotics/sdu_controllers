@@ -26,13 +26,11 @@ namespace sdu_controllers::controllers
 
     dt_ = 1. / 500.0;                           // Time step
 
-    rot_identity_ = Matrix3d::Identity(); 
+    rot_identity_ = Matrix3d::Identity();
 
-    reset();
+    AdmittanceControllerPosition::reset();
 
   }
-
-  AdmittanceControllerPosition::~AdmittanceControllerPosition() = default;
 
   void AdmittanceControllerPosition::step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Quaterniond &quat_desired)
   {

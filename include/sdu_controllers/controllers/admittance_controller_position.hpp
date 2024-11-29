@@ -38,7 +38,6 @@ namespace sdu_controllers::controllers
   {
    public:
     explicit AdmittanceControllerPosition();
-    ~AdmittanceControllerPosition() override;
 
     /**
      * @brief
