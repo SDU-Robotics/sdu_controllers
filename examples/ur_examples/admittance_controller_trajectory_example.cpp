@@ -38,7 +38,7 @@ Affine3d pos_rotmat_to_T(const Vector3d &position, const Matrix3d &rotation)
   return T;
 }
 
-Affine3d pos_quat_to_T(const VectorXd pose)
+Affine3d pos_quat_to_T(const VectorXd &pose)
 {
   Affine3d T = Affine3d::Identity();
   T.translation() = pose.block<3, 1>(0, 0);
@@ -92,7 +92,7 @@ VectorXd wrench_trans(const Vector3d &torques, const Vector3d &forces, const Aff
   return wrench_in_B; 
 }
 
-Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius=0.075, double freq=0.35)
+Vector3d get_circle_target(const Vector3d &pose, const double timestep, const double radius=0.075, const double freq=0.35)
 {
   Vector3d circle_target;
   circle_target[0] = pose[0] + radius * cos(2 * M_PI * freq * timestep); 
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
   // Initialize admittance control
   VectorXd u;
-  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller;
+  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller(frequency);
   adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
   adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
   adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200));

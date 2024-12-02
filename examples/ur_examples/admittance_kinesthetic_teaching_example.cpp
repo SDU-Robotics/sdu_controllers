@@ -25,7 +25,7 @@ Isometry3d pos_rotvec_to_T(const Vector3d &position, const AngleAxisd &rotation)
   return T;
 }
 
-Isometry3d pos_quat_to_T(const VectorXd pose)
+Isometry3d pos_quat_to_T(const VectorXd &pose)
 {
   Isometry3d T = Isometry3d::Identity();
   T.translation() = pose.block<3, 1>(0, 0);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
   // Initialize admittance control
   VectorXd u;
-  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller;
+  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller(frequency);
 
   std::string robot_ip = "127.0.0.1";
   if (argc > 1)

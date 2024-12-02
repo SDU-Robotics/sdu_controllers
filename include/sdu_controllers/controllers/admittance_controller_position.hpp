@@ -8,36 +8,43 @@
 namespace sdu_controllers::controllers
 {
   /**
-   * Admittance controller implementation as described in: Robotics Modelling, Planning and Control, Chapter 9, Eq. 9.37:
+   * The admittance controller is implemented as described in: Robotics Modelling, Planning and Control, Chapter 9, Eq. 9.37:
    *
    * \f$ \mathbf{M}_{t}\ddot{\tilde{z}} + \mathbf{K}_{Dt}\dot{\tilde{z}} + \mathbf{K}_{Pt}\tilde{z} = h_{e}^{d} \f$
    *
-   * The position and orientation are treated separately, for the position Eq. 9.37 is rearranged to solve for
+   * The position and orientation are treated separately. For the position Eq. 9.37 is rearranged to solve for
    * the acceleration \f$\ddot{x}\f$, yielding:
    *
    * \f$ \ddot{x} = \mathbf{M}^{-1}f_{base}^{d} - \mathbf{K}x - \mathbf{D}\dot{x} \f$
    *
    * which is integrated twice to give a position.
    *
-   * Similarly for the orientation we rearrange Eq. 9.37, to solve for the angular acceleration \f$\ddot{\omega}\f$,
+   * Similarly, for the orientation we rearrange Eq. 9.37, to solve for the angular acceleration \f$\ddot{\omega}\f$,
    * yielding:
    *
    * \f$ \ddot{\omega} = \mathbf{M}_{O}^{-1}\mu^{d} - \mathbf{K}^{'}_{O} \mathbf{q}_{e} - \mathbf{D}_{O}\dot{\omega} \f$
    *
-   * where \f$\mathbf{K}^{'}_{O} = 2\mathbf{E}^{T}\mathbf{K}_{O}\f$.
+   * The rotational stiffness \f$ \mathbf{K}^{'}_{O} \f$ is defined by Eq. 60 in F. Caccavale et al.: The Role of Euler
+   * Parameters in Robot Control as:
+   * \f$\mathbf{K}^{'}_{O} = 2\mathbf{E}^{T}\mathbf{K}_{O}\f$ with as \f$\mathbf{E} = \eta \mathbf{I} – \mathbf{S}(\epsilon) \f$.
    *
-   * Eq. 61 in F. Caccavale et al.: The Role of Euler Parameters in Robot Control is:
-   *
+   * We then integrate the acceleration to calculate the angular velocity.
+   * To integrate the velocity to the orientation in quaternions, we use
+   * Eq. 61 in F. Caccavale et al.: The Role of Euler Parameters in Robot Control:
    * \f$ d\epsilon_{cd}^{d} = \frac{1}{2}\Delta\omega_{cd}^{d}dt \f$
    *
-   * TODO: finish description of rotational part of the controller.
    *
-   * The output of the controller is a cartesian pose.
+   * The output of the controller is a cartesian pose with the orientation described as a quaternion (scalar-first).
    */
   class AdmittanceControllerPosition : public Controller
   {
    public:
-    explicit AdmittanceControllerPosition();
+    /**
+     * @brief
+     * Initialize the admittance controller
+     * @param frequency controller frequency, defaults to 500 Hz
+     */
+    explicit AdmittanceControllerPosition(double frequency=500.0);
 
     /**
      * @brief
@@ -112,24 +119,18 @@ namespace sdu_controllers::controllers
     void set_damping_matrix_orientation(const Eigen::Vector3d &damping);
 
     /**
-     * @brief
-     * Set the time interval between steps (used for integration, -> 1./control frequency)
-     */
-    void set_time_interval(double dt);
-
-    /**
      * @brief Step the execution of the controller.
-     * Parameters:
-     * - input force \f$ [f_{x}, f_{y}, f_{z}] \f$
-     * - input torque \f$ [\mu_{x}, \mu_{y}, \mu_{z}] \f$
-     * - desired position \f$ [x, y, z] \f$
-     * - desired orientation in quaternion \f$ [q_{w}, q_{x}, q_{y}, q_{z}]\f$ (Note: Eigen stores quaternions internally as: [x, y, z, w])
+     *
+     * @param input_force given as \f$ [f_{x}, f_{y}, f_{z}] \f$
+     * @param input_torque given as \f$ [\mu_{x}, \mu_{y}, \mu_{z}] \f$
+     * @param x_desired desired position given as \f$ [x, y, z] \f$
+     * @param quat_desired desired orientation in quaternion \f$ [q_{w}, q_{x}, q_{y}, q_{z}]\f$ (Note: Eigen stores quaternions internally as: [x, y, z, w])
      */
     void step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Quaterniond &quat_desired);
 
     /**
      * @brief Get the output of the controller. Updates when the step() function is called.
-     * Returns the new pose as \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
+     * @returns the new pose as \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
      */
     Eigen::VectorXd get_output() override;
 
