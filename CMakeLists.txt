@@ -20,6 +20,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_PYTHON "Enable building of Python bindings" ON)
 option(BUILD_DOCS "Enable building of documentation" ON)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
+option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -28,7 +29,9 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 add_subdirectory(src)
 
 # compile the examples
+if(BUILD_EXAMPLES)
 add_subdirectory(examples)
+endif()
 
 # compile the tests
 include(CTest)
