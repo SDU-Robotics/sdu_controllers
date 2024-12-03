@@ -10,8 +10,13 @@ target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
 add_executable(cartesian_motion_controller cartesian_motion_controller.cpp)
 target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
 
+add_executable(admittance_controller_example admittance_controller_example.cpp)
+target_link_libraries(admittance_controller_example PRIVATE sdu_controllers)
+
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
 
 add_executable(force_control_velocity_example force_control_velocity_example.cpp)
 target_link_libraries(force_control_velocity_example PRIVATE sdu_controllers)
+
+# add_subdirectory(ur_examples)
