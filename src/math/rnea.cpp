@@ -27,6 +27,62 @@ namespace sdu_controllers::math
     this->z0 = z0;
   }
 
+  Eigen::VectorXd RecursiveNewtonEuler::forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
+        const Eigen::VectorXd &tau, const Eigen::VectorXd &he)
+  {
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    // Get C(q, dq) dq + g(q)
+    Eigen::VectorXd tau_bar = inverse_dynamics(q, dq, zero_vec, zero_vec);
+    // Eigen::VectorXd tau_bar = velocityProduct(q, dq) + gravity(q);
+
+    Eigen::MatrixXd B = inertia(q);
+
+    // return B.inverse() * (tau - tau_bar);
+    return B.lu().solve(tau - tau_bar);
+  }
+
+  Eigen::MatrixXd RecursiveNewtonEuler::inertia(const Eigen::VectorXd &q)
+  {
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    Eigen::MatrixXd B = Eigen::MatrixXd::Zero(q.rows(), q.rows());
+    Eigen::VectorXd ddq_bar = Eigen::VectorXd::Zero(q.rows()),
+                    tau_tmp = Eigen::VectorXd::Zero(q.rows());
+
+    Eigen::Vector3d ddp0_original = this->ddp0;
+    this->ddp0 *= 0;
+
+    for (int i = 0; i < q.rows(); ++i)
+    {
+      ddq_bar.setZero();
+      ddq_bar(i) = 1.0;
+
+      tau_tmp = inverse_dynamics(q, zero_vec, ddq_bar, zero_vec);
+      B(Eigen::all, i) = tau_tmp;
+    }
+
+    this->ddp0 = ddp0_original;
+
+    return B;
+  }
+
+  Eigen::VectorXd RecursiveNewtonEuler::velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq)
+  {
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    Eigen::MatrixXd Cdq = Eigen::MatrixXd::Zero(q.rows(), q.rows());
+
+    Cdq = inverse_dynamics(q, dq, zero_vec, zero_vec) - gravity(q);
+    return Cdq;
+  }
+
+  Eigen::VectorXd RecursiveNewtonEuler::gravity(const Eigen::VectorXd &q)
+  {
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    Eigen::VectorXd grav = Eigen::VectorXd::Zero(q.rows());
+
+    grav = inverse_dynamics(q, zero_vec, zero_vec, zero_vec);
+    return grav;
+  }
+
   Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
         const Eigen::VectorXd &ddq, const Eigen::VectorXd &he)
   {

@@ -20,7 +20,8 @@ namespace sdu_controllers::math
 
     // Eq. (7.115), from page 293, Robotics: Modelling, Planning and Control.
     VectorXd tau_mark = C * dq + tau_g;
-    VectorXd ddq = B.inverse() * (tau - tau_mark);
+    // VectorXd ddq = B.inverse() * (tau - tau_mark);
+    VectorXd ddq = B.lu().solve(tau - tau_mark);
     //std::cout << "ddq:" << ddq << std::endl;
     return ddq;
   }
