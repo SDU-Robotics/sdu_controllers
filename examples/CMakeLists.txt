@@ -1,25 +1,25 @@
-add_executable(joint_motion_controller joint_motion_controller.cpp)
+add_executable(joint_motion_controller ur_examples/joint_motion_controller.cpp)
 target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
 
-add_executable(rnea_test rnea_test.cpp)
+add_executable(rnea_test ../tests/rnea_test.cpp)
 target_link_libraries(rnea_test PRIVATE sdu_controllers)
 
-add_executable(UR5e_inv_dyn_comparison UR5e_inv_dyn_comparison.cpp)
-target_link_libraries(UR5e_inv_dyn_comparison PRIVATE sdu_controllers)
+add_executable(ur5e_inv_dyn_comparison ur5e_inv_dyn_comparison.cpp)
+target_link_libraries(ur5e_inv_dyn_comparison PRIVATE sdu_controllers)
 
 add_executable(eurofusion_robot_rnea eurofusion_robot_rnea.cpp)
 target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
 
-add_executable(cartesian_motion_controller cartesian_motion_controller.cpp)
+add_executable(cartesian_motion_controller ur_examples/cartesian_motion_controller.cpp)
 target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
 
-add_executable(admittance_controller_example admittance_controller_example.cpp)
-target_link_libraries(admittance_controller_example PRIVATE sdu_controllers)
+add_executable(admittance_controller admittance_controller.cpp)
+target_link_libraries(admittance_controller PRIVATE sdu_controllers)
 
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
 
-add_executable(force_control_velocity force_control_velocity.cpp)
+add_executable(force_control_velocity ur_examples/force_control_velocity.cpp)
 target_link_libraries(force_control_velocity PRIVATE sdu_controllers)
 
 # add_subdirectory(ur_examples)
