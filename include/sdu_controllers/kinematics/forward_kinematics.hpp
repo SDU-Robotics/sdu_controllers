@@ -50,7 +50,6 @@ namespace sdu_controllers::kinematics
         T *= A_i;
 
     }
-    // std::cout << "T: " << T << std::endl;
     return T;
   }
 
@@ -132,7 +131,7 @@ namespace sdu_controllers::kinematics
       // complete_T.at(i) = T;
       complete_T.push_back(T);
     }
-    // std::cout << "T: " << T << std::endl;
+    
     return complete_T;
   }
 }  // namespace sdu_controllers::kinematics

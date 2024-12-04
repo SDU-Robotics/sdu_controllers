@@ -19,7 +19,7 @@ target_link_libraries(admittance_controller_example PRIVATE sdu_controllers)
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
 
-add_executable(force_control_velocity_example force_control_velocity_example.cpp)
-target_link_libraries(force_control_velocity_example PRIVATE sdu_controllers)
+add_executable(force_control_velocity force_control_velocity.cpp)
+target_link_libraries(force_control_velocity PRIVATE sdu_controllers)
 
 # add_subdirectory(ur_examples)
