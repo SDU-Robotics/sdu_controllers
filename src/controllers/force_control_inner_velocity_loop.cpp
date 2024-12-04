@@ -53,7 +53,7 @@ namespace sdu_controllers::controllers
     // Mdinv_ << Md_.inverse();
 
     // y_ = Jac.inverse() * (Mdinv_ * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
-    y_ = Jac.inverse() * (Md_.inverse() * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq));
+    y_ = Jac.lu().solve((Md_.inverse() * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq)));
 
     std::cout << "y_: " << y_ << std::endl;
   }
