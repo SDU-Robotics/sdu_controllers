@@ -111,6 +111,60 @@ std::vector<double> URRobot::get_alpha()
   return alpha;
 }
 
+std::vector<double> URRobot::get_m()
+{
+  std::vector<double> out;
+
+  for (int i = 0; i < 6; ++i)
+  {
+    out.push_back(m_[i]);
+  }
+
+  return out;
+}
+
+Eigen::Vector3d URRobot::get_g0()
+{
+  Eigen::Vector3d g0;
+  g0 << g[0], g[1], g[2];
+  return g0;
+}
+Eigen::Matrix<double, Eigen::Dynamic, 3> URRobot::get_CoM()
+{
+  Eigen::Matrix<double, 6, 3> out;
+
+  for (int i = 0; i < 6; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      out(i, j) = com_[i][j];
+    }
+  }
+
+  return out;
+}
+std::vector<Eigen::Matrix3d> URRobot::get_link_inertia()
+{
+  std::vector<Eigen::Matrix3d> out;
+  Eigen::Matrix3d zero_mat;
+  zero_mat.setZero();
+
+  for (int i = 0; i < 6; ++i)
+  {
+    out.push_back(zero_mat);
+
+    for (int j = 0; j < 3; ++j)
+    {
+      for (int k = 0; k < 3; ++k)
+      {
+        out[i](j, k) = link_inertia_[i][j][k];
+      }
+    }
+  }
+
+  return out;
+}
+
 std::vector<double> URRobot::gravity(const Eigen::Matrix<double, 6, 1> & q)
 {
     //std::feclearexcept(FE_ALL_EXCEPT);

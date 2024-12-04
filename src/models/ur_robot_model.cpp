@@ -32,6 +32,9 @@ namespace sdu_controllers::models
     joint_vel_bounds_ = { dq_low, dq_high };
     joint_acc_bounds_ = { ddq_low, ddq_high };
     joint_torque_bounds_ = { torque_low, torque_high };
+
+    is_joint_revolute = {true, true, true, true, true, true};
+    theta = {0, 0, 0, 0, 0, 0};
   }
 
   URRobotModel::URRobotModel(URRobot::RobotType robot_type) : ur_robot_(robot_type)
@@ -72,6 +75,9 @@ namespace sdu_controllers::models
     joint_vel_bounds_ = { dq_low, dq_high};
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
+
+    is_joint_revolute = {true, true, true, true, true, true};
+    theta = {0, 0, 0, 0, 0, 0};
   }
 
   MatrixXd URRobotModel::get_inertia_matrix(const VectorXd& q)
@@ -141,6 +147,30 @@ namespace sdu_controllers::models
   std::vector<double> URRobotModel::get_alpha()
   {
     return ur_robot_.get_alpha();
+  }
+  std::vector<double> URRobotModel::get_theta()
+  {
+    return theta;
+  }
+  std::vector<double> URRobotModel::get_m()
+  {
+    return ur_robot_.get_m();
+  }
+  std::vector<bool> URRobotModel::get_is_joint_revolute()
+  {
+    return is_joint_revolute;
+  }
+  Eigen::Vector3d URRobotModel::get_g0()
+  {
+    return ur_robot_.get_g0();
+  }
+  Eigen::Matrix<double, Eigen::Dynamic, 3> URRobotModel::get_CoM()
+  {
+    return ur_robot_.get_CoM();
+  }
+  std::vector<Eigen::Matrix3d> URRobotModel::get_link_inertia()
+  {
+    return ur_robot_.get_link_inertia();
   }
 
 }  // namespace sdu_controllers::models
