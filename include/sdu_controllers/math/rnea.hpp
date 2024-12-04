@@ -1,7 +1,6 @@
 #pragma once
-
-#ifndef RNEA_HPP
-#define RNEA_HPP
+#ifndef SDU_CONTROLLERS_RNEA_HPP
+#define SDU_CONTROLLERS_RNEA_HPP
 
 #include <memory>
 #include <sdu_controllers/models/robot_model.hpp>
@@ -40,6 +39,7 @@ namespace sdu_controllers::math
       Eigen::Matrix<double, Eigen::Dynamic, 3> CoM;
       std::vector<Eigen::Matrix3d> link_inertia;
   };
-}
 
-#endif //RNEA_HPP
+} // namespace sdu_controllers::math
+
+#endif // SDU_CONTROLLERS_RNEA_HPP
