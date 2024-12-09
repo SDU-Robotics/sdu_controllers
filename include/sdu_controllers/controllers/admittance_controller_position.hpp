@@ -35,6 +35,14 @@ namespace sdu_controllers::controllers
    *
    *
    * The output of the controller is a cartesian pose with the orientation described as a quaternion (scalar-first).
+   *
+   * The admittance parameters default to:
+   *
+   * \f$\mathbf{M} = 22.5\f$, \f$\mathbf{M}_{O} = 0.25\f$
+   *
+   * \f$\mathbf{K} = 0\f$, \f$\mathbf{K}_{O} = 0\f$
+   *
+   * \f$\mathbf{D} = 70\f$, \f$\mathbf{D}_{O} = 3\f$
    */
   class AdmittanceControllerPosition : public Controller
   {

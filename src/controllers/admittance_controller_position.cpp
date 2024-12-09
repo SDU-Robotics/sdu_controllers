@@ -39,7 +39,7 @@ namespace sdu_controllers::controllers
     x_e_ += dx_e_ * dt_;
 
     // -- Compute rotational error --
-    Eigen::Matrix3d E = quat_e_.w() * (rot_identity_ - math::skew(quat_e_.vec()));        // TODO: Check out parenthesis
+    Eigen::Matrix3d E = (quat_e_.w() * rot_identity_) - math::skew(quat_e_.vec());
     Eigen::Matrix3d Ko_mark = 2 * E.transpose() * Ko_;
 
     // Compute angular acceleration error domega_e
@@ -53,7 +53,7 @@ namespace sdu_controllers::controllers
     Eigen::Quaterniond omega_quat = math::exp(Eigen::Quaterniond(0, half_omega_e_dt[0], half_omega_e_dt[1], half_omega_e_dt[2]));
     quat_e_ = omega_quat * quat_e_;
 
-    // Calculate new position (Should be this in here or outside of sdu_controllers)
+    // Calculate new position
     Eigen::Vector3d x_c_ = x_desired + x_e_;
     Eigen::Quaterniond quat_c_ = quat_desired * quat_e_;
 
