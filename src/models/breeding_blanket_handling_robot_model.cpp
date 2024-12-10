@@ -31,10 +31,14 @@ namespace sdu_controllers::models
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
 
-    a_ = {0.0, 0.0, 0.0, 0.0, 0.39, 0.0, 0.0};
-    d_ = {-0.78, 0.0, 0.0, 0.0, 0.0, 3.05, 0.0};
-    alpha_ = {0.0, 0.0, pi/2., 0.0, pi/2., 0.0, pi/2.};
-    theta_ = {0.0, pi/2., 0.0, 0.0, 0.0, 0.0, 0.0};
+    double A = 0.39,
+           Da = 3.05,
+           Db = 1.85;
+
+    a_ = {0.0, 0.0, 0.0, 0.0, -A, 0.0, 0.0};
+    d_ = {0.0, 0.0, 0.0, 0.0, Da, 0.0, Db};
+    alpha_ = {0.0, -pi/2., 0.0, -pi/2., 0.0, -pi/2., 0.0};
+    theta_ = {0.0, -pi/2., 0.0, 0.0, pi/2., 0.0, 0.0};
     is_joint_revolute_ = {false, true, false, true, true, true, true};
 
     m_ = {2741.42545562447,
