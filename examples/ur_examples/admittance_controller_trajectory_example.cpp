@@ -112,13 +112,13 @@ int main(int argc, char* argv[])
   // Initialize admittance control
   VectorXd u;
   sdu_controllers::controllers::AdmittanceControllerPosition adm_controller(frequency);
-  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
-  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
-  adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200));
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
+  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
+  adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200).asDiagonal());
 
-  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
-  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10));
-  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5));
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25).asDiagonal());
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
+  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5).asDiagonal());
 
   std::string robot_ip = "127.0.0.1";
   if (argc > 1)
@@ -140,7 +140,9 @@ int main(int argc, char* argv[])
   Affine3d T_tip_tcp = T_tcp_tip.inverse();
   Affine3d T_base_tip = T_base_tcp * T_tcp_tip;
 
-  Affine3d T_base_tip_init = T_base_tip;
+  Vector3d pos_init = T_base_tip.translation();
+  auto quat_init = Quaterniond(T_base_tip.linear());
+  Vector4d quat_init_vec(quat_init.w(), quat_init.x(), quat_init.y(), quat_init.z());
 
   // Set target circle
   Vector3d x_desired = get_circle_target(T_base_tip.translation(), counter);
@@ -183,10 +185,10 @@ int main(int argc, char* argv[])
         Vector3d f_base_tip = T_base_tip.linear() * ft_tip.block<3,1>(3,0);
 
         // Get circle target
-        x_desired = get_circle_target(T_base_tip_init.translation(), counter);
+        x_desired = get_circle_target(pos_init, counter);
 
         // Step controller
-        adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), x_desired, Quaterniond(T_base_tip_init.linear()));
+        adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), x_desired, quat_init_vec);
         u = adm_controller.get_output();
 
         // Rotate output from tip to TCP before sending it to the robot

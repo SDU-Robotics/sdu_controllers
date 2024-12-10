@@ -55,16 +55,16 @@ int main()
   // Compute admittance trajectory
   VectorXd u;
   controllers::AdmittanceControllerPosition adm_controller;
-  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
-  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
-  adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160));
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
+  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
+  adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160).asDiagonal());
 
-  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
-  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10));
-  adm_controller.set_damping_matrix_orientation(Vector3d(10, 10, 10));
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25).asDiagonal());
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
+  adm_controller.set_damping_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
 
   Vector3d adm_pos = get_circle_target(start_position, 0);
-  Quaterniond quat_init(1., 0., 0., 0.);
+  Vector4d quat_init(1., 0., 0., 0.);
   Vector3d f = Vector3d::Zero();
   Vector3d mu = Vector3d::Zero();
 

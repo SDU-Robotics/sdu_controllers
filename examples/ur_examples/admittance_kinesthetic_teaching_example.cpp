@@ -109,13 +109,17 @@ int main(int argc, char* argv[])
   Isometry3d T_tip_tcp = T_tcp_tip.inverse();
   Isometry3d T_base_tip_init = T_base_tcp * T_tcp_tip;
 
-  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
-  adm_controller.set_stiffness_matrix_position(Vector3d(0, 0, 0));
-  adm_controller.set_damping_matrix_position(Vector3d(65, 65, 65));
+  Vector3d pos_init = T_base_tip_init.translation();
+  Quaterniond quat_init = Quaterniond(T_base_tip_init.rotation());
+  Vector4d quat_init_vec(quat_init.w(), quat_init.x(), quat_init.y(), quat_init.z());
 
-  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
-  adm_controller.set_stiffness_matrix_orientation(Vector3d(0, 0, 0));
-  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5));
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
+  adm_controller.set_stiffness_matrix_position(Vector3d(0, 0, 0).asDiagonal());
+  adm_controller.set_damping_matrix_position(Vector3d(65, 65, 65).asDiagonal());
+
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25).asDiagonal());
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(0, 0, 0).asDiagonal());
+  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5).asDiagonal());
 
   // Uncomment this for the highly damped mode (stable on table)
   // adm_controller.set_damping_matrix_position(Vector3d(3250, 3250, 3250));
@@ -155,7 +159,7 @@ int main(int argc, char* argv[])
       Vector3d f_base_tip = T_base_tip.rotation() * ft_tip.block<3,1>(3,0);
 
       // Step controller
-      adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), T_base_tip_init.translation(), Quaterniond(T_base_tip_init.rotation()));
+      adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), pos_init, quat_init_vec);
       u = adm_controller.get_output();
 
       // Rotate output from tip to TCP before sending it to the robot

@@ -62,21 +62,9 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
-     * Set the positional mass matrix \f$ \mathbf{M} \f$ from a mass vector
-     */
-    void set_mass_matrix_position(const Eigen::Vector3d &mass);
-
-    /**
-     * @brief
      * Set the positional stiffness matrix \f$ \mathbf{K} \f$
      */
     void set_stiffness_matrix_position(const Eigen::Matrix3d &stiffness);
-
-    /**
-     * @brief
-     * Set the positional stiffness matrix \f$ \mathbf{K} \f$ from a stiffness vector
-     */
-    void set_stiffness_matrix_position(const Eigen::Vector3d &stiffness);
 
     /**
      * @brief
@@ -86,21 +74,9 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
-     * Set the positional damping matrix \f$ \mathbf{D} \f$ from a damping vector
-     */
-    void set_damping_matrix_position(const Eigen::Vector3d &damping);
-
-    /**
-     * @brief
      * Set the orientational mass matrix \f$ \mathbf{M}_{O} \f$
      */
     void set_mass_matrix_orientation(const Eigen::Matrix3d &mass);
-
-    /**
-     * @brief
-     * Set the orientational mass matrix \f$ \mathbf{M}_{O} \f$ from a mass vector
-     */
-    void set_mass_matrix_orientation(const Eigen::Vector3d &mass);
 
     /**
      * @brief
@@ -110,21 +86,9 @@ namespace sdu_controllers::controllers
 
     /**
      * @brief
-     * Set the orientational stiffness matrix \f$ \mathbf{K}_{O} \f$ from a stiffness vector
-     */
-    void set_stiffness_matrix_orientation(const Eigen::Vector3d &stiffness);
-
-    /**
-     * @brief
      * Set the orientational damping matrix \f$ \mathbf{D}_{O} \f$
      */
     void set_damping_matrix_orientation(const Eigen::Matrix3d &damping);
-
-    /**
-     * @brief
-     * Set the orientational damping matrix \f$ \mathbf{D}_{O} \f$ from a damping vector
-     */
-    void set_damping_matrix_orientation(const Eigen::Vector3d &damping);
 
     /**
      * @brief Step the execution of the controller.
@@ -132,9 +96,9 @@ namespace sdu_controllers::controllers
      * @param input_force given as \f$ [f_{x}, f_{y}, f_{z}] \f$
      * @param input_torque given as \f$ [\mu_{x}, \mu_{y}, \mu_{z}] \f$
      * @param x_desired desired position given as \f$ [x, y, z] \f$
-     * @param quat_desired desired orientation in quaternion \f$ [q_{w}, q_{x}, q_{y}, q_{z}]\f$ (Note: Eigen stores quaternions internally as: [x, y, z, w])
+     * @param quat_desired desired orientation in quaternion \f$ [q_{w}, q_{x}, q_{y}, q_{z}]\f$ (scalar first)
      */
-    void step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Quaterniond &quat_desired);
+    void step(const Eigen::Vector3d &input_force, const Eigen::Vector3d &input_torque, const Eigen::Vector3d &x_desired, const Eigen::Vector4d &quat_desired);
 
     /**
      * @brief Get the output of the controller. Updates when the step() function is called.
