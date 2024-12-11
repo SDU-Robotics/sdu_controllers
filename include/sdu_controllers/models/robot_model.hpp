@@ -84,6 +84,18 @@ namespace sdu_controllers::models
 
     virtual std::vector<double> get_alpha() = 0;
 
+    virtual std::vector<double> get_theta() = 0;
+
+    virtual std::vector<double> get_m() = 0;
+
+    virtual std::vector<bool> get_is_joint_revolute() = 0;
+
+    virtual Eigen::Vector3d get_g0() = 0;
+
+    virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() = 0;
+
+    virtual std::vector<Eigen::Matrix3d> get_link_inertia() = 0;
+
   };
 
 }  // namespace sdu_controllers::models

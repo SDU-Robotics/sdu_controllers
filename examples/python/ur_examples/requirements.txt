@@ -1,3 +1,0 @@
-numpy<2
-ur_rtde==1.5.9
-pytransform3d==3.9.0
