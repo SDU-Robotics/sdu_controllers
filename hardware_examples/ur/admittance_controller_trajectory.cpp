@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
-// #include <math.h>
-// #include <sdu_controllers/math/math.hpp>
+
+#include <sdu_controllers/math/math.hpp>
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 
 #include <ur_rtde/rtde_receive_interface.h>
@@ -11,11 +11,8 @@
 #include <thread>
 #include <csignal>
 
-using namespace ur_rtde;
-using namespace std; 
 using namespace Eigen;
 using namespace std::chrono;
-using namespace sdu_controllers;
 
 // Interrupt flag
 bool flag_loop = true;
@@ -27,7 +24,7 @@ void raiseFlag(int)
 // Type conversions
 Affine3d pos_rotvec_to_T(const Vector3d &position, const AngleAxisd &rotation)
 {
-  Affine3d T = Affine3d::Identity(); 
+  Affine3d T = Affine3d::Identity();
   T.translation() = position;
   T.linear() = rotation.toRotationMatrix();
   return T;
@@ -35,15 +32,15 @@ Affine3d pos_rotvec_to_T(const Vector3d &position, const AngleAxisd &rotation)
 
 Affine3d pos_rotmat_to_T(const Vector3d &position, const Matrix3d &rotation)
 {
-  Affine3d T = Affine3d::Identity(); 
+  Affine3d T = Affine3d::Identity();
   T.translation() = position;
   T.linear() = rotation;
   return T;
 }
 
-Affine3d pos_quat_to_T(const VectorXd pose)
+Affine3d pos_quat_to_T(const VectorXd &pose)
 {
-  Affine3d T = Affine3d::Identity(); 
+  Affine3d T = Affine3d::Identity();
   T.translation() = pose.block<3, 1>(0, 0);
   T.linear() = Quaterniond(pose[3], pose[4], pose[5], pose[6]).toRotationMatrix();
   return T;
@@ -56,7 +53,7 @@ Affine3d stdvec_to_T(const std::vector<double> &pose)
   Vector3d compact_eaa(pose[3], pose[4], pose[5]);
   double angle = compact_eaa.norm(); 
 
-  Affine3d T = pos_rotvec_to_T(position, AngleAxisd(angle, compact_eaa.normalized())); 
+  Affine3d T = pos_rotvec_to_T(position, AngleAxisd(angle, compact_eaa.normalized()));
   return T;
 }
 
@@ -78,37 +75,24 @@ std::vector<double> T_to_stdvec(const Affine3d &T)
   return pose;
 }
 
-
-template<class Derived>
-  inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived> &vec)
-  {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-    return (Eigen::Matrix<typename Derived::Scalar, 3, 3>() << 0.0, -vec[2], vec[1],
-            vec[2], 0.0, -vec[0],
-            -vec[1], vec[0], 0.0)
-        .finished();
-  }
-
-
 MatrixXd adjoint(const Affine3d &T)
 {
   MatrixXd adj = MatrixXd::Zero(6, 6);
   adj.block<3,3>(0,0) = T.linear();
-  adj.block<3,3>(3,0) = skew(T.translation()) * T.linear();
+  adj.block<3,3>(3,0) = sdu_controllers::math::skew(T.translation()) * T.linear();
   adj.block<3,3>(3,3) = T.linear();
   return adj;
 }
 
-
 VectorXd wrench_trans(const Vector3d &torques, const Vector3d &forces, const Affine3d &T)
 {
-  VectorXd wrench_in_A(6); 
+  VectorXd wrench_in_A(6);
   wrench_in_A << torques[0], torques[1], torques[2], forces[0], forces[1], forces[2];
   VectorXd wrench_in_B = adjoint(T).transpose() * wrench_in_A;
   return wrench_in_B; 
 }
 
-Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius=0.075, double freq=0.35)
+Vector3d get_circle_target(const Vector3d &pose, const double timestep, const double radius=0.075, const double freq=0.35)
 {
   Vector3d circle_target;
   circle_target[0] = pose[0] + radius * cos(2 * M_PI * freq * timestep); 
@@ -116,7 +100,6 @@ Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius=
   circle_target[2] = pose[2];
   return circle_target;
 }
-
 
 
 int main(int argc, char* argv[])
@@ -128,23 +111,23 @@ int main(int argc, char* argv[])
 
   // Initialize admittance control
   VectorXd u;
-  controllers::AdmittanceControllerPosition adm_controller;
-  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
-  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
-  adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200));
+  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller(frequency);
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
+  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
+  adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200).asDiagonal());
 
-  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
-  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10));
-  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5));
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25).asDiagonal());
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
+  adm_controller.set_damping_matrix_orientation(Vector3d(5, 5, 5).asDiagonal());
 
-  string robot_ip = "127.0.0.1";
+  std::string robot_ip = "127.0.0.1";
   if (argc > 1)
   {
     robot_ip = argv[1];
   }
 
-  RTDEReceiveInterface rtde_receive(robot_ip); 
-  RTDEControlInterface rtde_control(robot_ip);
+  ur_rtde::RTDEReceiveInterface rtde_receive(robot_ip);
+  ur_rtde::RTDEControlInterface rtde_control(robot_ip);
 
   // rtde_control.moveL({0.05, -0.5, 0.3, 0., 3.141, 0.}, 0.5, 0.2);
   rtde_control.zeroFtSensor(); 
@@ -154,16 +137,18 @@ int main(int argc, char* argv[])
 
   // Define tip 
   Affine3d T_tcp_tip = pos_rotvec_to_T(Vector3d(0, 0, 0.194), AngleAxisd(0., Vector3d::UnitZ()));
-  Affine3d T_tip_tcp = T_tcp_tip.inverse(); 
-  Affine3d T_base_tip = T_base_tcp * T_tcp_tip; 
+  Affine3d T_tip_tcp = T_tcp_tip.inverse();
+  Affine3d T_base_tip = T_base_tcp * T_tcp_tip;
 
-  Affine3d T_base_tip_init = T_base_tip;
+  Vector3d pos_init = T_base_tip.translation();
+  auto quat_init = Quaterniond(T_base_tip.linear());
+  Vector4d quat_init_vec(quat_init.w(), quat_init.x(), quat_init.y(), quat_init.z());
 
   // Set target circle
-  Vector3d x_desired = get_circle_target(T_base_tip.translation(), counter); 
+  Vector3d x_desired = get_circle_target(T_base_tip.translation(), counter);
   Affine3d T_base_tip_circle = pos_rotmat_to_T(x_desired, T_base_tip.linear());
 
-  Affine3d T_base_tcp_circle = T_base_tip_circle * T_tip_tcp; 
+  Affine3d T_base_tcp_circle = T_base_tip_circle * T_tip_tcp;
 
   std::vector<double> robot_pose = T_to_stdvec(T_base_tcp_circle);
   rtde_control.moveL(robot_pose);
@@ -200,10 +185,10 @@ int main(int argc, char* argv[])
         Vector3d f_base_tip = T_base_tip.linear() * ft_tip.block<3,1>(3,0);
 
         // Get circle target
-        x_desired = get_circle_target(T_base_tip_init.translation(), counter);
+        x_desired = get_circle_target(pos_init, counter);
 
         // Step controller
-        adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), x_desired, Quaterniond(T_base_tip_init.linear()));
+        adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), x_desired, quat_init_vec);
         u = adm_controller.get_output();
 
         // Rotate output from tip to TCP before sending it to the robot

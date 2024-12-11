@@ -22,6 +22,9 @@ option(BUILD_DOCS "Enable building of documentation" ON)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
 
+# Optional hardware examples
+option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
+
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
@@ -29,7 +32,10 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 add_subdirectory(src)
 
 # compile the examples
+if(BUILD_EXAMPLES)
 add_subdirectory(examples)
+endif()
+add_subdirectory(hardware_examples)
 
 # compile the tests
 include(CTest)

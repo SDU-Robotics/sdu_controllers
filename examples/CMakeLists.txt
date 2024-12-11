@@ -1,8 +1,8 @@
-add_executable(admittance_controller admittance_controller.cpp)
-target_link_libraries(admittance_controller PRIVATE sdu_controllers)
-
 add_executable(sdu_controllers_example sdu_controllers_example.cpp)
 target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
+
+add_executable(admittance_controller admittance_controller.cpp)
+target_link_libraries(admittance_controller PRIVATE sdu_controllers)
 
 add_executable(joint_motion_controller ur_examples/joint_motion_controller.cpp)
 target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
@@ -15,6 +15,3 @@ target_link_libraries(force_control_velocity PRIVATE sdu_controllers)
 
 add_executable(eurofusion_robot_rnea eurofusion_examples/eurofusion_robot_rnea.cpp)
 target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
-
-
-# add_subdirectory(ur_examples)

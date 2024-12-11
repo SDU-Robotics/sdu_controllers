@@ -3,8 +3,9 @@
 #include <nanobind/stl/shared_ptr.h>
 
 #include <sdu_controllers/controllers/pd_controller.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
+#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
@@ -58,6 +59,19 @@ namespace sdu_controllers
         .def("step", &controllers::PDController::step)
         .def("get_output", &controllers::PDController::get_output)
         .def("reset", &controllers::PDController::reset);
+
+    nb::class_<controllers::AdmittanceControllerPosition>(m, "AdmittanceControllerPosition")
+        .def(nb::init<const double>(), nb::arg("frequency"))
+        .def("step", &controllers::AdmittanceControllerPosition::step)
+        .def("get_output", &controllers::AdmittanceControllerPosition::get_output)
+        .def("reset", &controllers::AdmittanceControllerPosition::reset)
+        .def("set_mass_matrix_position", &controllers::AdmittanceControllerPosition::set_mass_matrix_position)
+        .def("set_mass_matrix_orientation", &controllers::AdmittanceControllerPosition::set_mass_matrix_orientation)
+        .def("set_stiffness_matrix_position", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_position)
+        .def("set_stiffness_matrix_orientation", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_orientation)
+        .def("set_damping_matrix_position", &controllers::AdmittanceControllerPosition::set_damping_matrix_position)
+        .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation)
+    ;
 
     // math
     nb::class_<math::InverseDynamicsJointSpace>(m, "InverseDynamicsJointSpace")
