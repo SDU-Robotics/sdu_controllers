@@ -7,6 +7,9 @@
 
 namespace sdu_controllers::math
 {
+   /**
+   *  An implementation of the recursive Newton-Euler algorithm
+   */
   class RecursiveNewtonEuler
   {
     public:
@@ -22,14 +25,14 @@ namespace sdu_controllers::math
 
       void set_z0(const Eigen::Vector3d &z0);
 
+      Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
+      Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
+      Eigen::VectorXd gravity(const Eigen::VectorXd &q);
+
     private:
       void forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T);
 
       void backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);
-
-      Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
-      Eigen::VectorXd velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-      Eigen::VectorXd gravity(const Eigen::VectorXd &q);
 
       std::shared_ptr<models::RobotModel> robot_model;
 

@@ -65,12 +65,18 @@ namespace sdu_controllers::math
     return B;
   }
 
-  Eigen::VectorXd RecursiveNewtonEuler::velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq)
+  Eigen::VectorXd RecursiveNewtonEuler::velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq)
   {
     Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
     Eigen::MatrixXd Cdq = Eigen::MatrixXd::Zero(q.rows(), q.rows());
 
-    Cdq = inverse_dynamics(q, dq, zero_vec, zero_vec) - gravity(q);
+    Eigen::Vector3d ddp0_original = this->ddp0;
+    this->ddp0 *= 0;
+
+    Cdq = inverse_dynamics(q, dq, zero_vec, zero_vec);
+
+    this->ddp0 = ddp0_original;
+
     return Cdq;
   }
 

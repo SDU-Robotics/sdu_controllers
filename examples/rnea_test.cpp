@@ -56,6 +56,13 @@ int main()
   tau = rnea.inverse_dynamics(q, dq, ddq, he);
   std::cout << "tau\n" << tau << std::endl;
 
+  Eigen::MatrixXd B = rnea.inertia(q);
+  Eigen::VectorXd Cdq = rnea.velocity_product(q, dq);
+  Eigen::VectorXd grav = rnea.gravity(q);
+
+  std::cout << "B ddq + C dq + grav\n"
+    << B * ddq + Cdq + grav << std::endl;
+
   //  // Control loop
   //  for (const std::vector<double>& trajectory_point : input_trajectory)
   //  {
