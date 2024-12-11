@@ -7,11 +7,11 @@ Installation
 
 
 
-Building robot specific examples
---------------------------------
+Building hardware specific examples
+-----------------------------------
 
 To avoid any robot specific dependencies in the library and its examples, any examples targeted to a
-specific robot have been put in a separate folder which is not built by default.
+specific robot have been put in a separate folder which is not built by default. They can be found in the hardware_examples folder.
 
 For building the UR examples ur_rtde is required.
 
@@ -33,4 +33,4 @@ and the Python dependencies of the examples installed with
 
 .. code-block:: bash
 
-    pip install -r examples/python/ur_examples/requirements.txt
+    pip install -r hardware_examples/python/ur/requirements.txt

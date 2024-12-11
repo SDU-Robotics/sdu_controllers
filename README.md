@@ -53,6 +53,9 @@ which can be set by adding `-D<var>={ON, OFF}` to the `cmake` call:
 * `BUILD_DOCS`: Enable building the documentation (default: `ON`)
 * `BUILD_PYTHON`: Enable building the Python bindings (default: `ON`)
 * `BUILD_EXAMPLES`: Enable building the examples (default: `ON`)
+
+For some controllers, hardware specific examples have been implemented which can be run on a real robot. 
+These are disabled by default. 
 * `BUILD_UR_EXAMPLES`: Enable building UR specific examples (default: `OFF`)
 
 If you wish to build and install the project as a Python project without
