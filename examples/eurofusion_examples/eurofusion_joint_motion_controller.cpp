@@ -21,9 +21,9 @@ int main()
 
   // Initialize robot model and parameters
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
-  double freq = 50.0;
+  double freq = 1000.0;
   double dt = 1.0 / freq;
-  double Kp_value = 1700.0;
+  double Kp_value = 1000.0;
   double Kd_value = 2.0 * sqrt(Kp_value);
   double N_value = 1.0;
   uint16_t ROBOT_DOF = robot_model->get_dof();
@@ -48,6 +48,7 @@ int main()
   q << 0.0027, 0.0004, 0.0, 0.0, -0.0004, -0.062, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
   ddq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+  csv_writer << eigen_to_std_vector(q);
 
   VectorXd tau(ROBOT_DOF);
   Vector<double, 6> he = VectorXd::Zero(6);
@@ -82,12 +83,14 @@ int main()
 
     // Simulation
     ddq = rnea.forward_dynamics(q, dq, tau, he);
+
     // integrate to get velocity
     dq += ddq * dt;
     // integrate to get position
     q += dq * dt;
 
     std::cout << "q:" << q << std::endl;
+
     csv_writer << eigen_to_std_vector(q);
   }
   output_filestream.close();

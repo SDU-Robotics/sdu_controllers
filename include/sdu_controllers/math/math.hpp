@@ -84,16 +84,20 @@ namespace sdu_controllers::math
   }
 
   template<class Derived>
-  inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived> &vec)
+  static Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived> &vec)
   {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-    return (Eigen::Matrix<typename Derived::Scalar, 3, 3>() << 0.0, -vec[2], vec[1],
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3)
+
+    // clang-format off
+    return (Eigen::Matrix<typename Derived::Scalar, 3, 3>() <<
+            0.0, -vec[2], vec[1],
             vec[2], 0.0, -vec[0],
             -vec[1], vec[0], 0.0)
         .finished();
   }
+  // clang-format on
 
-  Eigen::Quaterniond exp(const Eigen::Quaterniond &quat)
+  static Eigen::Quaterniond exp(const Eigen::Quaterniond &quat)
   {
     using ::std::cos;
     using ::std::sin;
@@ -104,7 +108,7 @@ namespace sdu_controllers::math
 
     Eigen::Quaterniond q;
 
-    if (theta > double(0))
+    if (theta > static_cast<double>(0))
     {
       q.vec() = sin_theta * quat.vec() / theta;
     }

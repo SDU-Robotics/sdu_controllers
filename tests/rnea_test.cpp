@@ -53,7 +53,7 @@ int main()
   Eigen::VectorXd tau = rnea.inverse_dynamics(q, dq, ddq, he);
   std::cout << "tau\n" << tau << std::endl;
 
-  tau = rnea.inverse_dynamics(q, dq, ddq, he);
+  tau = inv_dyn_jnt_space.inverse_dynamics(ddq, q, dq);
   std::cout << "tau\n" << tau << std::endl;
 
   //  // Control loop

@@ -65,12 +65,11 @@ trajectory_out_arr = np.array(trajectory_out)
 width = 345
 cm = 1/2.54  # centimeters in inches
 fig, ax = plt.subplots(figsize=set_size(width), tight_layout=True)
-ax2 = ax.twinx()
-
 ax.plot(trajectory_in_arr, label='x_d', linewidth=1)
+ax.plot(trajectory_out_arr, '--', label='x_out', linewidth=1)
 ax.set_xlabel('samples')
 ax.set_ylabel('TCP pose')
-ax2.plot(trajectory_out_arr, '--', label='x_out', linewidth=1)
+
 
 
 fig.legend(['x_d[0]', 'x_d[1]', 'x_d[2]', 'x_d[3]', 'x_d[4]', 'x_d[5]', 'x_out[0]', 'x_out[1]', 'x_out[2]', 'x_out[3]', 'x_out[4]', 'x_out[5]'], loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax.transAxes)

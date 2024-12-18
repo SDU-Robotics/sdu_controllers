@@ -26,7 +26,7 @@ int main()
   auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
-  double Kp_value = 100.0;
+  double Kp_value = 1000.0;
   double Kd_value = 2 * sqrt(Kp_value);
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
@@ -67,13 +67,11 @@ int main()
         ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
       }
 
-      std::cout << "q_d: " << q_d << std::endl;
-
       // Add noise to q and dq
       VectorXd q_meas = q;
       VectorXd dq_meas = dq;
-      add_noise_to_vector(q_meas, 0.0, 0.001);
-      add_noise_to_vector(dq_meas, 0.0, 0.001);
+      //add_noise_to_vector(q_meas, 0.0, 0.001);
+      //add_noise_to_vector(dq_meas, 0.0, 0.001);
 
       // Controller
       VectorXd u_ff = ddq_d; // acceleration as feedforward.
@@ -93,7 +91,6 @@ int main()
 
       std::cout << "q:" << q << std::endl;
       csv_writer << eigen_to_std_vector(q);
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     output_filestream.close();
   }
