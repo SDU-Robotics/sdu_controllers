@@ -25,7 +25,7 @@ int main()
   double frequency = 500;
   double dt = 1. / frequency;
 
-  int t_steps = 2 * int(frequency);
+  auto t_steps = static_cast<uint16_t>(2 * frequency);
 
   // Create file outputs
   std::ofstream output_filestream_ref;
@@ -46,7 +46,7 @@ int main()
 
   // Create reference trajectory (desired trajectory)
   vector<Vector3d> ref_traj;
-  for (int t = 0; t < t_steps; t++)
+  for (uint16_t t = 0; t < t_steps; t++)
   {
     x_desired = get_circle_target(start_position, t * dt);
     csv_writer_ref << eigen_to_std_vector(x_desired);
@@ -55,21 +55,21 @@ int main()
   // Compute admittance trajectory
   VectorXd u;
   controllers::AdmittanceControllerPosition adm_controller;
-  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5));
-  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54));
-  adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160));
+  adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
+  adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
+  adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160).asDiagonal());
 
-  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25));
-  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10));
-  adm_controller.set_damping_matrix_orientation(Vector3d(10, 10, 10));
+  adm_controller.set_mass_matrix_orientation(Vector3d(0.25, 0.25, 0.25).asDiagonal());
+  adm_controller.set_stiffness_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
+  adm_controller.set_damping_matrix_orientation(Vector3d(10, 10, 10).asDiagonal());
 
   Vector3d adm_pos = get_circle_target(start_position, 0);
-  Quaterniond quat_init(1., 0., 0., 0.);
+  Vector4d quat_init(1., 0., 0., 0.);
   Vector3d f = Vector3d::Zero();
   Vector3d mu = Vector3d::Zero();
 
   vector<Vector3d> adm_traj;
-  for (int t = 0; t < t_steps; t++)
+  for (uint16_t t = 0; t < t_steps; t++)
   {
     x_desired = get_circle_target(start_position, t * dt);
     if (adm_pos[0] > 0.29 && adm_pos[0] < 0.31 && adm_pos[1] > 0.39 && adm_pos[1] < 0.41)
