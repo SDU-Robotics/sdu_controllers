@@ -4,7 +4,7 @@ using namespace Eigen;
 
 namespace sdu_controllers::models
 {
-  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel() : RobotModel()
+  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel() : bb_robot_(), RobotModel()
   {
     VectorXd q_low(dof_);
     VectorXd q_high(dof_);
@@ -30,18 +30,6 @@ namespace sdu_controllers::models
     joint_vel_bounds_ = { dq_low, dq_high};
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
-
-    /* EMIL
-     *a_ = {0.0, 0.0, 0.0, 0.0, 0.39, 0.0, 0.0};
-    d_ = {-0.78, 0.0, 0.0, 0.0, 0.0, 3.05, 0.0};
-    alpha_ = {0.0, 0.0, pi/2., 0.0, -pi/2., 0.0, -pi/2.};
-    theta_ = {0.0, -pi/2., 0.0, 0.0, 0.0, 0.0, 0.0};*/
-
-    /* PRIER standard
-    a_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.3880, 0.0};
-    d_ = {0.0, 0.0, 0.0, 0.0, 0.0, 4.5822, 0.0};
-    alpha_ = {0.0, 0.0, pi/2.0, 0.0, -pi/2.0, 0.0, -pi/2.0};
-    theta_ = {0.0, 0.0, 0.0, 0.0, 0.0, -pi/2.0, 0.0};*/
 
     /* BEATRIZ standard */
     a_ = {0.0, 0.0, 0.0, 0.0, 0.3880, 0.0, 0.0};
@@ -174,32 +162,27 @@ namespace sdu_controllers::models
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
   {
-    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
-    return I;
+    return bb_robot_.inertia(q);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_coriolis(const VectorXd& q, const VectorXd& qd)
   {
-    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
-    return I;
+    return bb_robot_.coriolis(q, qd);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_gravity(const VectorXd& q)
   {
-    VectorXd v = VectorXd::Zero(ROBOT_DOF);
-    return v;
+    return bb_robot_.gravity(q);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_jacobian(const VectorXd& q)
   {
-    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
-    return I;
+    return bb_robot_.jacobian(q);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_jacobian_dot(const VectorXd& q, const VectorXd& dq)
   {
-    MatrixXd I = MatrixXd::Identity(ROBOT_DOF, ROBOT_DOF);
-    return I;
+    return bb_robot_.jacobianDot(q, dq);
   }
 
   std::pair<VectorXd, VectorXd> BreedingBlanketHandlingRobotModel::get_joint_pos_bounds()
