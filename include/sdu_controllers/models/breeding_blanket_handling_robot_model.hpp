@@ -102,7 +102,7 @@ private:
   std::vector<double> d_;
   std::vector<double> alpha_;
   std::vector<double> theta_;
- std::vector<double> m_;
+  std::vector<double> m_;
   Eigen::Vector3d g;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;

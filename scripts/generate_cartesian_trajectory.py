@@ -8,19 +8,25 @@ frequency = 500.0
 dt = 1 / frequency
 
 t = np.arange(0, 4, dt)
+#TE1 = sm.SE3.Trans([0.4918, -0.13336, 0.4878]) * sm.SE3.RPY([math.pi/4, math.pi/4, math.pi/4], unit="rad", order="zyx")
+#TE2 = sm.SE3.Trans([0.258, -0.263, 0.395]) * sm.SE3.RPY([math.pi/4, math.pi/4, math.pi/4], unit="rad", order="zyx")
 TE1 = sm.SE3.Trans(0.4918, -0.13336, 0.4878) * sm.SE3.EulerVec(np.array([0.0006426083866161601, -3.1364574763614557, -0.03915484228919635]))
 TE2 = sm.SE3.Trans(0.3995, -0.2453, 0.3857) * sm.SE3.EulerVec(np.array([-0.0058207991671794254, -2.771465145790119, -0.03471883722219153]))
-print('TE1:', TE1.t, sm.base.tr2eul(TE1.R))
-print('TE2:', TE2.t, sm.base.tr2eul(TE2.R))
+
+print('TE1:', TE1.t, sm.base.tr2eul(TE1.R, check=True))
+print('TE1 rpy:',  sm.base.tr2rpy(TE1.R, order="xyz", check=True))
+print('TE2:', TE2.t, sm.base.tr2eul(TE2.R, check=True))
+print('TE2 rot mat:', TE2.R)
+print('TE2 rpy:',  sm.base.tr2rpy(TE2.R, order="xyz", check=True))
 cart_traj = rtb.ctraj(TE1, TE2, t)
-x_prev = np.concatenate([TE1.t, sm.base.tr2eul(TE1.R)])
+x_prev = np.concatenate([TE1.t, sm.base.tr2eul(TE1.R, check=True)])
 dx_prev = np.zeros(6)
 pos = []
 vel = []
 acc = []
 
 for pose in cart_traj:
-    x = np.concatenate([pose.t, sm.base.tr2eul(pose.R)]) # pose as Euler angles ZYZ
+    x = np.concatenate([pose.t, sm.base.tr2eul(pose.R, check=True)]) # pose as Euler angles ZYZ
     dx = (x_prev - x) / dt
     ddx = (dx_prev - dx) / dt
 

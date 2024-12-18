@@ -3,7 +3,7 @@ import numpy as np
 import math
 import csv
 
-frequency = 50.0
+frequency = 1000.0
 dt = 1 / frequency
 robot_dof = 7
 # q_start = np.array([0.0, -math.pi/2, -math.pi/2, -math.pi/2, math.pi/2, 0])

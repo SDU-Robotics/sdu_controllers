@@ -39,17 +39,18 @@ from sympy.printing.pretty.pretty_symbology import line_width
 plt.style.use('latex_plot.mplstyle')
 
 offset = 1
-robot_dof = 7
+robot_dof = 6
 trajectory_in = []
 trajectory_out = []
 
-with open('../examples/data/breeder_trajectory_interpolated.csv') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
+with open('../examples/data/joint_trajectory_safe.csv') as csv_file_in:
+    csv_reader_in = csv.reader(csv_file_in, delimiter=',')
     line_count = 0
-    for row in csv_reader:
+    for row in csv_reader_in:
         q = []
         for i in range(0, robot_dof):
-            q.append(float(row[1+i]))
+            q.append(float(row[i]))
+        #print('qd:', q)
         trajectory_in.append(q)
 
 
@@ -60,6 +61,8 @@ with open('../build/examples/output.csv') as csv_file:
         q = []
         for i in range(0, robot_dof):
             q.append(float(row[i]))
+
+        #print('qout:', q)
         trajectory_out.append(q)
 
 trajectory_in_arr = np.array(trajectory_in)
@@ -68,15 +71,12 @@ trajectory_out_arr = np.array(trajectory_out)
 width = 345
 cm = 1/2.54  # centimeters in inches
 fig, ax = plt.subplots(figsize=set_size(width), tight_layout=True)
-ax2 = ax.twinx()
-
 ax.plot(trajectory_in_arr, label='q_d', linewidth=1)
+ax.plot(trajectory_out_arr, '--', label='q_out', linewidth=1)
 ax.set_xlabel('samples')
 ax.set_ylabel('joint positions [rad]')
-ax2.plot(trajectory_out_arr, '--', label='q_out', linewidth=1)
 
-
-fig.legend(['$q_d[0]$', '$q_d[1]$', '$q_d[2]$', '$q_d[3]$', '$q_d[4]$', '$q_d[5]$', '$q_d[6]$', '$q_{out}[0]$', '$q_{out}[1]$', '$q_{out}[2]$', '$q_{out}[3]$', '$q_{out}[4]$', '$q_{out}[5]$', '$q_{out}[6]$'], loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax.transAxes)
+fig.legend(['$q_d[0]$', '$q_d[1]$', '$q_d[2]$', '$q_d[3]$', '$q_d[4]$', '$q_d[5]$', '$q_{out}[0]$', '$q_{out}[1]$', '$q_{out}[2]$', '$q_{out}[3]$', '$q_{out}[4]$', '$q_{out}[5]$'], loc="upper right", bbox_to_anchor=(1, 1))
 plt.title('Joint PD Controller Output')
 plt.savefig('joint_pd_control_output.pdf')
 plt.show()

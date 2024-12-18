@@ -70,9 +70,6 @@ with open('../examples/data/joint_trajectory_safe_bb.csv') as csv_file:
             q.append(float(row[1+i]))
         trajectory_in.append(q)
 
-time.pop()
-trajectory_in.pop()
-
 with open('../build/examples/output_eurofusion_joint.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
@@ -89,7 +86,6 @@ time_arr = np.array(time)
 width = 345
 cm = 1/2.54  # centimeters in inches
 fig, ax = plt.subplots(figsize=set_size(width), dpi=300) #
-ax2 = ax.twinx()
 plt.subplots_adjust(top=0.845,
                     bottom=0.2,
                     left=0.2,
@@ -99,9 +95,9 @@ plt.subplots_adjust(top=0.845,
 print(len(trajectory_in_arr))
 print(len(trajectory_out_arr))
 ax.plot(time_arr, trajectory_in_arr, label='q_d', linewidth=1)
+ax.plot(time_arr, trajectory_out_arr, '--', label='q_out', linewidth=1)
 ax.set_xlabel('Time [s]')
 ax.set_ylabel('Joint positions [rad]')
-ax2.plot(time_arr, trajectory_out_arr, '--', label='q_out', linewidth=1)
 fig.legend(['$q_d[0]$', '$q_d[1]$', '$q_d[2]$', '$q_d[3]$', '$q_d[4]$', '$q_d[5]$', '$q_d[6]$', '$q_{out}[0]$', '$q_{out}[1]$', '$q_{out}[2]$', '$q_{out}[3]$', '$q_{out}[4]$', '$q_{out}[5]$', '$q_{out}[6]$'], loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax.transAxes)
 plt.savefig('joint_pd_control_output_bb.pdf', bbox_inches='tight')
 plt.show()
