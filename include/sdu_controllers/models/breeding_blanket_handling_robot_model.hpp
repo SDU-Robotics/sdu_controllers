@@ -5,6 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <sdu_controllers/models/robot_model.hpp>
+#include <sdu_controllers/models/breeding_blanket_handling_robot.hpp>
 
 namespace sdu_controllers::models
 {
@@ -98,12 +99,14 @@ public:
 
 private:
   uint16_t dof_{ROBOT_DOF};
+
   std::vector<double> a_;
   std::vector<double> d_;
   std::vector<double> alpha_;
   std::vector<double> theta_;
- std::vector<double> m_;
+  std::vector<double> m_;
   Eigen::Vector3d g;
+  BreedingBlanketRobot bb_robot_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;

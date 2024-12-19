@@ -16,6 +16,7 @@ add_library(sdu_controllers
         ../include/sdu_controllers/math/forward_dynamics.hpp
         ../include/sdu_controllers/math/inverse_dynamics.hpp
         ../include/sdu_controllers/math/inverse_dynamics_joint_space.hpp
+        ../include/sdu_controllers/models/breeding_blanket_handling_robot.hpp
         ../include/sdu_controllers/models/breeding_blanket_handling_robot_model.hpp
         ../include/sdu_controllers/models/ur_robot_model.hpp
         ../include/sdu_controllers/controllers/pd_controller.hpp
@@ -27,6 +28,7 @@ add_library(sdu_controllers
         ../include/sdu_controllers/controllers/force_control_inner_velocity_loop.hpp
         ../include/sdu_controllers/math/rnea.hpp
         math/rnea.cpp
+        models/breeding_blanket_handling_robot.cpp
 
 )
 target_link_libraries(sdu_controllers Eigen3::Eigen)

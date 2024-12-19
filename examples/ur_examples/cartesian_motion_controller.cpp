@@ -19,7 +19,7 @@ int main()
 {
   // Setup writing of output trajectory to csv.
   std::ofstream output_filestream;
-  output_filestream.open("output.csv");
+  output_filestream.open("output_cartesian.csv");
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
@@ -98,6 +98,7 @@ int main()
     // integrate to get position
     q += dq * dt;
 
+
     std::cout << "q:" << q << std::endl;
     MatrixXd T = kinematics::forward_kinematics(q, robot_model);
     VectorXd pos = T.block<3, 1>(0, 3);
@@ -108,7 +109,6 @@ int main()
     VectorXd temp(q.size()+pos.size()+rpy_zyz.size());
     temp << q, pos, rpy_zyz;
     csv_writer << eigen_to_std_vector(temp);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
   }
   output_filestream.close();
 }
