@@ -2,14 +2,14 @@
 Getting started
 ***************
 
-To get started with using sdu_controllers, you need to install it on your system. See
+To get started with using sdu_controllers, you first need to install it on your system. See
 :ref:`Installation <installation>`.
 
 First steps
 ===========
-sdu_controllers needs to be used in conjunction with either a robot simulator or robot manipulator.
-Typically the controllers are part of a control loop that sends target positions to a robot with
-a given frequency.
+sdu_controllers implements a fundamental joint-space motion controller. By using this controller it will allow the robot to follow an arbitrary joint-space trajectory, within the defined limits of the robots.
+
+First a trajectory must be generated. For the sake of the example we choose two arbitrary joint positions.
 
 Example with Breeding Blanket Handling Robot
 ============================================
