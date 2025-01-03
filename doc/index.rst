@@ -11,13 +11,12 @@ sdu_controllers
 .. |Docs badge| image:: https://readthedocs.org/projects/sdu_controllers/badge/
    :target: https://sdu-controllers.readthedocs.io/
 
-
-.. figure:: _static/sdu_controllers-simulink.svg
-   :width: 100%
+.. figure:: _static/joint_motion_control.svg
+   :width: 90%
    :class: only-light
 
-.. figure:: _static/sdu_controllers-simulink-black.svg
-   :width: 100%
+.. figure:: _static/joint_motion_control.svg
+   :width: 90%
    :class: only-dark
 
 sdu_controllers is a C++ library that implements fundamental robot controllers. The library is
@@ -63,4 +62,5 @@ In this documentation
    pages/tutorial/getting_started
    pages/how_to_guides/installation
    pages/reference/api
+   pages/reference/bibliography
 

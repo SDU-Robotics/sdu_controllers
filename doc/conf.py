@@ -34,8 +34,12 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinx_book_theme",
     "sphinx_design",
-    "sphinxcontrib.icon"
+    "sphinxcontrib.icon",
+    "sphinxcontrib.bibtex"
 ]
+
+# bibtex
+bibtex_bibfiles = ['refs.bib']
 
 sphinx_tabs_valid_builders = ['linkcheck']
 

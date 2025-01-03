@@ -7,10 +7,18 @@ To get started with using sdu_controllers, you first need to install it on your 
 
 First steps
 ===========
-sdu_controllers implements a fundamental joint-space motion controller. By using this controller you can make a
+sdu_controllers implements a fundamental joint-space motion controller as described in :cite:t:`2009:Siciliano`. By using this controller you can make a
 robot follow an arbitrary joint-space trajectory, within the defined limits of the robots. In this example we use
 the Universal Robots UR5e 6DOF robot manipulator, see also the example with the 7DOF breeding blanket handling robot
 here.
+
+.. figure:: ../../_static/joint_motion_control.svg
+   :width: 90%
+   :class: only-light
+
+.. figure:: ../../_static/joint_motion_control.svg
+   :width: 90%
+   :class: only-dark
 
 Example with Universal Robots UR5e robot
 ========================================
