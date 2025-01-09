@@ -38,6 +38,8 @@ extensions = [
     "sphinxcontrib.bibtex"
 ]
 
+numfig = True
+
 # bibtex
 bibtex_bibfiles = ['refs.bib']
 
