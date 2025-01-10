@@ -1,4 +1,11 @@
 Tutorial
 ********
-To get started with using sdu_controllers, you first need to install it on your system. See
-:ref:`Installation <installation>`.
+To get started with sdu_controllers see the :ref:`Getting started <getting-started>` tutorial.
+Currently the following tutorials are available:
+
+.. toctree::
+   :caption: Tutorial
+   :maxdepth: 1
+
+   getting_started
+   admittance_controller

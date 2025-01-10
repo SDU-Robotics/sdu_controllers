@@ -32,18 +32,18 @@ In this documentation
 
 ..  grid:: 1 1 2 2
 
-   ..  grid-item:: :doc:`Tutorial <pages/tutorial/getting_started>`
+   ..  grid-item:: :doc:`Tutorial <pages/tutorial/index>`
 
        **Start here**: a hands-on introduction to sdu_controllers for new users
 
-   ..  grid-item:: :doc:`How-to guides <pages/how_to_guides/installation>`
+   ..  grid-item:: :doc:`How-to guides <pages/how_to_guides/index>`
 
-      **Step-by-step guides** covering key operations and common tasks
+      **Step-by-step guides** covering common tasks and key functionalities
 
 .. grid:: 1 1 2 2
    :reverse:
 
-   .. grid-item:: :doc:`Reference <pages/reference/api>`
+   .. grid-item:: :doc:`Reference <pages/reference/index>`
 
       **Technical information** - specifications, APIs, architecture
 
@@ -55,12 +55,12 @@ In this documentation
 
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
+   :maxdepth: 3
    :caption: Table of Contents
-   :titlesonly:
 
-   pages/tutorial/getting_started
-   pages/how_to_guides/installation
-   pages/reference/api
-   pages/reference/bibliography
+   pages/tutorial/index
+   pages/how_to_guides/index
+   pages/reference/index
+   pages/explanation/index
 
