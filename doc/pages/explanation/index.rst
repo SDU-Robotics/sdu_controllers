@@ -1,5 +1,8 @@
 Explanation
 ***********
-Discussion and clarification of key topics related to sdu_controllers
+Discussion and clarification of key topics related to sdu_controllers to
+help you understand how things fit together.
 
-TODO
+TODO:
+
+* Add section that explains the analytical jacobian.

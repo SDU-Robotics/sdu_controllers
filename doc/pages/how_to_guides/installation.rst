@@ -42,6 +42,13 @@ Building sdu_controllers requires the following software installed:
 * Doxygen (optional, documentation building is skipped if missing)
 * Python `>= 3.8` for building Python bindings
 
+On debian-based linux distributions like Ubuntu, you can install the
+dependencies with:
+
+.. code-block:: bash
+
+   sudo apt install build-essential cmake python3-dev python3-pip libeigen3-dev
+
 The following sequence of commands builds sdu_controllers.
 It assumes that your current working directory is the top-level directory
 of the freshly cloned repository:

@@ -75,7 +75,7 @@ html_static_path = ["_static"]
 html_theme_options = {
     "repository_url": "https://github.com/SDU-Robotics/sdu_controllers",
     "use_repository_button": True,
-    "show_toc_level": 1,
+    "show_toc_level": 2,
     "use_sidenotes": True
 }
 

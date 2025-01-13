@@ -8,4 +8,6 @@ Currently the following tutorials are available:
    :maxdepth: 1
 
    getting_started
+   joint_space_motion_control
+   cartesian_motion_control
    admittance_controller
