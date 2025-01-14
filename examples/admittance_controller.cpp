@@ -4,18 +4,19 @@
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/utils/utility.hpp>
 
+constexpr double pi = 3.14159265358979323846;
+
 using namespace std;
 using namespace csv;
 using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
 
-
 Vector3d get_circle_target(const Vector3d &pose, double timestep, double radius = 0.1, double freq = 0.5)
 {
   Vector3d circle_target;
-  circle_target[0] = pose[0] + radius * cos(2 * M_PI * freq * timestep);
-  circle_target[1] = pose[1] + radius * sin(2 * M_PI * freq * timestep);
+  circle_target[0] = pose[0] + radius * cos(2 * pi * freq * timestep);
+  circle_target[1] = pose[1] + radius * sin(2 * pi * freq * timestep);
   circle_target[2] = pose[2];
   return circle_target;
 }

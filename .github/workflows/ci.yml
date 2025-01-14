@@ -87,7 +87,7 @@ jobs:
         submodules: 'recursive'
 
     - name: install dependencies
-      uses: jrl-umi3218/github-actions/install-dependencies@master
+      uses: SDU-Robotics/github-actions/install-dependencies@master
       with:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
@@ -96,7 +96,7 @@ jobs:
         macos: |
           brew: eigen
         windows: |
-          github:
+          gitlab:
             - path: libeigen/eigen
               ref: 3.4.0
 

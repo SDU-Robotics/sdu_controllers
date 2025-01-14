@@ -6,3 +6,4 @@ help you understand how things fit together.
 TODO:
 
 * Add section that explains the analytical jacobian.
+* Add section that explains RNEA (Recursive Newton Euler Algorithm).
