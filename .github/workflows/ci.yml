@@ -44,8 +44,8 @@ jobs:
           brew: eigen
         windows: |
           github:
-            - path: eigenteam/eigen-git-mirror
-              ref: 3.3.7
+            - path: libeigen/eigen
+              ref: 3.4.0
 
     - name: make build directory
       run: cmake -E make_directory ${{ github.workspace }}/build
@@ -97,8 +97,8 @@ jobs:
           brew: eigen
         windows: |
           github:
-            - path: eigenteam/eigen-git-mirror
-              ref: 3.3.7
+            - path: libeigen/eigen
+              ref: 3.4.0
 
     - name: Set up Python
       uses: actions/setup-python@v5
