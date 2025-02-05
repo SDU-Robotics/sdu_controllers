@@ -46,7 +46,7 @@ namespace sdu_controllers::controllers
     std::cout << "dx_tilde: " << dx_tilde << std::endl;
 
     // Eq. (8.114) from page 348, Robotics: Modelling, Planning and Control:
-    y_ = J_A.inverse() * (ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq);
+    y_ = J_A.lu().solve(ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq);
   }
 
   void OperationalSpaceController::reset()

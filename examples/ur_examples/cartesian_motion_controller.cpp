@@ -27,10 +27,10 @@ int main()
   double freq = 500.0;
   double dt = 1.0 / freq;
 
-  double Kp_pos_value = 500.0;
-  double Kp_orient_value = 100.0;
-  double Kd_pos_value = 2*sqrt(Kp_pos_value);
-  double Kd_orient_value = 2*sqrt(Kp_orient_value);
+  double Kp_pos_value = 16250.0;
+  double Kp_orient_value = 16250.0;
+  double Kd_pos_value = 200.0;
+  double Kd_orient_value = 3.0;
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
 
@@ -103,7 +103,7 @@ int main()
     MatrixXd T = kinematics::forward_kinematics(q, robot_model);
     VectorXd pos = T.block<3, 1>(0, 3);
     std::cout << "pos:" << pos << std::endl;
-    Matrix3d rot_mat = T.topLeftCorner(3, 3);
+    Matrix3d rot_mat = T.block<3,3>(0, 0);
     Vector3d rpy_zyz = rot_mat.eulerAngles(2, 1, 2); // ZYZ representation
     std::cout << "rpy_zyz:" << rpy_zyz << std::endl;
     VectorXd temp(q.size()+pos.size()+rpy_zyz.size());
