@@ -3,11 +3,13 @@
 **************************
 Joint-space motion control
 **************************
-sdu_controllers implements a joint-space motion controller as described in :cite:t:`2009:Siciliano`. By using
-this controller you can make a robot follow an arbitrary joint-space trajectory that is defined within the
-limits of the robots. This page contains two examples, in the :ref:`first example <ur5e_joint_space_control>`
-we use the Universal Robots UR5e 6 DOF robot manipulator and in the :ref:`second example <bb_robot_joint_space_control>`
-the more advanced 7 DOF breeding blanket handling robot.
+sdu_controllers implements a joint-space motion controller with inverse dynamics control
+as described on page 330 in :cite:t:`2009:Siciliano`. By using this controller you can make
+a robot follow an arbitrary joint-space trajectory that is defined within the limits of
+the robots. This page contains two examples, in the :ref:`first example <ur5e_joint_space_control>`
+we use the Universal Robots UR5e 6 DOF robot manipulator and in the
+:ref:`second example <bb_robot_joint_space_control>` the more advanced 7 DOF breeding
+blanket handling robot.
 
 .. figure:: ../../_static/joint_motion_control.svg
    :width: 90%
@@ -16,6 +18,43 @@ the more advanced 7 DOF breeding blanket handling robot.
 .. figure:: ../../_static/joint_motion_control.svg
    :width: 90%
    :class: only-dark
+
+The dynamic model of an n-joint robot
+manipulator given by the Euler-Lagrange equation can be written as:
+
+.. math::
+
+   B(q)\ddot{q} + C(q, \dot{q})\dot{q} + F\dot{q} + g(q) = u
+
+where :math:`B(q)` is the inertia tensor, :math:`C(q, \dot{q})` is a matrix containing
+Coriolis and centrifugal terms, :math:`g(q)` is the gravity vector, and :math:`u` is the
+actuator torque. By taking the control :math:`u` as a function of the manipulator state
+in the form:
+
+.. math::
+
+   u = B(q)y + C(q, \dot{q})\dot{q} + F\dot{q} + g(q)
+
+then the system can be described as
+
+.. math::
+
+   \ddot{q} = y
+
+where :math:`y` is our auxiliary input signal.
+
+We can then choose to have PD-control acting on the desired joint positions :math:`q_{d}` and joint velocities :math:`\dot{q}_{d}`
+like the following:
+
+.. math::
+
+   y = u_{ff} + Kp * (q_{d} - q) + Kd * (\dot{q}_{d} - \dot{q})
+
+here the acceleration is used as feed-forward :math:`u_{ff} = \ddot{q}`.
+
+.. note::
+    You can also choose the gravity vector as feed-forward so that :math:`u_{ff} = g(q)`,
+    which will make the controller compensate the gravity forces.
 
 .. _ur5e_joint_space_control:
 
