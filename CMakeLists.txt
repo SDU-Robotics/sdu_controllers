@@ -23,7 +23,7 @@ option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
 
 # Optional hardware examples
-option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" ON)
+option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)

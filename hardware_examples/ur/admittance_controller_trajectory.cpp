@@ -17,7 +17,7 @@ using namespace sdu_controllers::controllers;
 
 // Interrupt flag
 bool flag_loop = true;
-void raiseFlag(int)
+void raise_flag(int)
 {
   flag_loop = false;
 }
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   Pose robot_pose(T_base_tcp_circle);  //   std::vector<double> robot_pose = T_to_stdvec(T_base_tcp_circle);
   robot.move_cartesian(robot_pose);
 
-  signal(SIGINT, raiseFlag);
+  signal(SIGINT, raise_flag);
 
   robot.set_control_mode(URRobot::ControlMode::CARTESIAN);
   robot.start_control();

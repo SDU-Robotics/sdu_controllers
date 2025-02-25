@@ -1,93 +1,32 @@
-#include <sdu_controllers/math/math.hpp>
-#include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <Eigen/Dense>
-#include <ur_rtde/rtde_receive_interface.h>
-#include <ur_rtde/rtde_control_interface.h>
-
 #include <chrono>
+#include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/hal/ur_robot.hpp>
+#include <sdu_controllers/math/math.hpp>
+#include <sdu_controllers/utils/utility.hpp>
 
 using namespace Eigen;
 using namespace std::chrono;
+using namespace sdu_controllers::math;
+using namespace sdu_controllers::utils;
+using namespace sdu_controllers::hal;
+using namespace sdu_controllers::controllers;
 
 // Interrupt flag
 bool flag_loop = true;
-void raiseFlag(int)
+void raise_flag(int)
 {
   flag_loop = false;
-}
-
-// Type conversions
-Isometry3d pos_rotvec_to_T(const Vector3d &position, const AngleAxisd &rotation)
-{
-  Isometry3d T = Isometry3d::Identity();
-  T.translation() = position;
-  T.linear() = rotation.toRotationMatrix();
-  return T;
-}
-
-Isometry3d pos_quat_to_T(const VectorXd &pose)
-{
-  Isometry3d T = Isometry3d::Identity();
-  T.translation() = pose.block<3, 1>(0, 0);
-  T.linear() = Quaterniond(pose[3], pose[4], pose[5], pose[6]).toRotationMatrix();
-  return T;
-}
-
-Isometry3d stdvec_to_T(const std::vector<double> &pose)
-{
-  Vector3d position(pose[0], pose[1], pose[2]);
-
-  Vector3d compact_eaa(pose[3], pose[4], pose[5]);
-  double angle = compact_eaa.norm();
-
-  Isometry3d T = pos_rotvec_to_T(position, AngleAxisd(angle, compact_eaa.normalized()));
-  return T;
-}
-
-std::vector<double> T_to_stdvec(const Isometry3d &T)
-{
-  std::vector<double> pose;
-  for(double p: T.translation())
-  {
-    pose.push_back(p);
-  }
-
-  AngleAxisd eaa(T.rotation());
-  Vector3d compact_eaa(eaa.angle() * eaa.axis());
-  for(double p: compact_eaa)
-  {
-    pose.push_back(p);
-  }
-
-  return pose;
-}
-
-// Wrench transform to transform force/torque into tip
-MatrixXd adjoint(const Isometry3d &T)
-{
-  MatrixXd adj = MatrixXd::Zero(6, 6);
-  adj.block<3,3>(0,0) = T.rotation();
-  adj.block<3,3>(3,0) = sdu_controllers::math::skew(T.translation()) * T.rotation();
-  adj.block<3,3>(3,3) = T.rotation();
-  return adj;
-}
-
-VectorXd wrench_trans(const Vector3d &torques, const Vector3d &forces, const Isometry3d &T)
-{
-  VectorXd wrench_in_A(6);
-  wrench_in_A << torques[0], torques[1], torques[2], forces[0], forces[1], forces[2];
-  VectorXd wrench_in_B = adjoint(T).transpose() * wrench_in_A;
-  return wrench_in_B;
 }
 
 int main(int argc, char* argv[])
 {
   double frequency = 500.0;
-  double dt = 1./frequency;
+  double dt = 1. / frequency;
 
   // Initialize admittance control
   VectorXd u;
-  sdu_controllers::controllers::AdmittanceControllerPosition adm_controller(frequency);
+  AdmittanceControllerPosition adm_controller(frequency);
 
   std::string robot_ip = "127.0.0.1";
   if (argc > 1)
@@ -95,19 +34,20 @@ int main(int argc, char* argv[])
     robot_ip = argv[1];
   }
 
-  ur_rtde::RTDEReceiveInterface rtde_receive(robot_ip);
-  ur_rtde::RTDEControlInterface rtde_control(robot_ip);
+  // Initialize UR Robot through HAL
+  URRobot robot(robot_ip, frequency);
 
   std::this_thread::sleep_for(500ms);
-  rtde_control.zeroFtSensor();
+  robot.zero_ft_sensor();
   std::this_thread::sleep_for(200ms);
 
-  Isometry3d T_base_tcp = stdvec_to_T(rtde_receive.getActualTCPPose());
+  Pose actual_tcp_pose = robot.get_cartesian_tcp_pose();
+  Affine3d T_base_tcp = actual_tcp_pose.to_transform();
 
   // Define tip
-  Isometry3d T_tcp_tip = pos_rotvec_to_T(Vector3d(0, 0, 0.05), AngleAxisd(0., Vector3d::UnitZ()));
-  Isometry3d T_tip_tcp = T_tcp_tip.inverse();
-  Isometry3d T_base_tip_init = T_base_tcp * T_tcp_tip;
+  Affine3d T_tcp_tip = Pose(Vector3d(0, 0, 0.05), Quaterniond::Identity()).to_transform();
+  Affine3d T_tip_tcp = T_tcp_tip.inverse();
+  Affine3d T_base_tip_init = T_base_tcp * T_tcp_tip;
 
   Vector3d pos_init = T_base_tip_init.translation();
   Quaterniond quat_init = Quaterniond(T_base_tip_init.rotation());
@@ -125,7 +65,10 @@ int main(int argc, char* argv[])
   // adm_controller.set_damping_matrix_position(Vector3d(3250, 3250, 3250));
   // adm_controller.set_damping_matrix_orientation(Vector3d(25, 25, 25));
 
-  signal(SIGINT, raiseFlag);
+  signal(SIGINT, raise_flag);
+
+  robot.set_control_mode(URRobot::ControlMode::CARTESIAN);
+  robot.start_control();
 
   std::vector<double> robot_pose;
 
@@ -134,14 +77,14 @@ int main(int argc, char* argv[])
     while (flag_loop)
     {
       // Start time
-      steady_clock::time_point start_time = rtde_control.initPeriod();
+      steady_clock::time_point start_time = robot.init_period();
 
       // Get current position
-      T_base_tcp = stdvec_to_T(rtde_receive.getActualTCPPose());
-      std::vector<double> ft = rtde_receive.getActualTCPForce();
+      T_base_tcp = robot.get_cartesian_tcp_pose();
+      std::vector<double> ft = robot.get_tcp_forces();
 
       // Transform into compliant coordinate system (tip?)
-      Isometry3d T_base_tip = T_base_tcp * T_tcp_tip;
+      Affine3d T_base_tip = T_base_tcp * T_tcp_tip;
 
       // Get current force & torque
       Vector3d f_base(ft[0], ft[1], ft[2]);
@@ -156,31 +99,31 @@ int main(int argc, char* argv[])
       VectorXd ft_tip = wrench_trans(mu_tcp, f_tcp, T_tcp_tip);
 
       // Rotate forces back to base frame
-      Vector3d f_base_tip = T_base_tip.rotation() * ft_tip.block<3,1>(3,0);
+      Vector3d f_base_tip = T_base_tip.rotation() * ft_tip.block<3, 1>(3, 0);
 
       // Step controller
-      adm_controller.step(f_base_tip, ft_tip.block<3,1>(0,0), pos_init, quat_init_vec);
+      adm_controller.step(f_base_tip, ft_tip.block<3, 1>(0, 0), pos_init, quat_init_vec);
       u = adm_controller.get_output();
 
       // Rotate output from tip to TCP before sending it to the robot
-      Isometry3d T_base_tip_out = pos_quat_to_T(u);
-      Isometry3d T_base_tcp_out = T_base_tip_out * T_tip_tcp;
+      Affine3d T_base_tip_out = Pose(eigen_to_std_vector(u));
+      Affine3d T_base_tcp_out = T_base_tip_out * T_tip_tcp;
 
-      // Send control value
-      robot_pose = T_to_stdvec(T_base_tcp_out);
-      rtde_control.servoL(robot_pose, 0.0, 0.0, dt, 0.03, 2000);
-      rtde_control.waitPeriod(start_time);
+      // Set control reference
+      robot.set_cartesian_pose_ref(Pose(T_base_tcp_out));
+
+      // Update the robot control
+      robot.step();
+
+      robot.wait_period(start_time);
     }
   }
-  catch(const std::exception& e)
+  catch (const std::exception& e)
   {
     std::cerr << e.what() << '\n';
   }
 
   // Shutdown
-  rtde_control.servoStop(10.0);
-
-  rtde_receive.disconnect();
-  rtde_control.disconnect();
+  robot.stop_control();
   return 0;
 }
