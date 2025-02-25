@@ -9,6 +9,9 @@ add_library(sdu_controllers
         models/ur_robot.cpp
         safety/safety_verifier.cpp
         controllers/operational_space_controller.cpp
+        hal/ur_robot.cpp
+        ../include/sdu_controllers/hal/robot.hpp
+        ../include/sdu_controllers/hal/ur_robot.hpp
         ../include/sdu_controllers/controllers/controller.hpp
         ../include/sdu_controllers/controllers/admittance_controller_position.hpp
         ../include/sdu_controllers/kinematics/forward_kinematics.hpp
@@ -27,6 +30,7 @@ add_library(sdu_controllers
         controllers/force_control_inner_velocity_loop.cpp
         ../include/sdu_controllers/controllers/force_control_inner_velocity_loop.hpp
         ../include/sdu_controllers/math/rnea.hpp
+        ../include/sdu_controllers/math/pose.hpp
         math/rnea.cpp
         models/breeding_blanket_handling_robot.cpp
 

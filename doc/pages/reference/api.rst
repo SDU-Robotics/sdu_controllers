@@ -23,6 +23,11 @@ Models:
 * :ref:`BreedingBlanketHandlingRobotModel <breeding-blanket-handling-robot-model-api>`
 * :ref:`URRobotModel <ur-robot-model-api>`
 
+HAL:
+
+* :ref:`Robot <robot-api>`
+* :ref:`URRobot <ur-robot-api>`
+
 .. _controller-api:
 
 Controller
@@ -114,3 +119,22 @@ BreedingBlanketHandlingRobotModel
 .. doxygenclass:: sdu_controllers::models::BreedingBlanketHandlingRobotModel
     :project: sdu_controllers
     :members:
+
+.. _robot-api:
+
+Robot
+=====
+
+.. doxygenclass:: sdu_controllers::hal::Robot
+    :project: sdu_controllers
+    :members:
+
+.. _ur-robot-api:
+
+URRobot
+=======
+
+.. doxygenclass:: sdu_controllers::hal::URRobot
+    :project: sdu_controllers
+    :members:
+

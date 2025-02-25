@@ -48,7 +48,7 @@ like the following:
 
 .. math::
 
-   y = u_{ff} + Kp * (q_{d} - q) + Kd * (\dot{q}_{d} - \dot{q})
+   y = u_{ff} + K_{P}(q_{d} - q) + K_{D}(\dot{q}_{d} - \dot{q})
 
 here the acceleration is used as feed-forward :math:`u_{ff} = \ddot{q}`.
 
@@ -179,6 +179,19 @@ to the following figure:
 .. figure:: ../../_static/joint_pd_control_output_torque_dark.svg
    :width: 90%
    :class: only-dark
+
+In order to check whether the output torques produces a robot movement that ressembles the input trajectory, a
+simulation can be performed by using forward dynamics to calculate an output trajectory based on the output torques :math:`u`. This
+output trajectory can then be compared with the input trajectory.
+
+The forward dynamics can be calculated using Eq. (7.115), from page 293 in :cite:t:`2009:Siciliano`:
+
+.. math::
+
+  \ddot{q} = \mathbf{B}^{-1}(q) \left(\tau - \mathbf{C}(q)\dot{q} -\mathbf{\tau}_{g}\right)
+
+this gives us the acceleration :math:`\ddot{q}`, which can be integrated to yield the velocity
+:math:`\dot{q}`, which can also be integrated to yield the position :math:`q`.
 
 
 .. _bb_robot_joint_space_control:
