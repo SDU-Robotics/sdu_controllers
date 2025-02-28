@@ -213,6 +213,24 @@ namespace sdu_controllers::hal
     return rtde_control_->moveL(pose_rotvec, velocity, acceleration, asynchronous);
   }
 
+  Eigen::VectorXd URRobot::get_joint_torques()
+  {
+    Eigen::VectorXd torques = utils::std_vector_to_eigen(rtde_control_->getJointTorques());
+    return torques;
+  }
+
+  Eigen::VectorXd URRobot::get_joint_positions()
+  {
+    Eigen::VectorXd q = utils::std_vector_to_eigen(rtde_receive_->getActualQ());
+    return q;
+  }
+
+  Eigen::VectorXd URRobot::get_joint_velocities()
+  {
+    Eigen::VectorXd qd = utils::std_vector_to_eigen(rtde_receive_->getActualQd());
+    return qd;
+  }
+
   math::Pose URRobot::get_cartesian_tcp_pose()
   {
     return math::Pose(rtde_receive_->getActualTCPPose());

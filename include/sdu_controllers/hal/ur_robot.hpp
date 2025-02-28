@@ -185,17 +185,17 @@ namespace sdu_controllers::hal
     /**
      * Get the joint torques
      */
-    Eigen::Vector<double, 7> get_joint_torques();
+    Eigen::VectorXd get_joint_torques();
 
     /**
      * Get the joint positions
      */
-    Eigen::Vector<double, 7> get_joint_positions();
+    Eigen::VectorXd get_joint_positions();
 
     /**
      * Get the joint velocities
      */
-    Eigen::Vector<double, 7> get_joint_velocity();
+    Eigen::VectorXd get_joint_velocities();
 
     /**
      * Get the cartesian pose with position in meters and orientation as Quaterniond (see the Pose class).
