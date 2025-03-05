@@ -12,48 +12,23 @@ set(sdu_controllers_SOURCES
       models/ur_robot_model.cpp
       models/ur_robot.cpp
       safety/safety_verifier.cpp
-
-)
-
-set(sdu_controllers_HEADERS
-      ../include/sdu_controllers/hal/robot.hpp
-      ../include/sdu_controllers/controllers/controller.hpp
-      ../include/sdu_controllers/controllers/admittance_controller_position.hpp
-      ../include/sdu_controllers/kinematics/forward_kinematics.hpp
-      ../include/sdu_controllers/math/math.hpp
-      ../include/sdu_controllers/math/forward_dynamics.hpp
-      ../include/sdu_controllers/math/inverse_dynamics.hpp
-      ../include/sdu_controllers/math/inverse_dynamics_joint_space.hpp
-      ../include/sdu_controllers/models/breeding_blanket_handling_robot.hpp
-      ../include/sdu_controllers/models/breeding_blanket_handling_robot_model.hpp
-      ../include/sdu_controllers/models/ur_robot_model.hpp
-      ../include/sdu_controllers/controllers/pd_controller.hpp
-      ../include/sdu_controllers/models/ur_robot.hpp
-      ../include/sdu_controllers/utils/utility.hpp
-      ../include/sdu_controllers/safety/safety_verifier.hpp
-      ../include/sdu_controllers/controllers/operational_space_controller.hpp
-      ../include/sdu_controllers/controllers/force_control_inner_velocity_loop.hpp
-      ../include/sdu_controllers/math/rnea.hpp
-      ../include/sdu_controllers/math/pose.hpp
 )
 
 # Try to find ur_rtde in order to build UR Robot HAL
-find_package(ur_rtde QUIET)
+find_package(ur_rtde)
 
 if(ur_rtde_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/ur_robot.cpp)
-    list(APPEND sdu_controllers_HEADERS ../include/sdu_controllers/hal/ur_robot.hpp)
 endif(ur_rtde_FOUND)
 
 # Try to find libfranka in order to build Franka Robot HAL
-find_package(Franka 0.15.0 REQUIRED)
+find_package(Franka 0.15.0)
 
 if(Franka_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
-    list(APPEND sdu_controllers_HEADERS ../include/sdu_controllers/hal/franka_robot.hpp)
 endif(Franka_FOUND)
 
-add_library(sdu_controllers ${sdu_controllers_SOURCES} ${sdu_controllers_HEADERS})
+add_library(sdu_controllers ${sdu_controllers_SOURCES})
 target_link_libraries(sdu_controllers Eigen3::Eigen)
 target_include_directories(
   sdu_controllers PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
