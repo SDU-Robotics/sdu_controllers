@@ -1,12 +1,14 @@
 #pragma once
-#ifndef SDU_CONTROLLERS_HAL_UR_ROBOT_HPP
-#define SDU_CONTROLLERS_HAL_UR_ROBOT_HPP
+#include <franka/control_types.h>
+#ifndef SDU_CONTROLLERS_HAL_FRANKA_ROBOT_HPP
+#define SDU_CONTROLLERS_HAL_FRANKA_ROBOT_HPP
 
-#include <ur_rtde/rtde_control_interface.h>
-#include <ur_rtde/rtde_receive_interface.h>
+#include <franka/exception.h>
+#include <franka/model.h>
+#include <franka/robot.h>
+#include <franka/robot_state.h>
 
 #include <Eigen/Dense>
-#include <chrono>
 #include <sdu_controllers/hal/robot.hpp>
 #include <sdu_controllers/math/pose.hpp>
 #include <string>
@@ -15,14 +17,12 @@
 namespace sdu_controllers::hal
 {
   /**
-   * This class provides an interface for controlling Universal Robots. The interface
-   * is using the ur_rtde library to control and receive data from the robot.
+   * This class provides an interface for controlling a Franka Emika Robot. The interface
+   * is using the FCI (Franka Control Interface) C++ library to control and receive data
+   * from the robot.
    *
    * The interface provides different online control modes:
-   *
-   *  - JOINT_POSITION
-   *  - CARTESIAN
-   *  - VELOCITY
+   *  - TORQUE
    *
    * where a target reference for the given control mode is set using set_joint_pos_ref(),
    * set_cartesian_pose_ref(), set_joint_vel_ref() or set_cartesian_vel_ref(). To perform the actual control,
@@ -35,13 +35,13 @@ namespace sdu_controllers::hal
    * interpolation).
    */
 
-  class URRobot : Robot
+  class FrankaRobot : Robot
   {
    public:
     /**
      * A constant that defines the number of degrees of freedom (DOF) the robot have.
      */
-    static const uint16_t ROBOT_DOF = 6;
+    static const uint16_t ROBOT_DOF = 7;
 
     /**
      * The ControlStates enum defines the available control states for the robot control.
@@ -62,17 +62,44 @@ namespace sdu_controllers::hal
     {
       UNDEFINED,
       JOINT_POSITION,
-      CARTESIAN_POSE,
       JOINT_VELOCITY,
-      CARTESIAN_VELOCITY
+      CARTESIAN_POSE,
+      CARTESIAN_VELOCITY,
+      TORQUE
     };
 
     /**
-     * URRobot constructor - creates a UR RTDE Interface for the robot at the specified IP-address.
+     * FrankaRobot constructor - creates an interface for controlling the robot at
+     * the specified IP-address.
      * @param ip The IP-address of the robot.
-     * @param control_frequency The robot control frequency, defaults to 500Hz.
+     * @param control_frequency The robot control frequency, defaults to 1000Hz.
      */
-    explicit URRobot(const std::string& ip, double control_frequency = 500.0);
+    explicit FrankaRobot(const std::string& ip, double control_frequency = 1000.0);
+
+    /**
+     * Sets a default collision behavior, joint impedance and Cartesian impedance.
+     */
+    void set_default_behavior();
+
+    /**
+     * Callback function for the joint position control loop.
+     */
+    franka::JointPositions joint_position_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+
+    /**
+     * Callback function for the joint velocity control loop.
+     */
+    franka::JointVelocities joint_velocity_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+
+    /**
+     * Callback function for the cartesian pose control loop.
+     */
+    franka::CartesianPose cartesian_pose_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+
+    /**
+     * Callback function for the cartesian velocity control loop.
+     */
+    franka::CartesianVelocities cartesian_velocity_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
 
     /**
      * the step() function should be called regularly at a fixed rate by the
@@ -100,19 +127,11 @@ namespace sdu_controllers::hal
     bool stop_control();
 
     /**
-     * @brief This function is used in combination with wait_period() and is used to get the start of a control period /
-     * cycle.
+     * Set a desired joint torque reference \f$tau_{d}\f$.
+     *
+     * @param \f$tau_{d}\f$ specifies desired joint torques [N].
      */
-    std::chrono::steady_clock::time_point init_period();
-
-    /**
-     * @brief Used for waiting the rest of the control period, set implicitly as dt = 1 / frequency. A combination of
-     * sleeping and spinning are used to achieve the lowest possible jitter. The function is especially useful for a
-     * realtime control loop. NOTE: the function is to be used in combination with the init_period().
-
-     * @param t_cycle_start the start of the control period. Typically given as dt = 1 / frequency.
-     */
-    void wait_period(const std::chrono::steady_clock::time_point& t_cycle_start);
+    bool set_joint_torque_ref(const Eigen::Vector<double, ROBOT_DOF>& tau_d);
 
     /**
      * Set a joint position reference target
@@ -150,11 +169,6 @@ namespace sdu_controllers::hal
      */
     bool set_cartesian_vel_ref(const Eigen::Vector<double, ROBOT_DOF>& xd, double acceleration = 0.25);
 
-    /**
-     * @brief Zeroes the TCP force/torque measurement from the builtin force/torque sensor by subtracting the current
-     * measurement from the subsequent.
-     */
-    void zero_ft_sensor();
 
     /**
      * Move to a given joint position in joint-space
@@ -208,8 +222,9 @@ namespace sdu_controllers::hal
     std::vector<double> get_tcp_forces();
 
    private:
-    std::shared_ptr<ur_rtde::RTDEReceiveInterface> rtde_receive_;
-    std::shared_ptr<ur_rtde::RTDEControlInterface> rtde_control_;
+    franka::Robot robot_;
+    franka::Model robot_model_;
+    franka::RobotState robot_state_;
     double control_frequency_;
     double dt_;
     ControlMode control_mode_;
@@ -221,16 +236,8 @@ namespace sdu_controllers::hal
     math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_vel_ref_;
     Eigen::Vector<double, ROBOT_DOF> cartesian_vel_ref_;
-
-    double servo_vel_;
-    double servo_acc_;
-    double servo_p_gain_;
-    double servo_lookahead_t_;
-
-    double deceleration_rate_;
-    double vel_tool_acceleration_;
   };
 
 }  // namespace sdu_controllers::hal
 
-#endif  // SDU_CONTROLLERS_HAL_UR_ROBOT_HPP
+#endif  // SDU_CONTROLLERS_HAL_FRANKA_ROBOT_HPP

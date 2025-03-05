@@ -46,6 +46,31 @@ namespace sdu_controllers::utils
     return eigen_vec;
   }
 
+  /**
+   * @brief Converts a std::array of doubles to an Eigen::Vector<double, N>
+   *
+   * This function takes a std::array of doubles and converts it to an Eigen::Vector<double, N>.
+   * The size of the output vector will match the size of the input array.
+   *
+   * @tparam N The size of the input std::array
+   * @param arr The input std::array of doubles to convert
+   * @return Eigen::Vector<double, N> The resulting Eigen vector
+   *
+   * @example
+   * std::array<double, 3> my_array = {1.0, 2.0, 3.0};
+   * Eigen::Vector<double, N> my_vec = std_array_to_eigen_vector(my_array);
+   */
+  template<std::size_t N>
+  Eigen::Vector<double, N> std_array_to_eigen_vector(const std::array<double, N> &arr)
+  {
+    Eigen::Vector<double, N> vec;
+    for (std::size_t i = 0; i < N; ++i)
+    {
+      vec(i) = arr[i];
+    }
+    return vec;
+  }
+
   // Template function to convert an Eigen::Matrix (vector) to a std::vector
   template<typename T>
   std::vector<T> eigen_to_std_vector(const Eigen::Matrix<T, Eigen::Dynamic, 1> &eigen_vec)

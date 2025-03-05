@@ -37,12 +37,21 @@ set(sdu_controllers_HEADERS
       ../include/sdu_controllers/math/pose.hpp
 )
 
+# Try to find ur_rtde in order to build UR Robot HAL
 find_package(ur_rtde QUIET)
 
 if(ur_rtde_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/ur_robot.cpp)
     list(APPEND sdu_controllers_HEADERS ../include/sdu_controllers/hal/ur_robot.hpp)
 endif(ur_rtde_FOUND)
+
+# Try to find libfranka in order to build Franka Robot HAL
+find_package(Franka 0.15.0 REQUIRED)
+
+if(Franka_FOUND)
+    list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
+    list(APPEND sdu_controllers_HEADERS ../include/sdu_controllers/hal/franka_robot.hpp)
+endif(Franka_FOUND)
 
 add_library(sdu_controllers ${sdu_controllers_SOURCES} ${sdu_controllers_HEADERS})
 target_link_libraries(sdu_controllers Eigen3::Eigen)

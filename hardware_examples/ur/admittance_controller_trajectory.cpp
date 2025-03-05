@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
   signal(SIGINT, raise_flag);
 
-  robot.set_control_mode(URRobot::ControlMode::CARTESIAN);
+  robot.set_control_mode(URRobot::ControlMode::CARTESIAN_POSE);
   robot.start_control();
 
   try

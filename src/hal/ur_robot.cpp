@@ -47,7 +47,7 @@ namespace sdu_controllers::hal
             // Initialize joint_pos_ref_ to current joint position of the robot, this is to avoid any sudden jumps.
             joint_pos_ref_ = utils::std_vector_to_eigen(rtde_receive_->getActualQ());
           }
-          else if (control_mode_ == ControlMode::CARTESIAN)
+          else if (control_mode_ == ControlMode::CARTESIAN_POSE)
           {
             // Initialize cartesian_pos_ref_ to current pose of the robot, this is to avoid any sudden jumps.
             cartesian_pose_ref_ = math::Pose(rtde_receive_->getActualTCPPose());
@@ -84,7 +84,7 @@ namespace sdu_controllers::hal
         // Check if the control should be stopped.
         if (stop_control_)
         {
-          if (control_mode_ == ControlMode::JOINT_POSITION || control_mode_ == ControlMode::CARTESIAN)
+          if (control_mode_ == ControlMode::JOINT_POSITION || control_mode_ == ControlMode::CARTESIAN_POSE)
             rtde_control_->servoStop();
           else if (control_mode_ == ControlMode::JOINT_VELOCITY || control_mode_ == ControlMode::CARTESIAN_VELOCITY)
             rtde_control_->speedStop();
@@ -98,7 +98,7 @@ namespace sdu_controllers::hal
           std::vector<double> q_vec(joint_pos_ref_.begin(), joint_pos_ref_.end());
           rtde_control_->servoJ(q_vec, servo_vel_, servo_acc_, dt_, servo_lookahead_t_, servo_p_gain_);
         }
-        else if (control_mode_ == ControlMode::CARTESIAN)
+        else if (control_mode_ == ControlMode::CARTESIAN_POSE)
         {
           Eigen::Vector3d pos = cartesian_pose_ref_.get_position();
           Eigen::Vector3d rotvec = cartesian_pose_ref_.to_angle_axis_vector();
@@ -168,7 +168,7 @@ namespace sdu_controllers::hal
   {
     // Check if the control mode has been set, otherwise set it to CARTESIAN_POSITION.
     if (control_mode_ == ControlMode::UNDEFINED)
-      set_control_mode(ControlMode::CARTESIAN);
+      set_control_mode(ControlMode::CARTESIAN_POSE);
 
     cartesian_pose_ref_ = pose;
     return true;
