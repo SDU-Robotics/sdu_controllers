@@ -1,12 +1,14 @@
 #pragma once
-#include <franka/control_types.h>
 #ifndef SDU_CONTROLLERS_HAL_FRANKA_ROBOT_HPP
 #define SDU_CONTROLLERS_HAL_FRANKA_ROBOT_HPP
 
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
+#include <franka/duration.h>
+
 
 #include <Eigen/Dense>
 #include <sdu_controllers/hal/robot.hpp>
@@ -80,6 +82,11 @@ namespace sdu_controllers::hal
      * Sets a default collision behavior, joint impedance and Cartesian impedance.
      */
     void set_default_behavior();
+
+    /**
+     * Callback function for the joint position control loop.
+     */
+    franka::Torques joint_torque_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
 
     /**
      * Callback function for the joint position control loop.
@@ -169,29 +176,22 @@ namespace sdu_controllers::hal
      */
     bool set_cartesian_vel_ref(const Eigen::Vector<double, ROBOT_DOF>& xd, double acceleration = 0.25);
 
-
     /**
      * Move to a given joint position in joint-space
+     *
      * @param q specifies joint positions of the robot axes [radians].
-     * @param velocity joint velocity [rad/s]
-     * @param acceleration joint acceleration [rad/s^2]
-     * @param asynchronous a bool specifying if the move command should be asynchronous.
-     * Default is false, this means the function will block until the movement has completed.
+     * @param speed_factor general speed factor in range [0, 1].
      */
     bool move_joints(
         const Eigen::Vector<double, ROBOT_DOF>& q,
-        double velocity = 1.05,
-        double acceleration = 1.4,
-        bool asynchronous = false);
+        double speed_factor = 0.1);
 
     /**
      * Move to a given position in cartesian space
+     *
      * @param pose specifies the target pose with position in meters and orientation as a
      * quaternion with scalar-first (WXYZ).
-     * @param velocity tool velocity [m/s]
-     * @param acceleration tool acceleration [m/s^2]
-     * @param asynchronous a bool specifying if the move command should be asynchronous. Default is false, this means the
-     * function will block until the movement has completed.
+     * @param speed_factor general speed factor in range [0, 1].
      */
     bool
     move_cartesian(const math::Pose& pose, double velocity = 0.25, double acceleration = 1.2, bool asynchronous = false);
@@ -233,9 +233,64 @@ namespace sdu_controllers::hal
     bool start_control_;
     bool stop_control_;
     Eigen::Vector<double, ROBOT_DOF> joint_pos_ref_;
-    math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_vel_ref_;
+    math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> cartesian_vel_ref_;
+    Eigen::Vector<double, ROBOT_DOF> joint_torque_ref_;
+  };
+
+  /**
+   * Copyright (c) 2023 Franka Robotics GmbH
+   *
+   * An example showing how to generate a joint pose motion to a goal position. Adapted from:
+   * Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots
+   * (Kogan Page Science Paper edition).
+   */
+  class MotionGenerator
+  {
+   public:
+    /**
+     * Creates a new MotionGenerator instance for a target q.
+     *
+     * @param[in] speed_factor General speed factor in range [0, 1].
+     * @param[in] q_goal Target joint positions.
+     */
+    MotionGenerator(double speed_factor, const std::array<double, 7> q_goal);
+
+    /**
+     * Sends joint position calculations
+     *
+     * @param[in] robot_state Current state of the robot.
+     * @param[in] period Duration of execution.
+     *
+     * @return Joint positions for use inside a control loop.
+     */
+    franka::JointPositions operator()(const franka::RobotState& robot_state, franka::Duration period);
+
+   private:
+    using Vector7d = Eigen::Matrix<double, 7, 1, Eigen::ColMajor>;
+    using Vector7i = Eigen::Matrix<int, 7, 1, Eigen::ColMajor>;
+
+    bool calculate_desired_values(double t, Vector7d* delta_q_d) const;
+    void calculate_synchronized_values();
+
+    static constexpr double k_delta_q_motion_finished = 1e-6;
+    const Vector7d q_goal_;
+
+    Vector7d q_start_;
+    Vector7d delta_q_;
+
+    Vector7d dq_max_sync_;
+    Vector7d t_1_sync_;
+    Vector7d t_2_sync_;
+    Vector7d t_f_sync_;
+    Vector7d q_1_;
+
+    double time_ = 0.0;
+
+    Vector7d dq_max_ = (Vector7d() << 2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5).finished();
+    Vector7d ddq_max_start_ = (Vector7d() << 5, 5, 5, 5, 5, 5, 5).finished();
+    Vector7d ddq_max_goal_ = (Vector7d() << 5, 5, 5, 5, 5, 5, 5).finished();
   };
 
 }  // namespace sdu_controllers::hal

@@ -11,7 +11,6 @@
 
 namespace sdu_controllers::hal
 {
-
   FrankaRobot::FrankaRobot(const std::string& ip, double control_frequency) : robot_(ip), robot_model_(robot_.loadModel())
   {
     control_frequency_ = control_frequency;
@@ -63,6 +62,15 @@ namespace sdu_controllers::hal
     return { array };
   }
 
+  franka::Torques FrankaRobot::joint_torque_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
+  {
+    // Update the robot state
+    robot_state_ = state;
+    std::array<double, 7> tau_d_array{};
+    Eigen::VectorXd::Map(&tau_d_array[0], 7) = joint_torque_ref_;
+    return tau_d_array;
+  }
+
   void FrankaRobot::step()
   {
     // State-machine control logic
@@ -85,9 +93,11 @@ namespace sdu_controllers::hal
             cartesian_pose_ref_ = math::Pose(initial_transform);
           }
           else if (control_mode_ == ControlMode::JOINT_VELOCITY)
-            joint_vel_ref_ = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+            joint_vel_ref_ = Eigen::VectorXd::Zero(ROBOT_DOF);
           else if (control_mode_ == ControlMode::CARTESIAN_VELOCITY)
-            cartesian_vel_ref_ = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+            cartesian_vel_ref_ << Eigen::VectorXd::Zero(ROBOT_DOF);
+          else if (control_mode_ == ControlMode::TORQUE)
+            joint_torque_ref_ << Eigen::VectorXd::Zero(ROBOT_DOF);
 
           // This code will run once on entry to state
           prev_state_ = curr_state_;
@@ -108,7 +118,12 @@ namespace sdu_controllers::hal
         {
           try
           {
-            if (control_mode_ == ControlMode::JOINT_POSITION)
+            if (control_mode_ == ControlMode::TORQUE)
+            {
+              robot_.control(
+                  std::bind(&FrankaRobot::joint_torque_control_cb, this, std::placeholders::_1, std::placeholders::_2));
+            }
+            else if (control_mode_ == ControlMode::JOINT_POSITION)
             {
               robot_.control(
                   std::bind(&FrankaRobot::joint_position_control_cb, this, std::placeholders::_1, std::placeholders::_2));
@@ -189,6 +204,12 @@ namespace sdu_controllers::hal
     return true;
   }
 
+  bool FrankaRobot::set_joint_torque_ref(const Eigen::Vector<double, ROBOT_DOF>& tau_d)
+  {
+    joint_torque_ref_ = tau_d;
+    return true;
+  }
+
   bool FrankaRobot::set_joint_pos_ref(const Eigen::Vector<double, ROBOT_DOF>& q)
   {
     // Check if the control mode has been set, otherwise set it to JOINT_POSITION.
@@ -231,20 +252,27 @@ namespace sdu_controllers::hal
 
   bool FrankaRobot::move_joints(
       const Eigen::Vector<double, ROBOT_DOF>& q,
-      double velocity,
-      double acceleration,
-      bool asynchronous)
+      double speed_factor)
   {
-    // std::vector<double> q_vec(q.begin(), q.end());
-    // return rtde_control_->moveJ(q_vec, velocity, acceleration, asynchronous);
+    try
+    {
+      std::array<double, 7> q_goal;
+      std::move(q.begin(), q.end(), q_goal.begin());
+      MotionGenerator motion_generator(speed_factor, q_goal);
+      robot_.control(motion_generator);
+    }
+    catch (const franka::Exception& e)
+    {
+      std::cout << e.what() << std::endl;
+      return false;
+    }
+    return true;
   }
 
   bool FrankaRobot::move_cartesian(const math::Pose& pose, double velocity, double acceleration, bool asynchronous)
   {
-    // Eigen::Vector3d pos = pose.get_position();
-    // Eigen::Vector3d rotvec = pose.to_angle_axis_vector();
-    // std::vector<double> pose_rotvec{ pos[0], pos[1], pos[2], rotvec[0], rotvec[1], rotvec[2] };
-    // return rtde_control_->moveL(pose_rotvec, velocity, acceleration, asynchronous);
+    // TODO: Implement simple cartesian movement (generate_cartesian_pose_motion.cpp in libfranka)
+    return false;
   }
 
   Eigen::VectorXd FrankaRobot::get_joint_torques()
@@ -276,6 +304,137 @@ namespace sdu_controllers::hal
     std::array<double, 6> tcp_wrench = robot_state_.O_F_ext_hat_K;
     std::vector<double> tcp_wrench_vec(tcp_wrench.begin(), tcp_wrench.end());
     return tcp_wrench_vec;
+  }
+
+  /*  Franka MotionGenerator */
+
+  MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal) : q_goal_(q_goal.data())
+  {
+    dq_max_ *= speed_factor;
+    ddq_max_start_ *= speed_factor;
+    ddq_max_goal_ *= speed_factor;
+    dq_max_sync_.setZero();
+    q_start_.setZero();
+    delta_q_.setZero();
+    t_1_sync_.setZero();
+    t_2_sync_.setZero();
+    t_f_sync_.setZero();
+    q_1_.setZero();
+  }
+
+  bool MotionGenerator::calculate_desired_values(double t, Vector7d* delta_q_d) const
+  {
+    Vector7i sign_delta_q;
+    sign_delta_q << delta_q_.cwiseSign().cast<int>();
+    Vector7d t_d = t_2_sync_ - t_1_sync_;
+    Vector7d delta_t_2_sync = t_f_sync_ - t_2_sync_;
+    std::array<bool, 7> joint_motion_finished{};
+
+    for (size_t i = 0; i < 7; i++)
+    {
+      if (std::abs(delta_q_[i]) < k_delta_q_motion_finished)
+      {
+        (*delta_q_d)[i] = 0;
+        joint_motion_finished[i] = true;
+      }
+      else
+      {
+        if (t < t_1_sync_[i])
+        {
+          (*delta_q_d)[i] = -1.0 / std::pow(t_1_sync_[i], 3.0) * dq_max_sync_[i] * sign_delta_q[i] *
+                            (0.5 * t - t_1_sync_[i]) * std::pow(t, 3.0);
+        }
+        else if (t >= t_1_sync_[i] && t < t_2_sync_[i])
+        {
+          (*delta_q_d)[i] = q_1_[i] + (t - t_1_sync_[i]) * dq_max_sync_[i] * sign_delta_q[i];
+        }
+        else if (t >= t_2_sync_[i] && t < t_f_sync_[i])
+        {
+          (*delta_q_d)[i] = delta_q_[i] + 0.5 *
+                                              (1.0 / std::pow(delta_t_2_sync[i], 3.0) *
+                                                   (t - t_1_sync_[i] - 2.0 * delta_t_2_sync[i] - t_d[i]) *
+                                                   std::pow((t - t_1_sync_[i] - t_d[i]), 3.0) +
+                                               (2.0 * t - 2.0 * t_1_sync_[i] - delta_t_2_sync[i] - 2.0 * t_d[i])) *
+                                              dq_max_sync_[i] * sign_delta_q[i];
+        }
+        else
+        {
+          (*delta_q_d)[i] = delta_q_[i];
+          joint_motion_finished[i] = true;
+        }
+      }
+    }
+    return std::all_of(joint_motion_finished.cbegin(), joint_motion_finished.cend(), [](bool x) { return x; });
+  }
+
+  void MotionGenerator::calculate_synchronized_values()
+  {
+    Vector7d dq_max_reach(dq_max_);
+    Vector7d t_f = Vector7d::Zero();
+    Vector7d delta_t_2 = Vector7d::Zero();
+    Vector7d t_1 = Vector7d::Zero();
+    Vector7d delta_t_2_sync = Vector7d::Zero();
+    Vector7i sign_delta_q;
+    sign_delta_q << delta_q_.cwiseSign().cast<int>();
+
+    for (size_t i = 0; i < 7; i++)
+    {
+      if (std::abs(delta_q_[i]) > k_delta_q_motion_finished)
+      {
+        if (std::abs(delta_q_[i]) < (3.0 / 4.0 * (std::pow(dq_max_[i], 2.0) / ddq_max_start_[i]) +
+                                     3.0 / 4.0 * (std::pow(dq_max_[i], 2.0) / ddq_max_goal_[i])))
+        {
+          dq_max_reach[i] = std::sqrt(
+              4.0 / 3.0 * delta_q_[i] * sign_delta_q[i] * (ddq_max_start_[i] * ddq_max_goal_[i]) /
+              (ddq_max_start_[i] + ddq_max_goal_[i]));
+        }
+        t_1[i] = 1.5 * dq_max_reach[i] / ddq_max_start_[i];
+        delta_t_2[i] = 1.5 * dq_max_reach[i] / ddq_max_goal_[i];
+        t_f[i] = t_1[i] / 2.0 + delta_t_2[i] / 2.0 + std::abs(delta_q_[i]) / dq_max_reach[i];
+      }
+    }
+    double max_t_f = t_f.maxCoeff();
+    for (size_t i = 0; i < 7; i++)
+    {
+      if (std::abs(delta_q_[i]) > k_delta_q_motion_finished)
+      {
+        double a = 1.5 / 2.0 * (ddq_max_goal_[i] + ddq_max_start_[i]);
+        double b = -1.0 * max_t_f * ddq_max_goal_[i] * ddq_max_start_[i];
+        double c = std::abs(delta_q_[i]) * ddq_max_goal_[i] * ddq_max_start_[i];
+        double delta = b * b - 4.0 * a * c;
+        if (delta < 0.0)
+        {
+          delta = 0.0;
+        }
+        dq_max_sync_[i] = (-1.0 * b - std::sqrt(delta)) / (2.0 * a);
+        t_1_sync_[i] = 1.5 * dq_max_sync_[i] / ddq_max_start_[i];
+        delta_t_2_sync[i] = 1.5 * dq_max_sync_[i] / ddq_max_goal_[i];
+        t_f_sync_[i] = (t_1_sync_)[i] / 2.0 + delta_t_2_sync[i] / 2.0 + std::abs(delta_q_[i] / dq_max_sync_[i]);
+        t_2_sync_[i] = (t_f_sync_)[i] - delta_t_2_sync[i];
+        q_1_[i] = (dq_max_sync_)[i] * sign_delta_q[i] * (0.5 * (t_1_sync_)[i]);
+      }
+    }
+  }
+
+  franka::JointPositions MotionGenerator::operator()(const franka::RobotState& robot_state, franka::Duration period)
+  {
+    time_ += period.toSec();
+
+    if (time_ == 0.0)
+    {
+      q_start_ = Vector7d(robot_state.q.data());
+      delta_q_ = q_goal_ - q_start_;
+      calculate_synchronized_values();
+    }
+
+    Vector7d delta_q_d;
+    bool motion_finished = calculate_desired_values(time_, &delta_q_d);
+
+    std::array<double, 7> joint_positions;
+    Eigen::VectorXd::Map(&joint_positions[0], 7) = (q_start_ + delta_q_d);
+    franka::JointPositions output(joint_positions);
+    output.motion_finished = motion_finished;
+    return output;
   }
 
 };  // namespace sdu_controllers::hal
