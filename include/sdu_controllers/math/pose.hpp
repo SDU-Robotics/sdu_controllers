@@ -5,13 +5,29 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <array>
+#include <iomanip>
+#include <iostream>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace sdu_controllers::math
 {
+  /**
+   * @brief Format options for pose string representation.
+   */
+  enum class PoseFormat
+  {
+    Default,    ///< Basic format: Position [x, y, z], Orientation [w, x, y, z]
+    Compact,    ///< Compact format: [x, y, z, qw, qx, qy, qz]
+    Verbose,    ///< Verbose format with labels and separate lines
+    Euler,      ///< Position and Euler angles (default ZYZ)
+    AngleAxis,  ///< Position and angle-axis representation
+    Matrix      ///< Full 4x4 transformation matrix
+  };
+
   /**
    * @brief A class representing a 3D pose with position and orientation.
    *
@@ -266,9 +282,144 @@ namespace sdu_controllers::math
       return to_transform();
     }
 
+    /**
+     * @brief Format the pose as a string according to the specified format.
+     *
+     * @param format The format to use for string representation
+     * @param precision The number of decimal places to use for floating-point values
+     * @return A formatted string representation of the pose
+     */
+    std::string to_string(PoseFormat format = PoseFormat::Default, int precision = 6) const
+    {
+      std::ostringstream oss;
+      oss << std::fixed << std::setprecision(precision);
+
+      switch (format)
+      {
+        case PoseFormat::Compact:
+        {
+          oss << "[" << position_.x() << ", " << position_.y() << ", " << position_.z() << ", " << orientation_.w() << ", "
+              << orientation_.x() << ", " << orientation_.y() << ", " << orientation_.z() << "]";
+          break;
+        }
+        case PoseFormat::Verbose:
+        {
+          oss << "Pose:\n"
+              << "  Position:\n"
+              << "    x: " << position_.x() << "\n"
+              << "    y: " << position_.y() << "\n"
+              << "    z: " << position_.z() << "\n"
+              << "  Orientation (quaternion):\n"
+              << "    w: " << orientation_.w() << "\n"
+              << "    x: " << orientation_.x() << "\n"
+              << "    y: " << orientation_.y() << "\n"
+              << "    z: " << orientation_.z();
+          break;
+        }
+        case PoseFormat::Euler:
+        {
+          Eigen::Vector3d euler = to_euler_angles("ZYZ");
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
+              << "Euler ZYZ [" << euler.x() << ", " << euler.y() << ", " << euler.z() << "] rad";
+          break;
+        }
+        case PoseFormat::AngleAxis:
+        {
+          Eigen::Vector3d aa = to_angle_axis_vector();
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
+              << "Angle-Axis [" << aa.x() << ", " << aa.y() << ", " << aa.z() << "]";
+          break;
+        }
+        case PoseFormat::Matrix:
+        {
+          Eigen::Affine3d transform = to_transform();
+          oss << "Transform Matrix:\n";
+          for (int i = 0; i < 4; ++i)
+          {
+            oss << "  [";
+            for (int j = 0; j < 4; ++j)
+            {
+              oss << transform.matrix()(i, j);
+              if (j < 3)
+                oss << ", ";
+            }
+            oss << "]\n";
+          }
+          break;
+        }
+        case PoseFormat::Default:
+        default:
+        {
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
+              << "Orientation [" << orientation_.w() << ", " << orientation_.x() << ", " << orientation_.y() << ", "
+              << orientation_.z() << "]";
+          break;
+        }
+      }
+      return oss.str();
+    };
+
+    /**
+     * @brief Helper class to set the format for printing poses.
+     *
+     * Usage: std::cout << PoseIOFormat(PoseFormat::Verbose, 4) << myPose;
+     */
+    class PoseIOFormat
+    {
+     public:
+      /**
+       * @brief Constructor to set formatting options.
+       *
+       * @param format The format to use for Pose output
+       * @param precision The number of decimal places to use
+       */
+      PoseIOFormat(PoseFormat format = PoseFormat::Default, int precision = 6) : format_(format), precision_(precision)
+      {
+      }
+
+      PoseFormat format() const
+      {
+        return format_;
+      }
+      int precision() const
+      {
+        return precision_;
+      }
+
+     private:
+      PoseFormat format_;
+      int precision_;
+    };
+
+    /**
+     * @brief Set the global pose IO format.
+     *
+     * @param format The new format to use
+     * @return The previous format
+     */
+    PoseIOFormat set_pose_io_format(const PoseIOFormat& format)
+    {
+      PoseIOFormat old = g_pose_io_format_;
+      g_pose_io_format_ = format;
+      return old;
+    }
+
+    /**
+     * @brief Get the current global pose IO format.
+     *
+     * @return The current format
+     */
+    PoseIOFormat get_pose_io_format()
+    {
+      return g_pose_io_format_;
+    }
+
    private:
     Eigen::Vector3d position_;        ///< The position component of the pose
     Eigen::Quaterniond orientation_;  ///< The orientation component of the pose (stored in scalar-first format)
+
+    // format state
+    PoseIOFormat g_pose_io_format_ = PoseIOFormat();
   };
 
 }  // namespace sdu_controllers::math

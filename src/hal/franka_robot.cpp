@@ -2,6 +2,7 @@
 #include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
+#include <franka/robot_state.h>
 
 #include <Eigen/Dense>
 #include <array>
@@ -20,6 +21,7 @@ namespace sdu_controllers::hal
     prev_state_ = ControlStates::NONE;
     start_control_ = false;
     stop_control_ = false;
+    motion_finished_ = false;
 
     // Set a default collision behavior, joint impedance and cartesian impedance.
     set_default_behavior();
@@ -49,7 +51,9 @@ namespace sdu_controllers::hal
     robot_state_ = state;
     std::array<double, ROBOT_DOF> q_arr;
     std::move(joint_pos_ref_.begin(), joint_pos_ref_.end(), q_arr.begin());
-    return franka::JointPositions(q_arr);
+    franka::JointPositions joint_positions(q_arr);
+    joint_positions.motion_finished = motion_finished_;
+    return joint_positions;
   }
 
   franka::CartesianPose FrankaRobot::cartesian_pose_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
@@ -59,7 +63,9 @@ namespace sdu_controllers::hal
     Eigen::Affine3d cart_pose = cartesian_pose_ref_.to_transform();
     std::array<double, 16> array;
     std::copy(cart_pose.data(), cart_pose.data() + array.size(), array.begin());
-    return { array };
+    franka::CartesianPose franka_cart_pose(array);
+    franka_cart_pose.motion_finished = motion_finished_;
+    return franka_cart_pose;
   }
 
   franka::Torques FrankaRobot::joint_torque_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
@@ -68,7 +74,9 @@ namespace sdu_controllers::hal
     robot_state_ = state;
     std::array<double, 7> tau_d_array{};
     Eigen::VectorXd::Map(&tau_d_array[0], 7) = joint_torque_ref_;
-    return tau_d_array;
+    franka::Torques torques(tau_d_array);
+    torques.motion_finished = motion_finished_;
+    return torques;
   }
 
   void FrankaRobot::step()
@@ -150,26 +158,33 @@ namespace sdu_controllers::hal
           // This code will run once on entry to state
           prev_state_ = curr_state_;
         }
-        // Check if the control should be stopped.
-        if (stop_control_)
-        {
-          // TODO: Check if torques should be zeroed before stopping in the case of TORQUE control.
-          robot_.stop();
-          curr_state_ = ControlStates::STOPPED;
-          break;
-        }
 
-        // Perform control
-        if (control_mode_ == ControlMode::JOINT_POSITION)
-        {
-        }
-        else if (control_mode_ == ControlMode::CARTESIAN_POSE)
-        {
-        }
-        else if (control_mode_ == ControlMode::UNDEFINED)
+        if (control_mode_ == ControlMode::UNDEFINED)
         {
           std::cerr << "Undefined control mode specified transitioning to ERROR state." << std::endl;
           curr_state_ = ControlStates::ERROR;
+          break;
+        }
+
+        // Notice! the control for the different ControlModes is done in the respective callback functions.
+
+        // Check if the control should be stopped
+        if (stop_control_)
+        {
+          if (control_mode_ == ControlMode::JOINT_POSITION || control_mode_ == ControlMode::CARTESIAN_POSE || control_mode_ == ControlMode::TORQUE)
+          {
+            motion_finished_ = true;
+          }
+
+          if (robot_state_.robot_mode == franka::RobotMode::kIdle)
+          {
+            // Reset motion_finished and stop control variable.
+            motion_finished_ = false;
+            stop_control_ = false;
+            robot_.stop();
+            curr_state_ = ControlStates::STOPPED;
+            break;
+          }
         }
 
         break;
@@ -272,6 +287,7 @@ namespace sdu_controllers::hal
   bool FrankaRobot::move_cartesian(const math::Pose& pose, double velocity, double acceleration, bool asynchronous)
   {
     // TODO: Implement simple cartesian movement (generate_cartesian_pose_motion.cpp in libfranka)
+
     return false;
   }
 
