@@ -11,7 +11,7 @@
 
 namespace sdu_controllers::hal
 {
-  FrankaRobot::FrankaRobot(const std::string& ip, double control_frequency) : robot_(ip), robot_model_(robot_.loadModel())
+  FrankaRobot::FrankaRobot(const std::string& ip, double control_frequency) : robot_(ip, franka::RealtimeConfig(franka::RealtimeConfig::kIgnore)), robot_model_(robot_.loadModel())
   {
     control_frequency_ = control_frequency;
     dt_ = 1.0 / control_frequency_;
