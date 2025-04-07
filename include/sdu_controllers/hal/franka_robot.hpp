@@ -232,6 +232,7 @@ namespace sdu_controllers::hal
     ControlStates prev_state_;
     bool start_control_;
     bool stop_control_;
+    bool motion_finished_;
     Eigen::Vector<double, ROBOT_DOF> joint_pos_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_vel_ref_;
     math::Pose cartesian_pose_ref_;
