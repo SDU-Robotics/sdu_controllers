@@ -9,12 +9,12 @@
 #include <franka/robot_state.h>
 #include <franka/duration.h>
 
-
 #include <Eigen/Dense>
 #include <sdu_controllers/hal/robot.hpp>
 #include <sdu_controllers/math/pose.hpp>
 #include <string>
 #include <vector>
+#include <thread>
 
 namespace sdu_controllers::hal
 {
@@ -82,6 +82,11 @@ namespace sdu_controllers::hal
      * Sets a default collision behavior, joint impedance and Cartesian impedance.
      */
     void set_default_behavior();
+    
+    /**
+     * Control function that runs in the control_thread_.
+     */
+    void control();
 
     /**
      * Callback function for the joint position control loop.
@@ -238,6 +243,7 @@ namespace sdu_controllers::hal
     math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> cartesian_vel_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_torque_ref_;
+    std::thread control_thread_;
   };
 
   /**

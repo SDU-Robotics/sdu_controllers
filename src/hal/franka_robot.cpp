@@ -12,7 +12,9 @@
 
 namespace sdu_controllers::hal
 {
-  FrankaRobot::FrankaRobot(const std::string& ip, double control_frequency) : robot_(ip, franka::RealtimeConfig(franka::RealtimeConfig::kIgnore)), robot_model_(robot_.loadModel())
+  FrankaRobot::FrankaRobot(const std::string& ip, double control_frequency)
+      : robot_(ip, franka::RealtimeConfig(franka::RealtimeConfig::kIgnore)),
+        robot_model_(robot_.loadModel())
   {
     control_frequency_ = control_frequency;
     dt_ = 1.0 / control_frequency_;
@@ -45,38 +47,48 @@ namespace sdu_controllers::hal
     robot_.setCartesianImpedance({ { 3000, 3000, 3000, 300, 300, 300 } });
   }
 
-  franka::JointPositions FrankaRobot::joint_position_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
+  void FrankaRobot::control()
   {
-    // Update the robot state
-    robot_state_ = state;
-    std::array<double, ROBOT_DOF> q_arr;
-    std::move(joint_pos_ref_.begin(), joint_pos_ref_.end(), q_arr.begin());
-    franka::JointPositions joint_positions(q_arr);
-    joint_positions.motion_finished = motion_finished_;
-    return joint_positions;
-  }
-
-  franka::CartesianPose FrankaRobot::cartesian_pose_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
-  {
-    // Update the robot state
-    robot_state_ = state;
-    Eigen::Affine3d cart_pose = cartesian_pose_ref_.to_transform();
-    std::array<double, 16> array;
-    std::copy(cart_pose.data(), cart_pose.data() + array.size(), array.begin());
-    franka::CartesianPose franka_cart_pose(array);
-    franka_cart_pose.motion_finished = motion_finished_;
-    return franka_cart_pose;
-  }
-
-  franka::Torques FrankaRobot::joint_torque_control_cb(const franka::RobotState& state, franka::Duration /*period*/)
-  {
-    // Update the robot state
-    robot_state_ = state;
-    std::array<double, 7> tau_d_array{};
-    Eigen::VectorXd::Map(&tau_d_array[0], 7) = joint_torque_ref_;
-    franka::Torques torques(tau_d_array);
-    torques.motion_finished = motion_finished_;
-    return torques;
+    if (control_mode_ == ControlMode::TORQUE)
+    {
+      robot_.control(
+          [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques
+          {
+            robot_state_ = robot_state;
+            std::array<double, 7> tau_d_array{};
+            Eigen::VectorXd::Map(&tau_d_array[0], 7) = joint_torque_ref_;
+            franka::Torques torques(tau_d_array);
+            torques.motion_finished = motion_finished_;
+            return torques;
+          });
+    }
+    else if (control_mode_ == ControlMode::JOINT_POSITION)
+    {
+      robot_.control(
+          [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::JointPositions
+          {
+            robot_state_ = robot_state;
+            std::array<double, ROBOT_DOF> q_arr;
+            std::move(joint_pos_ref_.begin(), joint_pos_ref_.end(), q_arr.begin());
+            franka::JointPositions joint_positions(q_arr);
+            joint_positions.motion_finished = motion_finished_;
+            return joint_positions;
+          });
+    }
+    else if (control_mode_ == ControlMode::CARTESIAN_POSE)
+    {
+      robot_.control(
+          [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose
+          {
+            robot_state_ = robot_state;
+            Eigen::Affine3d cart_pose = cartesian_pose_ref_.to_transform();
+            std::array<double, 16> array;
+            std::copy(cart_pose.data(), cart_pose.data() + array.size(), array.begin());
+            franka::CartesianPose franka_cart_pose(array);
+            franka_cart_pose.motion_finished = motion_finished_;
+            return franka_cart_pose;
+          });
+    }
   }
 
   void FrankaRobot::step()
@@ -126,21 +138,7 @@ namespace sdu_controllers::hal
         {
           try
           {
-            if (control_mode_ == ControlMode::TORQUE)
-            {
-              robot_.control(
-                  std::bind(&FrankaRobot::joint_torque_control_cb, this, std::placeholders::_1, std::placeholders::_2));
-            }
-            else if (control_mode_ == ControlMode::JOINT_POSITION)
-            {
-              robot_.control(
-                  std::bind(&FrankaRobot::joint_position_control_cb, this, std::placeholders::_1, std::placeholders::_2));
-            }
-            else if (control_mode_ == ControlMode::CARTESIAN_POSE)
-            {
-              robot_.control(
-                  std::bind(&FrankaRobot::cartesian_pose_control_cb, this, std::placeholders::_1, std::placeholders::_2));
-            }
+            control_thread_ = std::thread(&FrankaRobot::control, this);
             curr_state_ = ControlStates::RUNNING;
           }
           catch (const franka::Exception& e)
@@ -171,7 +169,8 @@ namespace sdu_controllers::hal
         // Check if the control should be stopped
         if (stop_control_)
         {
-          if (control_mode_ == ControlMode::JOINT_POSITION || control_mode_ == ControlMode::CARTESIAN_POSE || control_mode_ == ControlMode::TORQUE)
+          if (control_mode_ == ControlMode::JOINT_POSITION || control_mode_ == ControlMode::CARTESIAN_POSE ||
+              control_mode_ == ControlMode::TORQUE)
           {
             motion_finished_ = true;
           }
@@ -182,6 +181,12 @@ namespace sdu_controllers::hal
             motion_finished_ = false;
             stop_control_ = false;
             robot_.stop();
+
+            // join the control thread
+            if (control_thread_.joinable())
+            {
+              control_thread_.join();
+            }
             curr_state_ = ControlStates::STOPPED;
             break;
           }
@@ -204,19 +209,36 @@ namespace sdu_controllers::hal
   bool FrankaRobot::start_control()
   {
     start_control_ = true;
-    return true;
+    step();
+    if (curr_state_ == ControlStates::RUNNING)
+      return true;
+    else
+      return false;
   }
 
   bool FrankaRobot::stop_control()
   {
     stop_control_ = true;
-    return true;
+    step();
+    if (curr_state_ == ControlStates::STOPPED)
+    {
+      return true;
+    }
+    else
+    {
+      std::cerr << "Was unable to stop the control!" << std::endl;
+      return false;
+    }
   }
 
   bool FrankaRobot::set_control_mode(ControlMode control_mode)
   {
     control_mode_ = control_mode;
-    return true;
+    step();
+    if (curr_state_ == ControlStates::STOPPED)
+      return true;
+    else
+      return false;
   }
 
   bool FrankaRobot::set_joint_torque_ref(const Eigen::Vector<double, ROBOT_DOF>& tau_d)
@@ -265,9 +287,7 @@ namespace sdu_controllers::hal
     return true;
   }
 
-  bool FrankaRobot::move_joints(
-      const Eigen::Vector<double, ROBOT_DOF>& q,
-      double speed_factor)
+  bool FrankaRobot::move_joints(const Eigen::Vector<double, ROBOT_DOF>& q, double speed_factor)
   {
     try
     {

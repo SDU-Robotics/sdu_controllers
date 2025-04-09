@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     //start_pose_vec = {3.06890567e-01, -7.42545463e-17, 4.86882052e-01, 4.32978028e-17, 1.00000000e+00, -1.11022302e-16, -3.06161700e-17};
     //Pose start_pose(start_pose_vec);
 
-    Pose start_pose = robot.get_cartesian_tcp_pose();
+    /*Pose start_pose = robot.get_cartesian_tcp_pose();
     std::vector<double> x_d_init_vec(6);
     for (Index i = 0; i < x_d_init_vec.size(); i++)
     {
@@ -63,11 +63,12 @@ int main(int argc, char* argv[])
     Pose target_pose(x_d_init_vec);
     double total_time = 3.0;
     double acceleration_time = 0.5;
-    std::vector<Pose> init_trajectory = generate_trapezoidal_trajectory(start_pose, target_pose, total_time, acceleration_time);
-    
+    std::vector<Pose> init_trajectory = generate_trapezoidal_trajectory(start_pose, target_pose, total_time, acceleration_time);*/
+
+    robot.set_control_mode(FrankaRobot::ControlMode::CARTESIAN_POSE);
     robot.start_control();
 
-    for (const auto& pose : init_trajectory)
+    /*for (const auto& pose : init_trajectory)
     {
       auto t_cycle_start = steady_clock::now();
       robot.set_cartesian_pose_ref(pose);
@@ -79,7 +80,7 @@ int main(int argc, char* argv[])
       {
         std::this_thread::sleep_for(std::chrono::duration<double>(dt - t_app_duration.count()));
       }
-    }
+      }*/
 
     // Control loop
     for (const std::vector<double> &pose : input_trajectory)

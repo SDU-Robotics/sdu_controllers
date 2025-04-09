@@ -3,10 +3,9 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import math
-from telnetlib import AO
 
-def get_circle_target(timestep, radius=0.075, freq=0.33):
-    delta_x = radius * np.cos((2 * np.pi * freq * timestep))
+def get_circle_target(timestep, radius=0.075, freq=0.1):
+    delta_x = radius - radius * np.cos((2 * np.pi * freq * timestep))
     delta_y = radius * np.sin((2 * np.pi * freq * timestep))
     return delta_x, delta_y
 
