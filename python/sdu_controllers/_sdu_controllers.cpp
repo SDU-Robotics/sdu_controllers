@@ -3,7 +3,9 @@
 #include <nanobind/stl/shared_ptr.h>
 
 #include <sdu_controllers/controllers/pd_controller.hpp>
+#include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
@@ -60,6 +62,17 @@ namespace sdu_controllers
         .def("get_output", &controllers::PDController::get_output)
         .def("reset", &controllers::PDController::reset);
 
+    nb::class_<controllers::OperationalSpaceController>(m, "OperationalSpaceController")
+        .def(
+            nb::init<Eigen::MatrixXd, Eigen::MatrixXd, std::shared_ptr<models::RobotModel>>(),
+            nb::arg("Kp"), 
+            nb::arg("Kd"), 
+            nb::arg("robot_model")
+        )
+        .def("step", &controllers::OperationalSpaceController::step)
+        .def("get_output", &controllers::OperationalSpaceController::get_output)
+        .def("reset", &controllers::OperationalSpaceController::reset);
+
     nb::class_<controllers::AdmittanceControllerPosition>(m, "AdmittanceControllerPosition")
         .def(nb::init<const double>(), nb::arg("frequency"))
         .def("step", &controllers::AdmittanceControllerPosition::step)
@@ -81,6 +94,9 @@ namespace sdu_controllers
     nb::class_<math::ForwardDynamics>(m, "ForwardDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>())
         .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics);
+
+    // kinematics
+    m.def("forward_kinematics", &kinematics::forward_kinematics); 
   }
 
 }  // namespace sdu_controllers
