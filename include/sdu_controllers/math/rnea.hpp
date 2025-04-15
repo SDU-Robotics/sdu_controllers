@@ -20,6 +20,10 @@ namespace sdu_controllers::math
       Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
         const Eigen::VectorXd &tau, const Eigen::VectorXd &he);
 
+      Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
+      Eigen::VectorXd velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
+      Eigen::VectorXd gravity(const Eigen::VectorXd &q);
+
       void set_z0(const Eigen::Vector3d &z0);
 
     private:
@@ -27,9 +31,7 @@ namespace sdu_controllers::math
 
       void backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);
 
-      Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
-      Eigen::VectorXd velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-      Eigen::VectorXd gravity(const Eigen::VectorXd &q);
+      
 
       std::shared_ptr<models::RobotModel> robot_model;
 
