@@ -6,6 +6,7 @@ from sdu_controllers._sdu_controllers import PDController
 from sdu_controllers._sdu_controllers import AdmittanceControllerPosition
 from sdu_controllers._sdu_controllers import InverseDynamicsJointSpace
 from sdu_controllers._sdu_controllers import ForwardDynamics
+from sdu_controllers._sdu_controllers import RecursiveNewtonEuler
 
 # Export the version given in project metadata
 from importlib import metadata

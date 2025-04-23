@@ -1,11 +1,13 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/vector.h>
 
-#include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/math/rnea.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
@@ -41,8 +43,7 @@ namespace sdu_controllers
         .def("get_joint_acc_bounds", &models::URRobotModel::get_joint_acc_bounds)
         .def("get_joint_torque_bounds", &models::URRobotModel::get_joint_torque_bounds);
 
-    nb::class_<models::BreedingBlanketHandlingRobotModel, models::RobotModel>(
-        m, "BreedingBlanketHandlingRobotModel")
+    nb::class_<models::BreedingBlanketHandlingRobotModel, models::RobotModel>(m, "BreedingBlanketHandlingRobotModel")
         .def(nb::init<>())
         .def("get_inertia_matrix", &models::BreedingBlanketHandlingRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::BreedingBlanketHandlingRobotModel::get_coriolis)
@@ -68,10 +69,10 @@ namespace sdu_controllers
         .def("set_mass_matrix_position", &controllers::AdmittanceControllerPosition::set_mass_matrix_position)
         .def("set_mass_matrix_orientation", &controllers::AdmittanceControllerPosition::set_mass_matrix_orientation)
         .def("set_stiffness_matrix_position", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_position)
-        .def("set_stiffness_matrix_orientation", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_orientation)
+        .def(
+            "set_stiffness_matrix_orientation", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_orientation)
         .def("set_damping_matrix_position", &controllers::AdmittanceControllerPosition::set_damping_matrix_position)
-        .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation)
-    ;
+        .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation);
 
     // math
     nb::class_<math::InverseDynamicsJointSpace>(m, "InverseDynamicsJointSpace")
@@ -81,6 +82,51 @@ namespace sdu_controllers
     nb::class_<math::ForwardDynamics>(m, "ForwardDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>())
         .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics);
+
+    // Recursive Newton-Euler Algorithm
+    nb::module_ eigen = nb::module_::import_("numpy");
+    nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m, "RecursiveNewtonEuler")
+        .def(
+            nb::init<std::shared_ptr<sdu_controllers::models::RobotModel>>(),
+            "Initialize the RecursiveNewtonEuler algorithm with a robot model",
+            nb::arg("robot_model"))
+        .def(
+            "inverse_dynamics",
+            &sdu_controllers::math::RecursiveNewtonEuler::inverse_dynamics,
+            "Compute inverse dynamics: τ = H(q)q̈ + C(q,q̇)q̇ + g(q)",
+            nb::arg("q"),
+            nb::arg("dq"),
+            nb::arg("ddq"),
+            nb::arg("he"))
+        .def(
+            "forward_dynamics",
+            &sdu_controllers::math::RecursiveNewtonEuler::forward_dynamics,
+            "Compute forward dynamics: q̈ = H(q)⁻¹(τ - C(q,q̇)q̇ - g(q))",
+            nb::arg("q"),
+            nb::arg("dq"),
+            nb::arg("tau"),
+            nb::arg("he"))
+        .def(
+            "inertia",
+            &sdu_controllers::math::RecursiveNewtonEuler::inertia,
+            "Compute the joint-space inertia matrix H(q)",
+            nb::arg("q"))
+        .def(
+            "velocity_product",
+            &sdu_controllers::math::RecursiveNewtonEuler::velocityProduct,
+            "Compute the velocity product term C(q,q̇)q̇ from the manipulator equation",
+            nb::arg("q"),
+            nb::arg("dq"))
+        .def(
+            "gravity",
+            &sdu_controllers::math::RecursiveNewtonEuler::gravity,
+            "Compute the gravity forces g(q)",
+            nb::arg("q"))
+        .def(
+            "set_z0",
+            &sdu_controllers::math::RecursiveNewtonEuler::set_z0,
+            "Set the z-axis of the base frame",
+            nb::arg("z0"));
   }
 
 }  // namespace sdu_controllers
