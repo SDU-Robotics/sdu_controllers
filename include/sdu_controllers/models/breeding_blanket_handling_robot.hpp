@@ -5,33 +5,30 @@
 
 class BreedingBlanketRobot
 {
- public:
-  BreedingBlanketRobot();
-  int N;
-  Eigen::Matrix<double, 7, 1> gravity(const Eigen::Matrix<double, 7, 1>& q);
+public:
+	BreedingBlanketRobot();
+	~BreedingBlanketRobot();
+	int N;
+	Eigen::Matrix<double, 7, 1> gravity (const Eigen::Matrix<double, 7, 1> & q);
 
-  Eigen::Matrix<double, 6, 7> jacobian(const Eigen::Matrix<double, 7, 1>& q);
+	Eigen::Matrix<double, 6, 7> jacobian (const Eigen::Matrix<double, 7, 1> & q);
 
-  Eigen::Matrix<double, 6, 7> jacobianDot(const Eigen::Matrix<double, 7, 1>& q, const Eigen::Matrix<double, 7, 1>& dq);
+	Eigen::Matrix<double, 6, 7> jacobianDot (const Eigen::Matrix<double, 7, 1> & q, const Eigen::Matrix<double, 7, 1> & dq);
 
-  Eigen::Matrix<double, 7, 7> inertia(const Eigen::Matrix<double, 7, 1>& q);
+	Eigen::Matrix<double, 7, 7> inertia (const Eigen::Matrix<double, 7, 1> & q);
 
-  Eigen::Matrix<double, 7, 7> coriolis(const Eigen::Matrix<double, 7, 1>& q, const Eigen::Matrix<double, 7, 1>& dq);
+	Eigen::Matrix<double, 7, 7> coriolis (const Eigen::Matrix<double, 7, 1> & q, const Eigen::Matrix<double, 7, 1> & dq);
 
- private:
-  double a5_;
-  double d5_;
-  double d7_;
-  double theta2_;
-  double theta5_;
+	Eigen::Matrix<double, 1, 1> kin (const Eigen::Matrix<double, 7, 1> & q, const Eigen::Matrix<double, 7, 1> & dq);
 
-  std::vector<double> a_;
-  std::vector<double> d_;
-  std::vector<double> alpha_;
-  std::vector<double> theta_;
+private: 
 
-  double m_[7];
-  double com_[7][3];
-  double link_inertia_[7][3][3];
-  double g[3];
+	double a5_;
+  double d1_;
+	double d3_;
+	double d5_;
+	double m_[7];
+	double com_[7][3];
+	double link_inertia_[7][3][3];
+	double g[3];
 };
