@@ -14,7 +14,7 @@ namespace sdu_controllers::controllers
   }
 
   void
-  PIDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &u_ff, 
+  PIDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &u_ff,
                       const VectorXd &q, const VectorXd &dq)
   {
     integral_term += dt * (q_d - q);
