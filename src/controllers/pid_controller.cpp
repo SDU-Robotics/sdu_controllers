@@ -17,7 +17,7 @@ namespace sdu_controllers::controllers
   PIDController::step(const VectorXd &q_d, const VectorXd &dq_d, const VectorXd &u_ff,
                       const VectorXd &q, const VectorXd &dq)
   {
-    integral_term += dt * (q_d - q);
+    integral_term.noalias() += dt * (q_d - q);
 
     u_ = N_ * u_ff + Kp_ * (q_d - q) + Ki_ * integral_term + Kd_ * (dq_d - dq);
   }

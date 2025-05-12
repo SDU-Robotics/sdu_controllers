@@ -10,7 +10,7 @@ Kd = np.array([[5.]])
 Ki = np.array([[20.]])
 N = np.array([[0.]])
 
-dt = 1e-5
+dt = 1e-4
 
 pid = sc.PIDController(Kp, Ki, Kd, N, dt)
 print(pid)
@@ -26,8 +26,8 @@ dq_d = np.zeros([tvec.size,])
 u_ff = np.zeros([tvec.size,])
 
 ddq = np.zeros([tvec.size,])
-dq = np.zeros([tvec.size])
-q = np.zeros([tvec.size])
+dq = np.zeros([tvec.size,])
+q = np.zeros([tvec.size,])
 
 print(tvec.size)
 #

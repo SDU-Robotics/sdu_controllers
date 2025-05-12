@@ -36,10 +36,10 @@ classdef pid_controller < matlab.System
             obj.N_mat = obj.N * eye(obj.num_states);
             
             % Reshaping is necessary when the number of states is only 1.
-            obj.Kp_mat = py.numpy.reshape(py.numpy.asarray(obj.Kp_mat), [int16(obj.num_states), int16(obj.num_states)]);
-            obj.Ki_mat = py.numpy.reshape(py.numpy.asarray(obj.Ki_mat), [int16(obj.num_states), int16(obj.num_states)]);
-            obj.Kd_mat = py.numpy.reshape(py.numpy.asarray(obj.Kd_mat), [int16(obj.num_states), int16(obj.num_states)]);
-            obj.N_mat = py.numpy.reshape(py.numpy.asarray(obj.N_mat), [int16(obj.num_states), int16(obj.num_states)]);
+            % obj.Kp_mat = py.numpy.reshape(py.numpy.asarray(obj.Kp_mat), [int16(obj.num_states), int16(obj.num_states)]);
+            % obj.Ki_mat = py.numpy.reshape(py.numpy.asarray(obj.Ki_mat), [int16(obj.num_states), int16(obj.num_states)]);
+            % obj.Kd_mat = py.numpy.reshape(py.numpy.asarray(obj.Kd_mat), [int16(obj.num_states), int16(obj.num_states)]);
+            % obj.N_mat = py.numpy.reshape(py.numpy.asarray(obj.N_mat), [int16(obj.num_states), int16(obj.num_states)]);
 
             %
             obj.pid_contr = py.sdu_controllers.PIDController(obj.Kp_mat, ...
@@ -48,11 +48,17 @@ classdef pid_controller < matlab.System
 
         function [y] = stepImpl(obj, q_d, dq_d, u_ff, q, dq)
             % Reshaping is necessary when the number of states is only 1.
-            q_d_np = py.numpy.reshape(q_d, [int8(obj.num_states),]);
-            dq_d_np = py.numpy.reshape(dq_d, [int8(obj.num_states),]);
-            u_ff_np = py.numpy.reshape(u_ff, [int8(obj.num_states),]);
-            q_np = py.numpy.reshape(q, [int8(obj.num_states),]);
-            dq_np = py.numpy.reshape(dq, [int8(obj.num_states),]);
+            % q_d_np = py.numpy.reshape(q_d, [int8(obj.num_states),]);
+            % dq_d_np = py.numpy.reshape(dq_d, [int8(obj.num_states),]);
+            % u_ff_np = py.numpy.reshape(u_ff, [int8(obj.num_states),]);
+            % q_np = py.numpy.reshape(q, [int8(obj.num_states),]);
+            % dq_np = py.numpy.reshape(dq, [int8(obj.num_states),]);
+
+            q_d_np = q_d;
+            dq_d_np = dq_d;
+            u_ff_np = u_ff;
+            q_np = q;
+            dq_np = dq;
 
             %
             obj.pid_contr.step(q_d_np, dq_d_np, u_ff_np, q_np, dq_np);

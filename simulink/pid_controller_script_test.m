@@ -14,7 +14,7 @@ pid.sample_time = 1e-4;
 %%
 tvec = 0:pid.sample_time:20;
 
-q_d = sin(0.1 * tvec);
+q_d = sin(0.1 * tvec).' .* ones(length(tvec), pid.num_states);
 dq_d = q_d * 0;
 u_ff = q_d * 0;
 
@@ -28,12 +28,12 @@ for i = 1:length(tvec) - 1
     % i/length(tvec)
 
     % tic
-    y = pid.step(q_d(i), dq_d(i), u_ff(i), q(i), dq(i));
+    y = pid.step(q_d(i, :), dq_d(i, :), u_ff(i, :), q(i, :), dq(i, :));
     % toc
 
-    ddq(i) = 10 * q(i) - 5 * dq(i) + y;
-    dq(i + 1) = dq(i) + pid.sample_time * ddq(i);
-    q(i + 1) = q(i) + pid.sample_time * dq(i);
+    ddq(i, :) = 10 * q(i, :) - 5 * dq(i, :) + y;
+    dq(i + 1, :) = dq(i, :) + pid.sample_time * ddq(i, :);
+    q(i + 1, :) = q(i, :) + pid.sample_time * dq(i, :);
 end
 toc
 
