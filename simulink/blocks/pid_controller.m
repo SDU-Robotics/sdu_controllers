@@ -1,5 +1,5 @@
 classdef pid_controller < matlab.System
-    % PDController
+    % PID Controller
     %
     % This template includes the minimum set of functions required
     % to define a System object.

@@ -5,10 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ##
-Kp = np.array([[20.]])
-Kd = np.array([[5.]])
-Ki = np.array([[20.]])
-N = np.array([[0.]])
+# Kp = np.array([[20.]])
+# Kd = np.array([[5.]])
+# Ki = np.array([[20.]])
+# N = np.array([[0.]])
+Kp = 20.
+Kd = 5.
+Ki = 20.
+N = 0.
 
 dt = 1e-4
 
@@ -33,15 +37,15 @@ print(tvec.size)
 #
 t0 = time.time()
 for i in range(tvec.size - 1):
-    q_d_np = np.array([q_d[i]])
-    dq_d_np = np.array([dq_d[i]])
-    u_ff_np = np.array([u_ff[i]])
-    q_np = np.array([q[i]])
-    dq_np = np.array([dq[i]])
+    q_d_np = q_d[i]
+    dq_d_np = dq_d[i]
+    u_ff_np = u_ff[i]
+    q_np = q[i]
+    dq_np = dq[i]
 
     pid.step(q_d_np, dq_d_np, u_ff_np, q_np, dq_np)
     y = pid.get_output()
-    y = np.asarray(y)
+    # y = np.asarray(y)
     # print(y)
 
     ddq[i] = 10 * q[i] - 5 * dq[i] + y
