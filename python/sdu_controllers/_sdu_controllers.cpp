@@ -34,6 +34,7 @@ namespace sdu_controllers
 
     nb::class_<models::URRobotModel, models::RobotModel>(m, "URRobotModel")
         .def(nb::init<>())
+        .def(nb::init<URRobot::RobotType>())
         .def("get_inertia_matrix", &models::URRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::URRobotModel::get_coriolis)
         .def("get_gravity", &models::URRobotModel::get_gravity)

@@ -6,12 +6,16 @@ classdef pid_controller < matlab.System
 
     % Public, tunable properties
     properties
-       Kp = 100.0
-       Ki = 0.0
-       Kd = 2*sqrt(100.0)
-       N = 1
-       num_states = 6
-       sample_time = 1/500.
+        Kp = 100.0
+        Ki = 0.0
+        Kd = 2*sqrt(100.0)
+        N = 1
+        
+        % num_states Number of States
+        num_states = 6
+        
+        % sample_time Sample Time
+        sample_time = 1/500.
     end
 
     % Pre-computed constants or internal states
@@ -34,6 +38,12 @@ classdef pid_controller < matlab.System
             obj.pid_contr = py.sdu_controllers.PIDController(obj.Kp_mat, ...
                 obj.Ki_mat, obj.Kd_mat, obj.N_mat, obj.sample_time);
         end
+
+        % function sts = getSampleTimeImpl(obj)
+        %     disp("test")
+        %     sts = createSampleTime(obj, 'Type', 'Discrete', ...
+        %         'SampleTime', obj.sample_time);
+        % end
 
         function [y] = stepImpl(obj, q_d, dq_d, u_ff, q, dq)
             obj.pid_contr.step(q_d, dq_d, u_ff, q, dq);
