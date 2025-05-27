@@ -1,5 +1,5 @@
 classdef coriolis_matrix < matlab.System
-    % Forward Dynamics
+    % Coriolis matrix
     %
     % This template includes the minimum set of functions required
     % to define a System object.

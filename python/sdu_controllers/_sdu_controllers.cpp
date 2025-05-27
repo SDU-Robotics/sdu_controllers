@@ -5,6 +5,9 @@
 
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/controllers/pid_controller.hpp>
+#include <sdu_controllers/controllers/operational_space_controller.hpp>
+#include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
+
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/math/rnea.hpp>
@@ -12,6 +15,9 @@
 #include <sdu_controllers/models/robot_model.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
+
+#include <sdu_controllers/kinematics/forward_kinematics.hpp>
+
 #include <sdu_controllers/sdu_controllers.hpp>
 
 namespace nb = nanobind;
@@ -79,6 +85,17 @@ namespace sdu_controllers
         .def("set_damping_matrix_position", &controllers::AdmittanceControllerPosition::set_damping_matrix_position)
         .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation);
 
+    // Cartesian motion controller
+    nb::class_<controllers::OperationalSpaceController>(m, "OperationalSpaceController")
+        .def(nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
+            std::shared_ptr<models::RobotModel>>(), 
+            nb::arg("Kp"), nb::arg("Kd"), nb::arg("robot_model"))
+        .def("step", &controllers::OperationalSpaceController::step)
+        .def("get_output", &controllers::OperationalSpaceController::get_output)
+        .def("reset", &controllers::OperationalSpaceController::reset);
+
+    // Force controller, velocity based
+
     // math
     nb::class_<math::InverseDynamicsJointSpace>(m, "InverseDynamicsJointSpace")
         .def(nb::init<std::shared_ptr<models::RobotModel>>())
@@ -132,6 +149,11 @@ namespace sdu_controllers
             &sdu_controllers::math::RecursiveNewtonEuler::set_z0,
             "Set the z-axis of the base frame",
             nb::arg("z0"));
+
+    // Kinematics
+    m.def("forward_kinematics", &sdu_controllers::kinematics::forward_kinematics,
+        nb::arg("q"), nb::arg("robot_model"));
+        
   }
 
 }  // namespace sdu_controllers

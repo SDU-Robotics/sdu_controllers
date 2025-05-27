@@ -1,5 +1,5 @@
 classdef inverse_dynamics < matlab.System
-    % Forward Dynamics
+    % Inverse Dynamics
     %
     % This template includes the minimum set of functions required
     % to define a System object.
@@ -52,7 +52,8 @@ classdef inverse_dynamics < matlab.System
             % internal states.
             tau = obj.inv_dyn.inverse_dynamics(y, q, dq);
             % disp(tau)
-            tau = double(tau).';
+            % tau = double(tau).';
+            tau = reshape(double(tau), obj.links, 1);
             % disp(tau)
         end
 

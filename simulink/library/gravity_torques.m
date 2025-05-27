@@ -1,5 +1,5 @@
 classdef gravity_torques < matlab.System
-    % Forward Dynamics
+    % Gravity torques
     %
     % This template includes the minimum set of functions required
     % to define a System object.

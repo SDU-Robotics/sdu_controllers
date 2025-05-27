@@ -1,5 +1,5 @@
 classdef inertia_matrix < matlab.System
-    % Forward Dynamics
+    % Inertia matrix
     %
     % This template includes the minimum set of functions required
     % to define a System object.

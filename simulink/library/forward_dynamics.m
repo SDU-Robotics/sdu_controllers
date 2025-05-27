@@ -52,7 +52,8 @@ classdef forward_dynamics < matlab.System
             % internal states.
             ddq = obj.fwd_dyn.forward_dynamics(q, dq, tau);
             % disp(ddq)
-            ddq = double(ddq).';
+            % ddq = double(ddq).';
+            ddq = reshape(double(ddq), obj.links, 1);
             % disp(ddq)
         end
 
