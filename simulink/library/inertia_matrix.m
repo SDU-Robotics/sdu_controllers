@@ -1,4 +1,4 @@
-classdef forward_dynamics < matlab.System
+classdef inertia_matrix < matlab.System
     % Forward Dynamics
     %
     % This template includes the minimum set of functions required
@@ -20,7 +20,7 @@ classdef forward_dynamics < matlab.System
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
-        fwd_dyn
+        inv_dyn
     end
 
     methods (Access = protected)
@@ -29,62 +29,62 @@ classdef forward_dynamics < matlab.System
             switch obj.RobotType
                 case obj.all_robot_types(1)
                     obj.robot_model = py.sdu_controllers.BreedingBlanketHandlingRobotModel();
+                    obj.links = 7;
 
                 case obj.all_robot_types(2)
                     obj.robot_model = py.sdu_controllers.URRobotModel(...
                         py.sdu_controllers.RobotType(0) ...
                     );
+                    obj.links = 6;
 
                 case obj.all_robot_types(3)
                     obj.robot_model = py.sdu_controllers.URRobotModel(...
                         py.sdu_controllers.RobotType(1) ...
                     );
+                    obj.links = 6;
             end
 
-            obj.links = double(obj.robot_model.get_dof());
+            % obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
-
-            obj.fwd_dyn = py.sdu_controllers.ForwardDynamics(obj.robot_model);
         end
 
-        function ddq = stepImpl(obj, q, dq, tau)
+        function [B] = stepImpl(obj, q)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
-            ddq = obj.fwd_dyn.forward_dynamics(q, dq, tau);
-            % disp(ddq)
-            ddq = double(ddq).';
-            % disp(ddq)
+            B = obj.robot_model.get_inertia_matrix(q);
+            B = reshape(double(B), obj.links, obj.links);
         end
 
-        function ddq = isOutputFixedSizeImpl(~)
-            ddq = true;
+        function B = isOutputFixedSizeImpl(~)
+            B = true;
         end
 
         function resetImpl(obj)
             % Initialize / reset internal properties
         end
 
-        function ddq = getOutputSizeImpl(obj)
-            ddq = propagatedInputSize(obj, 1);
+        function B = getOutputSizeImpl(obj)
+            qsize = propagatedInputSize(obj, 1);
+            B = [qsize(1), qsize(1)];
         end
 
-        function ddq = getOutputDataTypeImpl(obj)
+        function B = getOutputDataTypeImpl(obj)
             % Return data type for each output port
-            ddq = "double";
+            B = "double";
 
             % Example: inherit data type from first input port
             % out = propagatedInputDataType(obj,1);
         end
 
-        function ddq = isOutputComplexImpl(obj)
+        function B = isOutputComplexImpl(obj)
             % Return true for each output port with complex data
-            ddq = false;
+            B = false;
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Forward Dynamics', obj.RobotType};
+            icon = {'Inertia Matrix', obj.RobotType};
         end
     end
 end

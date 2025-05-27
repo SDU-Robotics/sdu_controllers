@@ -1,4 +1,4 @@
-classdef forward_dynamics < matlab.System
+classdef gravity_torques < matlab.System
     % Forward Dynamics
     %
     % This template includes the minimum set of functions required
@@ -20,7 +20,7 @@ classdef forward_dynamics < matlab.System
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
-        fwd_dyn
+        inv_dyn
     end
 
     methods (Access = protected)
@@ -43,48 +43,44 @@ classdef forward_dynamics < matlab.System
 
             obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
-
-            obj.fwd_dyn = py.sdu_controllers.ForwardDynamics(obj.robot_model);
         end
 
-        function ddq = stepImpl(obj, q, dq, tau)
+        function tau = stepImpl(obj, q)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
-            ddq = obj.fwd_dyn.forward_dynamics(q, dq, tau);
-            % disp(ddq)
-            ddq = double(ddq).';
-            % disp(ddq)
+            tau = obj.robot_model.get_gravity(q);
+            tau = reshape(double(tau), obj.links, 1);
         end
 
-        function ddq = isOutputFixedSizeImpl(~)
-            ddq = true;
+        function tau = isOutputFixedSizeImpl(~)
+            tau = true;
         end
 
         function resetImpl(obj)
             % Initialize / reset internal properties
         end
 
-        function ddq = getOutputSizeImpl(obj)
-            ddq = propagatedInputSize(obj, 1);
+        function tau = getOutputSizeImpl(obj)
+            tau = propagatedInputSize(obj, 1);
         end
 
-        function ddq = getOutputDataTypeImpl(obj)
+        function tau = getOutputDataTypeImpl(obj)
             % Return data type for each output port
-            ddq = "double";
+            tau = "double";
 
             % Example: inherit data type from first input port
             % out = propagatedInputDataType(obj,1);
         end
 
-        function ddq = isOutputComplexImpl(obj)
+        function tau = isOutputComplexImpl(obj)
             % Return true for each output port with complex data
-            ddq = false;
+            tau = false;
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Forward Dynamics', obj.RobotType};
+            icon = {'Gravity Torques', obj.RobotType};
         end
     end
 end

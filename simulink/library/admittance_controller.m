@@ -85,5 +85,9 @@ classdef admittance_controller < matlab.System
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
+
+        function icon = getIconImpl(obj)
+            icon = {'Admittance Controller'};
+        end
     end
 end

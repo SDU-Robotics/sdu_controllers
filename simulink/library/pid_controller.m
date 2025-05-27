@@ -50,6 +50,7 @@ classdef pid_controller < matlab.System
 
             y = double(obj.pid_contr.get_output());
             % y = double(obj.pid_contr.output);
+            y = reshape(y, obj.num_states, 1);
         end
 
         function [y] = isOutputFixedSizeImpl(~)
@@ -82,7 +83,9 @@ classdef pid_controller < matlab.System
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
-        
-
+       
+        function icon = getIconImpl(obj)
+            icon = {'PID Controller'};
+        end
     end
 end

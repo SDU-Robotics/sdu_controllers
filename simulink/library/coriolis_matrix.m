@@ -1,4 +1,4 @@
-classdef forward_dynamics < matlab.System
+classdef coriolis_matrix < matlab.System
     % Forward Dynamics
     %
     % This template includes the minimum set of functions required
@@ -20,7 +20,7 @@ classdef forward_dynamics < matlab.System
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
-        fwd_dyn
+        inv_dyn
     end
 
     methods (Access = protected)
@@ -43,48 +43,45 @@ classdef forward_dynamics < matlab.System
 
             obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
-
-            obj.fwd_dyn = py.sdu_controllers.ForwardDynamics(obj.robot_model);
         end
 
-        function ddq = stepImpl(obj, q, dq, tau)
+        function [C] = stepImpl(obj, q, dq)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
-            ddq = obj.fwd_dyn.forward_dynamics(q, dq, tau);
-            % disp(ddq)
-            ddq = double(ddq).';
-            % disp(ddq)
+            C = obj.robot_model.get_coriolis(q, dq);
+            C = reshape(double(C), obj.links, obj.links);
         end
 
-        function ddq = isOutputFixedSizeImpl(~)
-            ddq = true;
+        function C = isOutputFixedSizeImpl(~)
+            C = true;
         end
 
         function resetImpl(obj)
             % Initialize / reset internal properties
         end
 
-        function ddq = getOutputSizeImpl(obj)
-            ddq = propagatedInputSize(obj, 1);
+        function C = getOutputSizeImpl(obj)
+            qsize = propagatedInputSize(obj, 1);
+            C = [qsize(1), qsize(1)];
         end
 
-        function ddq = getOutputDataTypeImpl(obj)
+        function C = getOutputDataTypeImpl(obj)
             % Return data type for each output port
-            ddq = "double";
+            C = "double";
 
             % Example: inherit data type from first input port
             % out = propagatedInputDataType(obj,1);
         end
 
-        function ddq = isOutputComplexImpl(obj)
+        function C = isOutputComplexImpl(obj)
             % Return true for each output port with complex data
-            ddq = false;
+            C = false;
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Forward Dynamics', obj.RobotType};
+            icon = {'Coriolis Matrix', obj.RobotType};
         end
     end
 end
