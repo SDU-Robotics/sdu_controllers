@@ -29,16 +29,21 @@ namespace sdu_controllers
     m.doc() = "Python Bindings for sdu_controllers";
     m.def("add_one", &add_one, "Increments an integer value");
 
+    nb::module_ m_models = m.def_submodule("models", "Submodule containing robot model definitions.");
+    nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
+    nb::module_ m_math = m.def_submodule("math", "Submodule containing math utility functions.");
+    nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
+
     // enums
-    nb::enum_<URRobot::RobotType>(m, "RobotType")
+    nb::enum_<URRobot::RobotType>(m_models, "RobotType")
         .value("UR3e", URRobot::RobotType::UR3e)
         .value("UR5e", URRobot::RobotType::UR5e)
         .export_values();
 
     // models
-    nb::class_<models::RobotModel>(m, "RobotModel");
+    nb::class_<models::RobotModel>(m_models, "RobotModel");
 
-    nb::class_<models::URRobotModel, models::RobotModel>(m, "URRobotModel")
+    nb::class_<models::URRobotModel, models::RobotModel>(m_models, "URRobotModel")
         .def(nb::init<>())
         .def(nb::init<URRobot::RobotType>())
         .def("get_inertia_matrix", &models::URRobotModel::get_inertia_matrix)
@@ -50,7 +55,7 @@ namespace sdu_controllers
         .def("get_joint_acc_bounds", &models::URRobotModel::get_joint_acc_bounds)
         .def("get_joint_torque_bounds", &models::URRobotModel::get_joint_torque_bounds);
 
-    nb::class_<models::BreedingBlanketHandlingRobotModel, models::RobotModel>(m, "BreedingBlanketHandlingRobotModel")
+    nb::class_<models::BreedingBlanketHandlingRobotModel, models::RobotModel>(m_models, "BreedingBlanketHandlingRobotModel")
         .def(nb::init<>())
         .def("get_inertia_matrix", &models::BreedingBlanketHandlingRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::BreedingBlanketHandlingRobotModel::get_coriolis)
@@ -58,7 +63,7 @@ namespace sdu_controllers
         .def("get_dof", &models::BreedingBlanketHandlingRobotModel::get_dof);
 
     // controllers
-    nb::class_<controllers::PIDController>(m, "PIDController")
+    nb::class_<controllers::PIDController>(m_controllers, "PIDController")
         .def(
             nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
                          const Eigen::MatrixXd &, const Eigen::MatrixXd &,
@@ -72,7 +77,7 @@ namespace sdu_controllers
         .def("get_output", &controllers::PIDController::get_output)
         .def("reset", &controllers::PIDController::reset);
 
-    nb::class_<controllers::AdmittanceControllerPosition>(m, "AdmittanceControllerPosition")
+    nb::class_<controllers::AdmittanceControllerPosition>(m_controllers, "AdmittanceControllerPosition")
         .def(nb::init<const double>(), nb::arg("frequency"))
         .def("step", &controllers::AdmittanceControllerPosition::step)
         .def("get_output", &controllers::AdmittanceControllerPosition::get_output)
@@ -86,7 +91,7 @@ namespace sdu_controllers
         .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation);
 
     // Cartesian motion controller
-    nb::class_<controllers::OperationalSpaceController>(m, "OperationalSpaceController")
+    nb::class_<controllers::OperationalSpaceController>(m_controllers, "OperationalSpaceController")
         .def(nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
             std::shared_ptr<models::RobotModel>>(), 
             nb::arg("Kp"), nb::arg("Kd"), nb::arg("robot_model"))
@@ -97,17 +102,17 @@ namespace sdu_controllers
     // Force controller, velocity based
 
     // math
-    nb::class_<math::InverseDynamicsJointSpace>(m, "InverseDynamicsJointSpace")
+    nb::class_<math::InverseDynamicsJointSpace>(m_math, "InverseDynamicsJointSpace")
         .def(nb::init<std::shared_ptr<models::RobotModel>>())
         .def("inverse_dynamics", &math::InverseDynamicsJointSpace::inverse_dynamics);
 
-    nb::class_<math::ForwardDynamics>(m, "ForwardDynamics")
+    nb::class_<math::ForwardDynamics>(m_math, "ForwardDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>())
         .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics);
 
     // Recursive Newton-Euler Algorithm
     nb::module_ eigen = nb::module_::import_("numpy");
-    nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m, "RecursiveNewtonEuler")
+    nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m_math, "RecursiveNewtonEuler")
         .def(
             nb::init<std::shared_ptr<sdu_controllers::models::RobotModel>>(),
             "Initialize the RecursiveNewtonEuler algorithm with a robot model",
@@ -151,7 +156,7 @@ namespace sdu_controllers
             nb::arg("z0"));
 
     // Kinematics
-    m.def("forward_kinematics", &sdu_controllers::kinematics::forward_kinematics,
+    m_kinematics.def("forward_kinematics", &sdu_controllers::kinematics::forward_kinematics,
         nb::arg("q"), nb::arg("robot_model"));
         
   }

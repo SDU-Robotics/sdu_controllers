@@ -1,26 +1,27 @@
-from sdu_controllers._sdu_controllers import add_one
-from sdu_controllers._sdu_controllers import RobotType
-from sdu_controllers._sdu_controllers import URRobotModel
-from sdu_controllers._sdu_controllers import BreedingBlanketHandlingRobotModel
+#!/usr/bin/env python3
+__all__ = (
+    "models",
+    "controllers",
+    "math",
+    "kinematics"
+)
 
-from sdu_controllers._sdu_controllers import PIDController as PIDController_
-from sdu_controllers._sdu_controllers import AdmittanceControllerPosition
-from sdu_controllers._sdu_controllers import OperationalSpaceController
+import numpy as _np
 
-from sdu_controllers._sdu_controllers import InverseDynamicsJointSpace
-from sdu_controllers._sdu_controllers import ForwardDynamics
-from sdu_controllers._sdu_controllers import RecursiveNewtonEuler
+from ._sdu_controllers import models
+from ._sdu_controllers import controllers
 
-from sdu_controllers._sdu_controllers import forward_kinematics
+from ._sdu_controllers.controllers import PIDController as _original_PIDController
+
+from ._sdu_controllers import math
+from ._sdu_controllers import kinematics
 
 # Export the version given in project metadata
 from importlib import metadata
-import numpy as np
 
 __version__ = metadata.version(__package__)
 
 del metadata
-
 # def one_plus_one():
  #    return add_one(1)
 
@@ -40,25 +41,27 @@ del metadata
 #
 #     return PIDController_(Kp, Ki, Kd, N, dt)
 
-class PIDController(PIDController_):
+class _PIDController(_original_PIDController):
     def __init__(self, Kp, Ki, Kd, N, dt):
         args = [Kp, Ki, Kd, N]
 
         for i, arg in enumerate(args):
             if isinstance(arg, float):
-                args[i] = np.array([[arg]])
+                args[i] = _np.array([[arg]])
 
         super().__init__(*args, dt)
 
-        self.output = np.zeros((args[0].shape[0],))
+        self.output = _np.zeros((args[0].shape[0],))
 
     def step(self, q_d, dq_d, u_ff, q, dq):
         args = [q_d, dq_d, u_ff, q, dq]
 
         for i, arg in enumerate(args):
             if isinstance(arg, float):
-                args[i] = np.array([arg])
+                args[i] = _np.array([arg])
 
         super().step(*args)
 
         self.output = super().get_output()
+
+controllers.PIDController = _PIDController
