@@ -49,7 +49,7 @@ class _PIDController(_original_PIDController):
             if isinstance(arg, float):
                 args[i] = _np.array([[arg]])
 
-        super().__init__(*args, dt)
+        super(_PIDController, self).__init__(*args, dt)
 
         self.output = _np.zeros((args[0].shape[0],))
 

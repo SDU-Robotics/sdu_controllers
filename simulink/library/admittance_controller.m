@@ -18,13 +18,16 @@ classdef admittance_controller < matlab.System
     % Pre-computed constants or internal states
     properties (Access = private)        
         adm_contr
+        sdu_controllers
     end
 
     methods (Access = protected)
         function setupImpl(obj)          
+            obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
+
             frequency = 1/obj.sample_time;
             obj.adm_contr = ...
-                py.sdu_controllers.AdmittanceControllerPosition(frequency);
+                obj.sdu_controllers.controllers.AdmittanceControllerPosition(frequency);
 
             obj.adm_contr.set_mass_matrix_position(obj.Mp);
             obj.adm_contr.set_stiffness_matrix_position(obj.Kp);

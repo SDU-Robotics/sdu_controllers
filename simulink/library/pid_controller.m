@@ -25,6 +25,7 @@ classdef pid_controller < matlab.System
         Kd_mat
         N_mat
         pid_contr
+        sdu_controllers
     end
 
     methods (Access = protected)
@@ -35,7 +36,8 @@ classdef pid_controller < matlab.System
             obj.N_mat = obj.N * eye(obj.num_states);
            
             %
-            obj.pid_contr = py.sdu_controllers.PIDController(obj.Kp_mat, ...
+            obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
+            obj.pid_contr = obj.sdu_controllers.controllers.PIDController(obj.Kp_mat, ...
                 obj.Ki_mat, obj.Kd_mat, obj.N_mat, obj.sample_time);
         end
 

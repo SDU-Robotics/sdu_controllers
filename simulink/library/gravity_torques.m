@@ -20,24 +20,26 @@ classdef gravity_torques < matlab.System
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
-        inv_dyn
+        sdu_controllers
     end
 
     methods (Access = protected)
         function setupImpl(obj)
+            obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
+            
             % Perform one-time calculations, such as computing constants
             switch obj.RobotType
                 case obj.all_robot_types(1)
-                    obj.robot_model = py.sdu_controllers.BreedingBlanketHandlingRobotModel();
+                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
 
                 case obj.all_robot_types(2)
-                    obj.robot_model = py.sdu_controllers.URRobotModel(...
-                        py.sdu_controllers.RobotType(0) ...
+                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
+                        obj.sdu_controllers.models.RobotType(0) ...
                     );
 
                 case obj.all_robot_types(3)
-                    obj.robot_model = py.sdu_controllers.URRobotModel(...
-                        py.sdu_controllers.RobotType(1) ...
+                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
+                        obj.sdu_controllers.models.RobotType(1) ...
                     );
             end
 
