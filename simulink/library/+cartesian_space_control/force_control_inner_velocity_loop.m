@@ -1,12 +1,12 @@
-classdef inverse_dynamics < matlab.System
-    % Inverse Dynamics
-    %
-    % This template includes the minimum set of functions required
-    % to define a System object.
+classdef force_control_inner_velocity_loop < matlab.System
+    % Force Control with Inner Velocity Loop
 
     % Public, tunable properties
     properties
-
+        Kp = eye(6)
+        Kd = eye(6)
+        Md = eye(6)
+        Kf = eye(6)
     end
 
     properties(Nontunable)
@@ -14,19 +14,18 @@ classdef inverse_dynamics < matlab.System
     end
 
     % Pre-computed constants or internal states
-    properties (Access = private)
+    properties (Access = private)        
         robot_model
         links
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
-
-        inv_dyn
-
+        
         sdu_controllers
+        f_contr
     end
 
     methods (Access = protected)
-        function setupImpl(obj)
+        function setupImpl(obj)          
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
 
             % Perform one-time calculations, such as computing constants
@@ -46,51 +45,47 @@ classdef inverse_dynamics < matlab.System
             end
 
             obj.links = double(obj.robot_model.get_dof());
-            % disp(obj.links)
 
-            obj.inv_dyn = obj.sdu_controllers.math.InverseDynamicsJointSpace(obj.robot_model);
+            obj.f_contr = obj.sdu_controllers.controllers.ForceControlInnerVelocityLoop(obj.Kp, obj.Kd, obj.Md, obj.Kf, obj.robot_model);
         end
 
-        function tau = stepImpl(obj, q, dq, y)
-            % Implement algorithm. Calculate y as a function of input u and
-            % internal states.
-            tau = obj.inv_dyn.inverse_dynamics(y, q, dq);
-            % disp(tau)
-            % tau = double(tau).';
-            % tau = reshape(double(tau), obj.links, 1);
-            tau = reshape(double(tau), propagatedInputSize(obj, 1));
-            % disp(tau)
+        function [y] = stepImpl(obj, f_d, f_e, q, dq)
+            obj.f_contr.step(f_d, f_e, q, dq);
+
+            y = double(obj.f_contr.get_output());
+            y = reshape(y, obj.links, 1);
         end
 
-        function tau = isOutputFixedSizeImpl(~)
-            tau = true;
+        function [y] = isOutputFixedSizeImpl(~)
+            y = true;
         end
 
-        function resetImpl(obj)
-            % Initialize / reset internal properties
+        % function resetImpl(obj)
+        %     % Initialize / reset internal properties
+        % end
+
+        function [y] = getOutputSizeImpl(obj)
+            % Example: inherit size from fourth input port
+            y = propagatedInputSize(obj, 4);
         end
 
-        function tau = getOutputSizeImpl(obj)
-            tau = propagatedInputSize(obj, 1);
-        end
-
-        function tau = getOutputDataTypeImpl(obj)
+        function [y] = getOutputDataTypeImpl(obj)
             % Return data type for each output port
-            tau = "double";
+            y = "double";
 
             % Example: inherit data type from first input port
             % out = propagatedInputDataType(obj,1);
         end
 
-        function tau = isOutputComplexImpl(obj)
+        function [y] = isOutputComplexImpl(obj)
             % Return true for each output port with complex data
-            tau = false;
+            y = false;
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Inverse Dynamics', obj.RobotType};
+            icon = {'Force Controller', 'With', 'Inner Velocity Loop', obj.RobotType};
         end
     end
 end

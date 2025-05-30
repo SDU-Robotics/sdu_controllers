@@ -3,19 +3,24 @@
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
 
+// controllers
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/controllers/pid_controller.hpp>
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
 
+// dynamics
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/math/rnea.hpp>
+
+// models
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 
+// kinematics
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 
 #include <sdu_controllers/sdu_controllers.hpp>
@@ -100,6 +105,18 @@ namespace sdu_controllers
         .def("reset", &controllers::OperationalSpaceController::reset);
 
     // Force controller, velocity based
+    nb::class_<controllers::ForceControlInnerVelocityLoop>(m_controllers, "ForceControlInnerVelocityLoop")
+        .def(nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &,
+              const Eigen::MatrixXd &, const Eigen::MatrixXd &,
+            std::shared_ptr<models::RobotModel>>(),
+            nb::arg("Kp"),
+            nb::arg("Kd"),
+            nb::arg("Md"),
+            nb::arg("Kf"),
+            nb::arg("robot_model"))
+        .def("step", &controllers::ForceControlInnerVelocityLoop::step)
+        .def("get_output", &controllers::ForceControlInnerVelocityLoop::get_output)
+        .def("reset", &controllers::ForceControlInnerVelocityLoop::reset);
 
     // math
     nb::class_<math::InverseDynamicsJointSpace>(m_math, "InverseDynamicsJointSpace")
