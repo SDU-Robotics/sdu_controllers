@@ -3,6 +3,8 @@
 #include <sdu_controllers/math/math.hpp>
 #include <utility>
 
+#include <sdu_controllers/math/pseudoinverse.hpp>
+
 using namespace Eigen;
 
 namespace sdu_controllers::controllers
@@ -56,9 +58,13 @@ namespace sdu_controllers::controllers
 
     // TODO: This will only work for a robot with six joints, since you cannot take the inverse
     //       of a 6x7 sized Jacobian.
-    y_ = Jac.lu().solve((Md_.inverse() * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq)));
 
-    std::cout << "y_: " << y_ << std::endl;
+    // MatrixXd JacPinv = Jac.transpose() * (Jac * Jac.transpose()).inverse();
+    MatrixXd JacPinv = sdu_controllers::math::pseudoinverse(Jac);
+
+    y_ = JacPinv * ((Md_.inverse() * (-Kd_ * vel + Kp_ * xf - Md_ * JacDot * dq)));
+
+    // std::cout << "y_: " << y_ << std::endl;
   }
 
   void ForceControlInnerVelocityLoop::reset()
