@@ -33,7 +33,7 @@ int main()
 
   // Initialize robot model and parameters
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
-  double freq = 1000.0;
+  double freq = 500.0;
   double dt = 1.0 / freq;
 
   double Kp_pos_value = 1;
@@ -104,13 +104,18 @@ int main()
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds = robot_model->get_joint_torque_bounds();
 
   // Control loop
-  double t_end = 130; //dt * 5;
+  double t_end = 100; //dt * 5;
 
   for (size_t j = 0; j < t_end / dt; j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
   {
     std::cout << j * dt << std::endl;
 
-    dfd << 0, 0, 0.1 * dt, VectorXd::Zero(3);
+    // dfd << 0, 0, 0.1 * dt, VectorXd::Zero(3);
+    dfd << 0,
+           (M_PI*cos((M_PI * j * dt)/50))/5 * dt,
+           2 * M_PI *cos((M_PI * j * dt)/50) * dt,
+           VectorXd::Zero(3);
+
     fd += dfd;
 
     // Add noise to q and dq
@@ -137,36 +142,36 @@ int main()
     VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
     std::cout << "ddq: " << ddq << std::endl;
 
-    // // Check bounds
-    // for (size_t i = 0; i < ROBOT_DOF; ++i)
-    // {
-    //   if (ddq[i] < joint_acc_bounds.first[i])
-    //     ddq[i] = joint_acc_bounds.first[i];
-    //   else if (ddq[i] > joint_acc_bounds.second[i])
-    //     ddq[i] = joint_acc_bounds.second[i];
-    // }
+    // Check bounds
+    for (size_t i = 0; i < ROBOT_DOF; ++i)
+    {
+      if (ddq[i] < joint_acc_bounds.first[i])
+        ddq[i] = joint_acc_bounds.first[i];
+      else if (ddq[i] > joint_acc_bounds.second[i])
+        ddq[i] = joint_acc_bounds.second[i];
+    }
 
     // integrate to get velocity
     dq += ddq * dt;
 
-    // for (size_t i = 0; i < ROBOT_DOF; ++i)
-    // {
-    //   if (dq[i] < joint_vel_bounds.first[i])
-    //     dq[i] = joint_vel_bounds.first[i];
-    //   else if (dq[i] > joint_vel_bounds.second[i])
-    //     dq[i] = joint_vel_bounds.second[i];
-    // }
+    for (size_t i = 0; i < ROBOT_DOF; ++i)
+    {
+      if (dq[i] < joint_vel_bounds.first[i])
+        dq[i] = joint_vel_bounds.first[i];
+      else if (dq[i] > joint_vel_bounds.second[i])
+        dq[i] = joint_vel_bounds.second[i];
+    }
 
     // integrate to get position
     q += dq * dt;
 
-    // for (size_t i = 0; i < ROBOT_DOF; ++i)
-    // {
-    //   if (q[i] < joint_pos_bounds.first[i])
-    //     q[i] = joint_pos_bounds.first[i];
-    //   else if (q[i] > joint_pos_bounds.second[i])
-    //     q[i] = joint_pos_bounds.second[i];
-    // }
+    for (size_t i = 0; i < ROBOT_DOF; ++i)
+    {
+      if (q[i] < joint_pos_bounds.first[i])
+        q[i] = joint_pos_bounds.first[i];
+      else if (q[i] > joint_pos_bounds.second[i])
+        q[i] = joint_pos_bounds.second[i];
+    }
 
     // std::cout << "q:" << q << std::endl;
     MatrixXd T = kinematics::forward_kinematics(q, robot_model);
