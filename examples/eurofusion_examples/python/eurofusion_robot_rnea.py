@@ -6,12 +6,12 @@ import sdu_controllers
 input_trajectory = genfromtxt('../../data/breeder_trajectory_interpolated.csv', delimiter=',')
 
 # Initialize robot model and parameters
-bb_robot = sdu_controllers.BreedingBlanketHandlingRobotModel()
+bb_robot = sdu_controllers.models.BreedingBlanketHandlingRobotModel()
 frequency = 1000.0
 dt = 1.0 / frequency
 ROBOT_DOF = bb_robot.get_dof()
 
-rnea = sdu_controllers.RecursiveNewtonEuler(bb_robot)
+rnea = sdu_controllers.math.RecursiveNewtonEuler(bb_robot)
 z0 = np.array([0, 0, -1.0])
 rnea.set_z0(z0)
 
