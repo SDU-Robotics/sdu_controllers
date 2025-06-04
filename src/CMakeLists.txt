@@ -28,8 +28,13 @@ if(Franka_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
 endif(Franka_FOUND)
 
+find_package(yaml-cpp)
+
 add_library(sdu_controllers ${sdu_controllers_SOURCES})
-target_link_libraries(sdu_controllers Eigen3::Eigen)
+target_link_libraries(sdu_controllers PUBLIC
+    Eigen3::Eigen
+    yaml-cpp::yaml-cpp
+)
 target_include_directories(
   sdu_controllers PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)

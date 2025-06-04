@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.28)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set a name and a version number for your project:
 project(
   sdu_controllers
-  VERSION 0.0.1
+  VERSION 0.0.2
   LANGUAGES CXX)
 
 # Initialize some default paths
@@ -25,6 +25,14 @@ option(BUILD_TESTING "Enable building of the tests" ON)
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
 option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" OFF)
+
+# Add config library as a path such that we can find parameter files used for the robot models.
+file(REAL_PATH "./config" CONFIG_FILE_PATH)
+file(TO_CMAKE_PATH "${CONFIG_FILE_PATH}" CONFIG_FILE_PATH_NORMALIZED)
+add_definitions(-DCONFIG_FILE_PATH="${CONFIG_FILE_PATH_NORMALIZED}")
+
+include(CMakePrintHelpers)
+cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
