@@ -26,6 +26,19 @@ int main()
   std::cout << "before" << std::endl;
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
   std::cout << "end" << std::endl;
+
+  // Pick up
+  double mass = 1000;
+  Vector3d com = {1., 2., 3.,};
+  Matrix3d inertia;
+  inertia << 1., 2., 3.,
+             2., 4., 5.,
+             3., 5., 6.;
+  inertia << inertia * 1e5;
+
+  robot_model->set_tcp_mass(mass, com, inertia);
+
+  //
   double freq = 1000.0;
   double dt = 1.0 / freq;
 
@@ -71,7 +84,7 @@ int main()
   // Read input trajectory from file
   std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe_bb.csv");
 
-  // Control loopg
+  // Control loop
   for (const std::vector<double>& trajectory_point : input_trajectory)
   {
     // Desired

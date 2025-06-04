@@ -97,6 +97,8 @@ public:
 
   std::vector<Eigen::Matrix3d> get_link_inertia();
 
+  void set_tcp_mass(double &mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia);
+
 private:
   uint16_t dof_{ROBOT_DOF};
 
@@ -116,6 +118,9 @@ private:
   Eigen::Matrix<double, 7, 3> com_;
   std::vector<Eigen::Matrix3d> link_inertia_;
 
+  std::vector<double> m_default_;
+  Eigen::Matrix<double, 7, 3> com_default_;
+  std::vector<Eigen::Matrix3d> link_inertia_default_;
 };
 
 } // namespace sdu_controllers::models

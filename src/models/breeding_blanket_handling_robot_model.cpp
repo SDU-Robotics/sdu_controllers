@@ -107,8 +107,10 @@ namespace sdu_controllers::models
       }
     }
 
-    for (const double & elem : m_)
-      std::cout << elem << std::endl;
+    // Copy m_, com_, link_inertia_ into default vectors.
+    m_default_ = m_;
+    com_default_ = com_;
+    link_inertia_default_ = link_inertia_;
 
     g << 0, 0, -9.82;
   }
@@ -198,6 +200,51 @@ namespace sdu_controllers::models
   std::vector<bool> BreedingBlanketHandlingRobotModel::get_is_joint_revolute() 
   {
     return is_joint_revolute_;
+  }
+
+  void BreedingBlanketHandlingRobotModel::set_tcp_mass(double &mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia)
+  {
+    // self._m[5] = self._m_default[5] + mass
+    // com_new = (numpy.asarray(self._com_default[5]) * self._m_default[5] + numpy.asarray(com) * mass)/self._m[5]
+    // self._com[5] = com_new.tolist()
+    // r = -numpy.asarray(self._com_default[5]) + com_new
+    // offset_matrix_a = numpy.asarray([[r[1] ** 2 + r[2] ** 2, -r[0]*r[1],             -r[0]*r[2]],
+    //                                  [-r[0]*r[1],             r[0] ** 2 + r[2] ** 2, -r[1]*r[2]],
+    //                                  [-r[0]*r[2],            -r[1]*r[2],              r[0] ** 2 + r[1] ** 2]])
+    // r = -numpy.asarray(com) + com_new
+    // offset_matrix_b = numpy.asarray([[r[1] ** 2 + r[2] ** 2, -r[0]*r[1],             -r[0]*r[2]],
+    //                                  [-r[0]*r[1],             r[0] ** 2 + r[2] ** 2, -r[1]*r[2]],
+    //                                  [-r[0]*r[2],            -r[1]*r[2],              r[0] ** 2 + r[1] ** 2]])
+    // new_inertia = numpy.asarray(self._inertia_default[5]) + self._m_default[5] * offset_matrix_a +\
+    //               numpy.asarray(inertia) + mass * offset_matrix_b
+    // self._inertia[5] = new_inertia.tolist()
+
+    int N = get_dof();
+    m_[N - 1] = m_default_[N - 1] + mass;
+
+    Eigen::Vector3d com_default_N = com_default_(N - 1, Eigen::all);
+    Eigen::Vector3d com_new = (com_default_N * m_default_[N - 1] + com * mass) / m_[N - 1];
+    com_(N - 1, Eigen::all) = com_new;
+
+    Eigen::Vector3d r;
+    r << -com_default_N + com_new;
+
+    Eigen::Matrix3d offset_matrix_a, offset_matrix_b;
+
+    offset_matrix_a << pow(r(1), 2) + pow(r(2), 2),                  -r(0)*r(1),                  -r(0)*r(2),
+                                        -r(0)*r(1), pow(r(0), 2) + pow(r(2), 2),                  -r(1)*r(2),
+                                        -r(0)*r(2),                  -r(1)*r(2), pow(r(0), 2) + pow(r(1), 2);
+
+    r = -com + com_new;
+    offset_matrix_b << pow(r(1), 2) + pow(r(2), 2),                  -r(0)*r(1),                  -r(0)*r(2),
+                                        -r(0)*r(1), pow(r(0), 2) + pow(r(2), 2),                  -r(1)*r(2),
+                                        -r(0)*r(2),                  -r(1)*r(2), pow(r(0), 2) + pow(r(1), 2);
+
+    Eigen::Matrix3d new_inertia = link_inertia_default_[N - 1] +
+      m_default_[N - 1] * offset_matrix_a +
+      inertia + mass * offset_matrix_b;
+
+    link_inertia_[N - 1] << new_inertia;
   }
 
 }  // namespace sdu_controllers::math
