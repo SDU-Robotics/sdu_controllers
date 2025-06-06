@@ -113,6 +113,13 @@ namespace sdu_controllers::models
     link_inertia_default_ = link_inertia_;
 
     g << 0, 0, -9.82;
+
+    // pass variables to bb_robot object
+    bb_robot_.set_dh_params(a_[4], d_[0], d_[2], d_[4]);
+
+    double * m_tmp;
+    m_tmp = m_.data();
+    bb_robot_.set_m(m_tmp);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
@@ -218,14 +225,12 @@ namespace sdu_controllers::models
     // new_inertia = numpy.asarray(self._inertia_default[5]) + self._m_default[5] * offset_matrix_a +\
     //               numpy.asarray(inertia) + mass * offset_matrix_b
     // self._inertia[5] = new_inertia.tolist()
-
     int N = get_dof();
     m_[N - 1] = m_default_[N - 1] + mass;
 
     Eigen::Vector3d com_default_N = com_default_(N - 1, Eigen::all);
     Eigen::Vector3d com_new = (com_default_N * m_default_[N - 1] + com * mass) / m_[N - 1];
     com_(N - 1, Eigen::all) = com_new;
-
     Eigen::Vector3d r;
     r << -com_default_N + com_new;
 
@@ -245,6 +250,10 @@ namespace sdu_controllers::models
       inertia + mass * offset_matrix_b;
 
     link_inertia_[N - 1] << new_inertia;
-  }
 
-}  // namespace sdu_controllers::math
+    // set bb_robot variables
+    double * m_tmp = &m_[0];
+    bb_robot_.set_m(m_tmp);
+  }
+  
+} 
