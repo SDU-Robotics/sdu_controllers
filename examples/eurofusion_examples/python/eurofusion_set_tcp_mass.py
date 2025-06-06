@@ -19,6 +19,18 @@ inertia = 1e5 * np.eye(3)
 M = bb_robot.get_inertia_matrix(q)
 print("M\n", M)
 
+bb_robot.set_tcp_mass(mass, com * 0, inertia * 0)
+M = bb_robot.get_inertia_matrix(q)
+print("M\n", M)
+
+bb_robot.set_tcp_mass(mass * 0, com, inertia * 0)
+M = bb_robot.get_inertia_matrix(q)
+print("M\n", M)
+
+bb_robot.set_tcp_mass(mass * 0, com * 0, inertia)
+M = bb_robot.get_inertia_matrix(q)
+print("M\n", M)
+
 bb_robot.set_tcp_mass(mass, com, inertia)
 M = bb_robot.get_inertia_matrix(q)
 print("M\n", M)
