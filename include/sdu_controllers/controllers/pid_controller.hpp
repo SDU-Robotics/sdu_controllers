@@ -16,12 +16,7 @@ namespace sdu_controllers::controllers
     /**
      * @brief Step the execution of the controller.
      */
-    void step(
-        const Eigen::VectorXd &q_d,
-        const Eigen::VectorXd &dq_d,
-        const Eigen::VectorXd &ddq_d,
-        const Eigen::VectorXd &q,
-        const Eigen::VectorXd &dq);
+    void step(const Eigen::VectorXd& q_d, const Eigen::VectorXd& dq_d, const Eigen::VectorXd& u_ff, const Eigen::VectorXd& q, const Eigen::VectorXd& dq);
 
     /**
      * @brief Get the output of the controller. Updates when the step() function is called.

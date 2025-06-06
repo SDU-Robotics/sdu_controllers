@@ -27,7 +27,7 @@ option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OF
 option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" OFF)
 
 # Add config library as a path such that we can find parameter files used for the robot models.
-file(REAL_PATH "./config" CONFIG_FILE_PATH)
+file(REAL_PATH "config" CONFIG_FILE_PATH)
 file(TO_CMAKE_PATH "${CONFIG_FILE_PATH}" CONFIG_FILE_PATH_NORMALIZED)
 add_definitions(-DCONFIG_FILE_PATH="${CONFIG_FILE_PATH_NORMALIZED}")
 
@@ -36,6 +36,7 @@ cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(yaml-cpp 0.7.0 REQUIRED NO_MODULE)
 
 # compile the library
 add_subdirectory(src)
