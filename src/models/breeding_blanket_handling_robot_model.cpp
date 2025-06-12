@@ -89,7 +89,7 @@ namespace sdu_controllers::models
       I(1, 0) = __ixy;
 
       I(0, 2) = __ixz;
-      I(2, 0) = __ixy;
+      I(2, 0) = __ixz;
 
       I(1, 2) = __iyz;
       I(2, 1) = __iyz;
