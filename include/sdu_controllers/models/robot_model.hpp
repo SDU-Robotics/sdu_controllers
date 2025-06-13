@@ -3,6 +3,7 @@
 #define SDU_CONTROLLERS_ROBOT_MODEL_HPP
 
 #include <Eigen/Dense>
+#include <iostream>
 
 namespace sdu_controllers::models
 {
@@ -95,7 +96,6 @@ namespace sdu_controllers::models
     virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() = 0;
 
     virtual std::vector<Eigen::Matrix3d> get_link_inertia() = 0;
-
   };
 
 }  // namespace sdu_controllers::models

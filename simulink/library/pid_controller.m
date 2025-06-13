@@ -48,6 +48,12 @@ classdef pid_controller < matlab.System
         % end
 
         function [y] = stepImpl(obj, q_d, dq_d, u_ff, q, dq)
+            q_d = reshape(q_d, 1, obj.num_states);
+            dq_d = reshape(dq_d, 1, obj.num_states);
+            u_ff = reshape(u_ff, 1, obj.num_states);
+            q = reshape(q, 1, obj.num_states);
+            dq = reshape(dq, 1, obj.num_states);
+
             obj.pid_contr.step(q_d, dq_d, u_ff, q, dq);
 
             y = double(obj.pid_contr.get_output());

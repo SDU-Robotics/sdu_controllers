@@ -21,10 +21,61 @@ public:
 
 	Eigen::Matrix<double, 1, 1> kin (const Eigen::Matrix<double, 7, 1> & q, const Eigen::Matrix<double, 7, 1> & dq);
 
-private: 
+	// set methods
+	void set_dh_params(double a5, double d1, double d3, double d5)
+	{
+		a5_ = a5;
+		d1_ = d1;
+		d3_ = d3;
+		d5_ = d5;
+	}
 
+	void set_m(double * m)
+	{
+		for (size_t i = 0; i < 7; ++i)
+		{
+			m_[i] = m[i];
+		}
+	}
+
+	void set_com(double (&com)[7][3])
+	{
+		for (size_t i = 0; i < 7; ++i)
+		{
+			for (size_t j = 0; j < 3; ++j)
+			{
+				com_[i][j] = com[i][j];
+			}
+		}
+	}
+
+	void set_link_inertia(double (&link_inertia)[7][3][3])
+	{
+		for (size_t i = 0; i < 7; ++i)
+		{
+			for (size_t j = 0; j < 3; ++j)
+			{
+				for (size_t k = 0; k < 3; ++k)
+				{
+					link_inertia_[i][j][k] = link_inertia[i][j][k];
+				}
+			}
+		}
+	}
+
+	void set_g(double (&gin)[3])
+	{
+		for (size_t i = 0; i < 3; ++i)
+		{
+			g[i] = gin[i];
+		}
+	}
+
+
+
+private:
 	double a5_;
-  double d1_;
+  	double d1_;
 	double d3_;
 	double d5_;
 	double m_[7];

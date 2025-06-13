@@ -6,19 +6,15 @@ classdef inverse_dynamics < matlab.System
 
     % Public, tunable properties
     properties
-
     end
 
     properties(Nontunable)
-        RobotType {mustBeMember(RobotType, ["BB Handler", "UR3e", "UR5e"])} = "UR5e"
+        robot_model
     end
 
     % Pre-computed constants or internal states
     properties (Access = private)
-        robot_model
         links
-
-        all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
         inv_dyn
 
@@ -29,22 +25,6 @@ classdef inverse_dynamics < matlab.System
         function setupImpl(obj)
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
 
-            % Perform one-time calculations, such as computing constants
-            switch obj.RobotType
-                case obj.all_robot_types(1)
-                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
-
-                case obj.all_robot_types(2)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(0) ...
-                    );
-
-                case obj.all_robot_types(3)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(1) ...
-                    );
-            end
-
             obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
 
@@ -54,6 +34,10 @@ classdef inverse_dynamics < matlab.System
         function tau = stepImpl(obj, q, dq, y)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
+            y = reshape(y, 1, obj.links);
+            q = reshape(q, 1, obj.links);
+            dq = reshape(dq, 1, obj.links);
+
             tau = obj.inv_dyn.inverse_dynamics(y, q, dq);
             % disp(tau)
             % tau = double(tau).';
@@ -90,7 +74,7 @@ classdef inverse_dynamics < matlab.System
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Inverse Dynamics', obj.RobotType};
+            icon = {'Inverse Dynamics', class(obj.robot_model)};
         end
     end
 end

@@ -10,15 +10,12 @@ classdef forward_dynamics < matlab.System
     end
 
     properties(Nontunable)
-        RobotType {mustBeMember(RobotType, ["BB Handler", "UR3e", "UR5e"])} = "UR5e"
+        robot_model
     end
 
     % Pre-computed constants or internal states
     properties (Access = private)
-        robot_model
         links
-
-        all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
         fwd_dyn
 
@@ -28,22 +25,6 @@ classdef forward_dynamics < matlab.System
     methods (Access = protected)
         function setupImpl(obj)
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
-            
-            % Perform one-time calculations, such as computing constants
-            switch obj.RobotType
-                case obj.all_robot_types(1)
-                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
-
-                case obj.all_robot_types(2)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(0) ...
-                    );
-
-                case obj.all_robot_types(3)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(1) ...
-                    );
-            end
 
             obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
@@ -54,6 +35,10 @@ classdef forward_dynamics < matlab.System
         function ddq = stepImpl(obj, q, dq, tau)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
+            q = reshape(q, 1, obj.links);
+            dq = reshape(dq, 1, obj.links);
+            tau = reshape(tau, 1, obj.links);
+
             ddq = obj.fwd_dyn.forward_dynamics(q, dq, tau);
             % disp(ddq)
             % ddq = double(ddq).';
@@ -89,7 +74,7 @@ classdef forward_dynamics < matlab.System
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Forward Dynamics', obj.RobotType};
+            icon = {'Forward Dynamics', class(obj.robot_model)};
         end
     end
 end

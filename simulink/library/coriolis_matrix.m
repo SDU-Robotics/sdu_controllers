@@ -10,15 +10,12 @@ classdef coriolis_matrix < matlab.System
     end
 
     properties(Nontunable)
-        RobotType {mustBeMember(RobotType, ["BB Handler", "UR3e", "UR5e"])} = "UR5e"
+        robot_model
     end
 
     % Pre-computed constants or internal states
     properties (Access = private)
-        robot_model
         links
-
-        all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
         sdu_controllers
     end
@@ -28,21 +25,6 @@ classdef coriolis_matrix < matlab.System
             % Perform one-time calculations, such as computing constants
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
 
-            switch obj.RobotType
-                case obj.all_robot_types(1)
-                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
-
-                case obj.all_robot_types(2)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(0) ...
-                    );
-
-                case obj.all_robot_types(3)
-                    obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
-                        obj.sdu_controllers.models.RobotType(1) ...
-                    );
-            end
-
             obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
         end
@@ -50,6 +32,9 @@ classdef coriolis_matrix < matlab.System
         function [C] = stepImpl(obj, q, dq)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
+            q = reshape(q, 1, obj.links);
+            dq = reshape(dq, 1, obj.links);
+
             C = obj.robot_model.get_coriolis(q, dq);
             C = reshape(double(C), obj.links, obj.links);
         end
@@ -83,7 +68,7 @@ classdef coriolis_matrix < matlab.System
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Coriolis Matrix', obj.RobotType};
+            icon = {'Coriolis Matrix', class(obj.robot_model)};
         end
     end
 end
