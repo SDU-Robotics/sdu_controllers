@@ -1,7 +1,7 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <sdu_controllers/controllers/pd_controller.hpp>
+#include <sdu_controllers/controllers/pid_controller.hpp>
 #include <sdu_controllers/math/rnea.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
@@ -24,14 +24,17 @@ int main()
   double freq = 1000.0;
   double dt = 1.0 / freq;
   double Kp_value = 1000.0;
+  double Ki_value = 1;
   double Kd_value = 2.0 * sqrt(Kp_value);
   double N_value = 1.0;
   uint16_t ROBOT_DOF = robot_model->get_dof();
   VectorXd Kp_vec = VectorXd::Ones(ROBOT_DOF) * Kp_value;
+  VectorXd Ki_vec = VectorXd::Ones(ROBOT_DOF) * Kp_value;
   VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_value;
   VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_value;
 
-  controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), N_vec.asDiagonal());
+  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(), 
+    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt);
   math::RecursiveNewtonEuler rnea(robot_model);
   Vector3d z0;
   z0 << 0.0, 0.0, -1.0;
@@ -77,8 +80,8 @@ int main()
     // Controller
     VectorXd u_ff = ddq_d; // acceleration as feedforward.
     // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
-    pd_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
-    VectorXd y = pd_controller.get_output();
+    pid_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
+    VectorXd y = pid_controller.get_output();
     tau << rnea.inverse_dynamics(q_meas, dq_meas, y, he);
 
     // Simulation

@@ -1,16 +1,17 @@
 #pragma once
-#ifndef SDU_CONTROLLERS_PD_CONTROLLER_HPP
-#define SDU_CONTROLLERS_PD_CONTROLLER_HPP
+#ifndef SDU_CONTROLLERS_PID_CONTROLLER_HPP
+#define SDU_CONTROLLERS_PID_CONTROLLER_HPP
 
 #include <Eigen/Dense>
 #include <sdu_controllers/controllers/controller.hpp>
 
 namespace sdu_controllers::controllers
 {
-  class PDController : public Controller
+  class PIDController : public Controller
   {
    public:
-    explicit PDController(Eigen::MatrixXd Kp, Eigen::MatrixXd Kd, Eigen::MatrixXd N);
+    explicit PIDController(Eigen::MatrixXd Kp,  Eigen::MatrixXd Ki, 
+                           Eigen::MatrixXd Kd, Eigen::MatrixXd N, double dt);
 
     /**
      * @brief Step the execution of the controller.
@@ -33,9 +34,10 @@ namespace sdu_controllers::controllers
     void reset() override;
 
    private:
-    Eigen::VectorXd u_;
-    Eigen::MatrixXd Kp_, Kd_, N_;
+    Eigen::VectorXd u_, integral_term;
+    Eigen::MatrixXd Kp_, Ki_, Kd_, N_;
+    double dt;
   };
 }  // namespace sdu_controllers::controllers
 
-#endif  // SDU_CONTROLLERS_PD_CONTROLLER_HPP
+#endif  // SDU_CONTROLLERS_PID_CONTROLLER_HPP

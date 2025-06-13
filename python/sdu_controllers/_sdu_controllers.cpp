@@ -4,7 +4,7 @@
 #include <nanobind/stl/vector.h>
 
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
-#include <sdu_controllers/controllers/pd_controller.hpp>
+#include <sdu_controllers/controllers/pid_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/math/rnea.hpp>
@@ -51,15 +51,19 @@ namespace sdu_controllers
         .def("get_dof", &models::BreedingBlanketHandlingRobotModel::get_dof);
 
     // controllers
-    nb::class_<controllers::PDController>(m, "PDController")
+    nb::class_<controllers::PIDController>(m, "PIDController")
         .def(
-            nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, const Eigen::MatrixXd &>(),
+            nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
+                         const Eigen::MatrixXd &, const Eigen::MatrixXd &,
+                         double>(),
             nb::arg("Kp"),
+            nb::arg("Ki"),
             nb::arg("Kd"),
-            nb::arg("N"))
-        .def("step", &controllers::PDController::step)
-        .def("get_output", &controllers::PDController::get_output)
-        .def("reset", &controllers::PDController::reset);
+            nb::arg("N"),
+            nb::arg("dt"))
+        .def("step", &controllers::PIDController::step)
+        .def("get_output", &controllers::PIDController::get_output)
+        .def("reset", &controllers::PIDController::reset);
 
     nb::class_<controllers::AdmittanceControllerPosition>(m, "AdmittanceControllerPosition")
         .def(nb::init<const double>(), nb::arg("frequency"))
