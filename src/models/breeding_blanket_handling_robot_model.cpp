@@ -40,12 +40,6 @@ namespace sdu_controllers::models
     joint_acc_bounds_ = { ddq_low, ddq_high};
     joint_torque_bounds_ = {torque_low, torque_high};
 
-    /* BEATRIZ standard */
-    // a_ = {0.0, 0.0, 0.0,0.0,0.388,0.0,0.0};
-    // d_ = {-0.4450, 0.0, 0.93, 0.0, 3.3873, 0.0, 0.0};
-    // alpha_ = {0.0, -(pi)/2.0, 0.0, -(pi)/2, 0.0, -(pi)/2,0.0};
-    // theta_ = {-(pi)/2.0, 0.0, 0.0,0.0, -(pi)/2, 0.0, 0.0};
-
     a_ = config["kinematics"]["a"].as<std::vector<double>>();
     d_ = config["kinematics"]["d"].as<std::vector<double>>();
     alpha_ = config["kinematics"]["alpha"].as<std::vector<double>>();
