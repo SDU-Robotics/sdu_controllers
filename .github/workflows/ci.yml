@@ -34,7 +34,7 @@ jobs:
         submodules: 'recursive'
 
     - name: install dependencies
-      uses: jrl-umi3218/github-actions/install-dependencies@master
+      uses: SDU-Robotics/github-actions/install-dependencies@master
       with:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
@@ -43,9 +43,9 @@ jobs:
         macos: |
           brew: eigen
         windows: |
-          github:
-            - path: eigenteam/eigen-git-mirror
-              ref: 3.3.7
+          gitlab:
+            - path: libeigen/eigen
+              ref: 3.4.0
 
     - name: make build directory
       run: cmake -E make_directory ${{ github.workspace }}/build
@@ -87,7 +87,7 @@ jobs:
         submodules: 'recursive'
 
     - name: install dependencies
-      uses: jrl-umi3218/github-actions/install-dependencies@master
+      uses: SDU-Robotics/github-actions/install-dependencies@master
       with:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
@@ -96,9 +96,9 @@ jobs:
         macos: |
           brew: eigen
         windows: |
-          github:
-            - path: eigenteam/eigen-git-mirror
-              ref: 3.3.7
+          gitlab:
+            - path: libeigen/eigen
+              ref: 3.4.0
 
     - name: Set up Python
       uses: actions/setup-python@v5

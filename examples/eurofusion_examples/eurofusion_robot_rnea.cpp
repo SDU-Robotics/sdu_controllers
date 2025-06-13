@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>

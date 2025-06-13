@@ -20,7 +20,7 @@ import subprocess
 # -- Project information -----------------------------------------------------
 
 project = "sdu_controllers"
-copyright = "2024, University of Southern Denmark"
+copyright = "2025, University of Southern Denmark"
 author = "SDU Robotics"
 
 # -- General configuration ---------------------------------------------------
@@ -34,8 +34,14 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinx_book_theme",
     "sphinx_design",
-    "sphinxcontrib.icon"
+    "sphinxcontrib.icon",
+    "sphinxcontrib.bibtex"
 ]
+
+numfig = True
+
+# bibtex
+bibtex_bibfiles = ['refs.bib']
 
 sphinx_tabs_valid_builders = ['linkcheck']
 
@@ -69,7 +75,7 @@ html_static_path = ["_static"]
 html_theme_options = {
     "repository_url": "https://github.com/SDU-Robotics/sdu_controllers",
     "use_repository_button": True,
-    "show_toc_level": 1,
+    "show_toc_level": 2,
     "use_sidenotes": True
 }
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <sdu_controllers/models/robot_model.hpp>
+#include <sdu_controllers/models/breeding_blanket_handling_robot.hpp>
 
 namespace sdu_controllers::models
 {
@@ -96,14 +97,18 @@ public:
 
   std::vector<Eigen::Matrix3d> get_link_inertia();
 
+  void set_tcp_mass(double &mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia);
+
 private:
   uint16_t dof_{ROBOT_DOF};
+
   std::vector<double> a_;
   std::vector<double> d_;
   std::vector<double> alpha_;
   std::vector<double> theta_;
- std::vector<double> m_;
+  std::vector<double> m_;
   Eigen::Vector3d g;
+  BreedingBlanketRobot bb_robot_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
@@ -113,6 +118,9 @@ private:
   Eigen::Matrix<double, 7, 3> com_;
   std::vector<Eigen::Matrix3d> link_inertia_;
 
+  std::vector<double> m_default_;
+  Eigen::Matrix<double, 7, 3> com_default_;
+  std::vector<Eigen::Matrix3d> link_inertia_default_;
 };
 
 } // namespace sdu_controllers::models

@@ -1,7 +1,7 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <sdu_controllers/controllers/pd_controller.hpp>
+#include <sdu_controllers/controllers/pid_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
@@ -26,15 +26,18 @@ int main()
   auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
-  double Kp_value = 100.0;
-  double Kd_value = 2 * sqrt(Kp_value);
+  double Kp_value = 1000.0;
+  double Ki_value = 100.0;
+  double Kd_value = 2 * sqrt(Kp_value) * 0;
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
   VectorXd Kp_vec = VectorXd::Ones(ROBOT_DOF) * Kp_value;
+  VectorXd Ki_vec = VectorXd::Ones(ROBOT_DOF) * Ki_value;
   VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_value;
   VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_value;
 
-  controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), N_vec.asDiagonal());
+  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(), 
+    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt);
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model);
 
@@ -67,19 +70,17 @@ int main()
         ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
       }
 
-      std::cout << "q_d: " << q_d << std::endl;
-
       // Add noise to q and dq
       VectorXd q_meas = q;
       VectorXd dq_meas = dq;
-      add_noise_to_vector(q_meas, 0.0, 0.001);
-      add_noise_to_vector(dq_meas, 0.0, 0.001);
+      //add_noise_to_vector(q_meas, 0.0, 0.001);
+      //add_noise_to_vector(dq_meas, 0.0, 0.001);
 
       // Controller
       VectorXd u_ff = ddq_d; // acceleration as feedforward.
       // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
-      pd_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
-      VectorXd y = pd_controller.get_output();
+      pid_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
+      VectorXd y = pid_controller.get_output();
       std::cout << "y: " << y << std::endl;
       VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
       std::cout << "tau: " << tau << std::endl;
@@ -93,7 +94,6 @@ int main()
 
       std::cout << "q:" << q << std::endl;
       csv_writer << eigen_to_std_vector(q);
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     output_filestream.close();
   }

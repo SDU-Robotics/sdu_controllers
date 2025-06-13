@@ -9,6 +9,10 @@ a {
     color: #7FDBFF;
 }
 
+.only-light {
+    margin-top: 30px;
+}
+
 html[data-theme="dark"] .sphinx-tabs-panel {
     background: rgb(18, 18, 18);
 }

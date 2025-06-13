@@ -17,6 +17,8 @@ namespace sdu_controllers::math
     f = Eigen::MatrixXd::Zero(3, N);
     mu = Eigen::MatrixXd::Zero(3, N);
     ddp0 = -robot_model->get_g0();
+    omega0 = Eigen::MatrixXd::Zero(3, 1);
+    domega0 = Eigen::MatrixXd::Zero(3, 1);
     CoM = robot_model->get_CoM();
     link_inertia = robot_model->get_link_inertia();
     z0 << 0, 0, 1;
@@ -43,10 +45,12 @@ namespace sdu_controllers::math
 
   Eigen::MatrixXd RecursiveNewtonEuler::inertia(const Eigen::VectorXd &q)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
-    Eigen::MatrixXd B = Eigen::MatrixXd::Zero(q.rows(), q.rows());
-    Eigen::VectorXd ddq_bar = Eigen::VectorXd::Zero(q.rows()),
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
+                    he0 = Eigen::VectorXd::Zero(6),
+                    ddq_bar = Eigen::VectorXd::Zero(q.rows()),
                     tau_tmp = Eigen::VectorXd::Zero(q.rows());
+
+    Eigen::MatrixXd B = Eigen::MatrixXd::Zero(q.rows(), q.rows());
 
     Eigen::Vector3d ddp0_original = this->ddp0;
     this->ddp0 *= 0;
@@ -55,8 +59,7 @@ namespace sdu_controllers::math
     {
       ddq_bar.setZero();
       ddq_bar(i) = 1.0;
-
-      tau_tmp = inverse_dynamics(q, zero_vec, ddq_bar, zero_vec);
+      tau_tmp = inverse_dynamics(q, zero_vec, ddq_bar, he0);
       B(Eigen::all, i) = tau_tmp;
     }
 
@@ -67,7 +70,8 @@ namespace sdu_controllers::math
 
   Eigen::VectorXd RecursiveNewtonEuler::velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
+                    he0 = Eigen::VectorXd::Zero(6);
     Eigen::MatrixXd Cdq = Eigen::MatrixXd::Zero(q.rows(), q.rows());
 
     Eigen::Vector3d ddp0_original = this->ddp0;
@@ -82,16 +86,17 @@ namespace sdu_controllers::math
 
   Eigen::VectorXd RecursiveNewtonEuler::gravity(const Eigen::VectorXd &q)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
+                    he0 = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd grav = Eigen::VectorXd::Zero(q.rows());
 
-    grav = inverse_dynamics(q, zero_vec, zero_vec, zero_vec);
+    grav = inverse_dynamics(q, zero_vec, zero_vec, he0);
     return grav;
   }
 
   Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
         const Eigen::VectorXd &ddq, const Eigen::VectorXd &he)
-  {
+  {    
     std::vector<Eigen::Matrix4d> T = kinematics::forward_kinematics_all(q, robot_model);
     forward(dq, ddq, T);
     backward(he, T);
@@ -190,8 +195,6 @@ namespace sdu_controllers::math
 
     for (int i = robot_model->get_dof() - 1; i >= 0; --i)
     {
-      // std::cout << i << std::endl;
-
       if (i > 0)
       {
         r_ = T[i](Eigen::seqN(0, 3), 3) - T[i - 1](Eigen::seqN(0, 3), 3);
@@ -240,7 +243,6 @@ namespace sdu_controllers::math
           zi = T[i - 1](Eigen::seqN(0, 3), 2);
           tau(i) = mu(Eigen::all, i).transpose() * zi;
         }
-        // std::cout << "tau(" << i << ") " << tau(i) << std::endl;
       }
       else
       { // Prismatic

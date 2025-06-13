@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <sdu_controllers/controllers/pd_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
@@ -53,7 +52,7 @@ int main()
   Eigen::VectorXd tau = rnea.inverse_dynamics(q, dq, ddq, he);
   std::cout << "tau\n" << tau << std::endl;
 
-  tau = rnea.inverse_dynamics(q, dq, ddq, he);
+  tau = inv_dyn_jnt_space.inverse_dynamics(ddq, q, dq);
   std::cout << "tau\n" << tau << std::endl;
 
   Eigen::MatrixXd B = rnea.inertia(q);
