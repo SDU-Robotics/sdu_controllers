@@ -158,7 +158,7 @@ namespace sdu_controllers
             nb::arg("q"))
         .def(
             "velocity_product",
-            &sdu_controllers::math::RecursiveNewtonEuler::velocityProduct,
+            &sdu_controllers::math::RecursiveNewtonEuler::velocity_product,
             "Compute the velocity product term C(q,q̇)q̇ from the manipulator equation",
             nb::arg("q"),
             nb::arg("dq"))
