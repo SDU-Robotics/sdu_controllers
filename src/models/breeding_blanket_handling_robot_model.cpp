@@ -111,9 +111,30 @@ namespace sdu_controllers::models
     // pass variables to bb_robot object
     bb_robot_.set_dh_params(a_[4], d_[0], d_[2], d_[4]);
 
+    // m
     double * m_tmp;
     m_tmp = m_.data();
     bb_robot_.set_m(m_tmp);
+
+    // com
+    double com_tmp [ROBOT_DOF][3];
+
+    for (size_t i = 0; i < ROBOT_DOF; ++i)
+      for (size_t j = 0; j < 3; ++j)
+        com_tmp[i][j] = com_(i, j);
+
+    bb_robot_.set_com(com_tmp);
+
+    // inertia
+    double inertia_tmp [ROBOT_DOF][3][3];
+
+    for (size_t i = 0; i < ROBOT_DOF; ++i)
+      for (size_t j = 0; j < 3; ++j)
+        for (size_t k = 0; k < 3; ++k)
+          inertia_tmp[i][j][k] = link_inertia_[i](j, k);
+
+    bb_robot_.set_link_inertia(inertia_tmp);
+
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
