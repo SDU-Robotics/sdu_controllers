@@ -24,14 +24,10 @@ namespace sdu_controllers::math
         const Eigen::VectorXd &tau, const Eigen::VectorXd &he);
 
       Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
-      Eigen::VectorXd velocityProduct(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
+      Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd gravity(const Eigen::VectorXd &q);
 
       void set_z0(const Eigen::Vector3d &z0);
-
-      Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
-      Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-      Eigen::VectorXd gravity(const Eigen::VectorXd &q);
 
     private:
       void forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T);
