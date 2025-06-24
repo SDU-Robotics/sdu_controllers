@@ -66,7 +66,8 @@ namespace sdu_controllers
         .def("get_coriolis", &models::BreedingBlanketHandlingRobotModel::get_coriolis)
         .def("get_gravity", &models::BreedingBlanketHandlingRobotModel::get_gravity)
         .def("get_dof", &models::BreedingBlanketHandlingRobotModel::get_dof)
-        .def("set_tcp_mass", &models::BreedingBlanketHandlingRobotModel::set_tcp_mass);
+        .def("set_tcp_mass", &models::BreedingBlanketHandlingRobotModel::set_tcp_mass)
+        .def("get_CoM", &models::BreedingBlanketHandlingRobotModel::get_CoM);
 
     // controllers
     nb::class_<controllers::PIDController>(m_controllers, "PIDController")
