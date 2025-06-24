@@ -7,8 +7,13 @@
 #include <Eigen/Dense>
 #include <array>
 #include <sdu_controllers/hal/franka_robot.hpp>
+#include <sdu_controllers/hal/robot.hpp>
+#include <sdu_controllers/math/pose.hpp>
 #include <sdu_controllers/utils/utility.hpp>
+#include <thread>
 #include <vector>
+#include <chrono>
+#include <mutex>
 
 namespace sdu_controllers::hal
 {
@@ -23,6 +28,7 @@ namespace sdu_controllers::hal
     prev_state_ = ControlStates::NONE;
     start_control_ = false;
     stop_control_ = false;
+    stop_receive_ = false;
     motion_finished_ = false;
 
     // Set a default collision behavior, joint impedance and cartesian impedance.
@@ -30,6 +36,7 @@ namespace sdu_controllers::hal
 
     // Read and initialize the current robot state
     robot_state_ = robot_.readOnce();
+    //receive_thread_ = std::thread(&FrankaRobot::receive_robot_state, this);
   }
 
   void FrankaRobot::set_default_behavior()
@@ -43,8 +50,46 @@ namespace sdu_controllers::hal
         { { 20.0, 20.0, 20.0, 20.0, 20.0, 20.0 } },
         { { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 } },
         { { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 } });
-    robot_.setJointImpedance({ { 3000, 3000, 3000, 2500, 2500, 2000, 2000 } });
-    robot_.setCartesianImpedance({ { 3000, 3000, 3000, 300, 300, 300 } });
+    //robot_.setJointImpedance({ { 3000, 3000, 3000, 2500, 2500, 2000, 2000 } });
+    //robot_.setCartesianImpedance({ { 300, 300, 300, 50, 50, 50 } });
+  }
+
+  void FrankaRobot::set_current_pose(const franka::CartesianPose& pose)
+  {
+    std::lock_guard<std::mutex> lk(update_pose_mutex_);
+    current_pose_ = pose;
+  }
+
+  franka::CartesianPose FrankaRobot::get_current_pose()
+  {
+    std::lock_guard<std::mutex> lk(update_pose_mutex_);
+    return current_pose_;
+  }
+
+  double FrankaRobot::get_step_time()
+  {
+    return step_time_;
+  }
+
+  void FrankaRobot::update_robot_state(const franka::RobotState &robot_state)
+  {
+    std::lock_guard<std::mutex> lk(robot_state_mutex_);
+    robot_state_ = robot_state;
+  }
+
+  void FrankaRobot::receive_robot_state()
+  {
+    while (!stop_receive_)
+    {
+      if (curr_state_ == ControlStates::NONE || curr_state_ == ControlStates::INIT || curr_state_ == ControlStates::STOPPED)
+      {
+        update_robot_state(robot_.readOnce());
+      }
+      else
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      }
+    }
   }
 
   void FrankaRobot::control()
@@ -54,7 +99,7 @@ namespace sdu_controllers::hal
       robot_.control(
           [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques
           {
-            robot_state_ = robot_state;
+            //update_robot_state(robot_state);
             std::array<double, 7> tau_d_array{};
             Eigen::VectorXd::Map(&tau_d_array[0], 7) = joint_torque_ref_;
             franka::Torques torques(tau_d_array);
@@ -67,7 +112,7 @@ namespace sdu_controllers::hal
       robot_.control(
           [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::JointPositions
           {
-            robot_state_ = robot_state;
+            //update_robot_state(robot_state);
             std::array<double, ROBOT_DOF> q_arr;
             std::move(joint_pos_ref_.begin(), joint_pos_ref_.end(), q_arr.begin());
             franka::JointPositions joint_positions(q_arr);
@@ -77,16 +122,54 @@ namespace sdu_controllers::hal
     }
     else if (control_mode_ == ControlMode::CARTESIAN_POSE)
     {
+      //std::array<double, 16> initial_pose;
+      //double time{0.0};
       robot_.control(
-          [this](const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose
+          [=](const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose
           {
-            robot_state_ = robot_state;
-            Eigen::Affine3d cart_pose = cartesian_pose_ref_.to_transform();
-            std::array<double, 16> array;
-            std::copy(cart_pose.data(), cart_pose.data() + array.size(), array.begin());
-            franka::CartesianPose franka_cart_pose(array);
-            franka_cart_pose.motion_finished = motion_finished_;
-            return franka_cart_pose;
+            step_time_ += period.toSec();
+
+            if (step_time_ == 0.0)
+            {
+              set_current_pose(franka::CartesianPose(robot_state.O_T_EE_c));
+            }
+
+            /*constexpr double kRadius = 0.3;
+            double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * step_time_));
+            double delta_x = kRadius * std::sin(angle);
+            double delta_z = kRadius * (std::cos(angle) - 1);
+
+            std::array<double, 16> new_pose = initial_pose;
+            new_pose[12] += delta_x;
+            new_pose[14] += delta_z;*/
+
+            franka::CartesianPose new_pose = get_current_pose();
+            Eigen::Affine3d new_pose_transform(Eigen::Matrix4d::Map(new_pose.O_T_EE.data()));
+            math::Pose my_new_pose(new_pose_transform);
+            std::cout << "new_pose: " << my_new_pose.to_string() << std::endl;
+
+            if (step_time_ >= 10.0) {
+              std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+              return franka::MotionFinished(new_pose);
+            }
+            return new_pose;
+
+            /*else
+            {
+              // The rest of your control loop
+              Eigen::Affine3d current_pose_affine(Eigen::Matrix4d::Map(robot_state.O_T_EE_c.data())); // O_T_EE_c
+              std::array<double, 16> array_current;
+              std::copy(current_pose_affine.data(), current_pose_affine.data() + array_current.size(), array_current.begin());
+              math::Pose current_pose(current_pose_affine);
+              std::cout << "Current pose: " << current_pose.to_string() << std::endl;
+              std::cout << "Sending: " << cartesian_pose_ref_.to_string() << std::endl;
+              Eigen::Affine3d cart_pose = cartesian_pose_ref_.to_transform();
+              std::array<double, 16> array;
+              std::copy(cart_pose.data(), cart_pose.data() + array.size(), array.begin());
+              franka::CartesianPose franka_cart_pose(robot_state.O_T_EE_c);
+              franka_cart_pose.motion_finished = motion_finished_;
+              return franka_cart_pose;
+            }*/
           });
     }
   }
@@ -136,6 +219,14 @@ namespace sdu_controllers::hal
         // running state)
         if (start_control_)
         {
+          // Stop receiving
+          stop_receive_ = true;
+          // join the control thread
+          if (receive_thread_.joinable())
+          {
+            receive_thread_.join();
+          }
+
           try
           {
             control_thread_ = std::thread(&FrankaRobot::control, this);
@@ -163,7 +254,6 @@ namespace sdu_controllers::hal
           curr_state_ = ControlStates::ERROR;
           break;
         }
-
         // Notice! the control for the different ControlModes is done in the respective callback functions.
 
         // Check if the control should be stopped
@@ -175,21 +265,26 @@ namespace sdu_controllers::hal
             motion_finished_ = true;
           }
 
-          if (robot_state_.robot_mode == franka::RobotMode::kIdle)
-          {
-            // Reset motion_finished and stop control variable.
-            motion_finished_ = false;
-            stop_control_ = false;
-            robot_.stop();
+          //if (robot_state_.robot_mode == franka::RobotMode::kIdle)
+          //{
+          // Reset motion_finished and stop control and receive variable.
+          //           motion_finished_ = false;
+          //stop_control_ = false;
+          //stop_receive_ = false;
+          //
+          robot_.stop();
 
-            // join the control thread
-            if (control_thread_.joinable())
-            {
-              control_thread_.join();
-            }
-            curr_state_ = ControlStates::STOPPED;
-            break;
+          // join the control thread
+          if (control_thread_.joinable())
+          {
+            control_thread_.join();
           }
+
+          // Start receive thread again
+          //receive_thread_ = std::thread(&FrankaRobot::receive_robot_state, this);
+
+          curr_state_ = ControlStates::STOPPED;
+          break;
         }
 
         break;
@@ -291,10 +386,20 @@ namespace sdu_controllers::hal
   {
     try
     {
+      stop_receive_ = true;
+      // join the control thread
+      if (receive_thread_.joinable())
+      {
+        receive_thread_.join();
+      }
+
       std::array<double, 7> q_goal;
       std::move(q.begin(), q.end(), q_goal.begin());
       MotionGenerator motion_generator(speed_factor, q_goal);
       robot_.control(motion_generator);
+
+      stop_receive_ = false;
+      //receive_thread_ = std::thread(&FrankaRobot::receive_robot_state, this);
     }
     catch (const franka::Exception& e)
     {
@@ -329,9 +434,16 @@ namespace sdu_controllers::hal
     return dq;
   }
 
-  math::Pose FrankaRobot::get_cartesian_tcp_pose()
+  math::Pose FrankaRobot::get_actual_tcp_pose()
   {
+    robot_state_ = robot_.readOnce();
     Eigen::Affine3d current_transform(Eigen::Matrix4d::Map(robot_state_.O_T_EE.data()));
+    return math::Pose(current_transform);
+  }
+
+  math::Pose FrankaRobot::get_target_tcp_pose()
+  {
+    Eigen::Affine3d current_transform(Eigen::Matrix4d::Map(robot_state_.O_T_EE_c.data()));
     return math::Pose(current_transform);
   }
 

@@ -24,7 +24,7 @@ option(BUILD_TESTING "Enable building of the tests" ON)
 
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
-option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" OFF)
+option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" ON)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)

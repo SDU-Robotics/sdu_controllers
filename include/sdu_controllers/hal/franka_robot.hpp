@@ -82,36 +82,24 @@ namespace sdu_controllers::hal
      * Sets a default collision behavior, joint impedance and Cartesian impedance.
      */
     void set_default_behavior();
-    
+
     /**
      * Control function that runs in the control_thread_.
      */
     void control();
 
     /**
-     * Callback function for the joint position control loop.
+     * Receive robot state callback function receive_thread_.
      */
-    franka::Torques joint_torque_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+    void receive_robot_state();
 
-    /**
-     * Callback function for the joint position control loop.
-     */
-    franka::JointPositions joint_position_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+    void update_robot_state(const franka::RobotState& robot_state);
 
-    /**
-     * Callback function for the joint velocity control loop.
-     */
-    franka::JointVelocities joint_velocity_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+    void set_current_pose(const franka::CartesianPose& pose);
 
-    /**
-     * Callback function for the cartesian pose control loop.
-     */
-    franka::CartesianPose cartesian_pose_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+    double get_step_time();
 
-    /**
-     * Callback function for the cartesian velocity control loop.
-     */
-    franka::CartesianVelocities cartesian_velocity_control_cb(const franka::RobotState& state, franka::Duration /*period*/);
+    franka::CartesianPose get_current_pose();
 
     /**
      * the step() function should be called regularly at a fixed rate by the
@@ -217,9 +205,14 @@ namespace sdu_controllers::hal
     Eigen::VectorXd get_joint_velocities();
 
     /**
-     * Get the cartesian pose with position in meters and orientation as Quaterniond (see the Pose class).
+     * Get the measured (actual) cartesian pose with position in meters and orientation as Quaterniond (see the Pose class).
      */
-    math::Pose get_cartesian_tcp_pose();
+    math::Pose get_actual_tcp_pose();
+
+    /**
+     * Get the target (last-commanded) cartesian pose with position in meters and orientation as Quaterniond (see the Pose class).
+     */
+    math::Pose get_target_tcp_pose();
 
     /**
      * @returns Generalized forces in the TCP.
@@ -230,6 +223,7 @@ namespace sdu_controllers::hal
     franka::Robot robot_;
     franka::Model robot_model_;
     franka::RobotState robot_state_;
+    double step_time_ = 0.0;
     double control_frequency_;
     double dt_;
     ControlMode control_mode_;
@@ -237,12 +231,16 @@ namespace sdu_controllers::hal
     ControlStates prev_state_;
     bool start_control_;
     bool stop_control_;
+    bool stop_receive_;
     bool motion_finished_;
     Eigen::Vector<double, ROBOT_DOF> joint_pos_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_vel_ref_;
     math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> cartesian_vel_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_torque_ref_;
+    std::mutex robot_state_mutex_;
+    std::mutex update_pose_mutex_;
+    std::thread receive_thread_;
     std::thread control_thread_;
   };
 

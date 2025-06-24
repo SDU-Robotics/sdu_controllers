@@ -1,6 +1,6 @@
 #include <Eigen/Dense>
+#include <chrono>
 #include <cmath>
-#include <cstdint>
 #include <iostream>
 #include <sdu_controllers/hal/franka_robot.hpp>
 #include <sdu_controllers/math/pose.hpp>
@@ -43,60 +43,51 @@ int main(int argc, char* argv[])
 
     // Get the measured joint position from the Franka.
     VectorXd actual_q = robot.get_joint_positions();
-    std::cout << "actual q: " << actual_q;
+    std::cout << "actual q: " << actual_q << std::endl;
 
     // Read input trajectory from file
-    const uint8_t time_offset = 1;
-    std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/franka_cartesian_trajectory_circle.csv");
-
-    // First generate trajectory that moves the robot to the start of the circle to avoid any jumps.
-    //std::vector<double> start_pose_vec(7);
-    //start_pose_vec = {3.06890567e-01, -7.42545463e-17, 4.86882052e-01, 4.32978028e-17, 1.00000000e+00, -1.11022302e-16, -3.06161700e-17};
-    //Pose start_pose(start_pose_vec);
-
-    /*Pose start_pose = robot.get_cartesian_tcp_pose();
-    std::vector<double> x_d_init_vec(6);
-    for (Index i = 0; i < x_d_init_vec.size(); i++)
-    {
-      x_d_init_vec[i] = input_trajectory[0][time_offset + i];
-    }
-    Pose target_pose(x_d_init_vec);
-    double total_time = 3.0;
-    double acceleration_time = 0.5;
-    std::vector<Pose> init_trajectory = generate_trapezoidal_trajectory(start_pose, target_pose, total_time, acceleration_time);*/
+    //const uint8_t time_offset = 1;
+    //std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/franka_cartesian_trajectory_circle.csv");
+    Pose start_pose = robot.get_target_tcp_pose();
+    std::cout << "Robot current pose: " << start_pose.to_string() << std::endl;
 
     robot.set_control_mode(FrankaRobot::ControlMode::CARTESIAN_POSE);
+    robot.set_cartesian_pose_ref(start_pose);
     robot.start_control();
+    robot.step();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    /*for (const auto& pose : init_trajectory)
-    {
-      auto t_cycle_start = steady_clock::now();
-      robot.set_cartesian_pose_ref(pose);
-      robot.step();
-
-      auto t_app_stop = steady_clock::now();
-      auto t_app_duration = duration<double>(t_app_stop - t_cycle_start);
-      if (t_app_duration.count() < dt)
-      {
-        std::this_thread::sleep_for(std::chrono::duration<double>(dt - t_app_duration.count()));
-      }
-      }*/
+    double step_time = robot.get_step_time();
 
     // Control loop
-    for (const std::vector<double> &pose : input_trajectory)
+    while (step_time < 10.0)
     {
       auto t_cycle_start = steady_clock::now();
+      step_time = robot.get_step_time();
 
-      std::vector<double> x_d_vec(6);
+      constexpr double radius = 0.3;
+      double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * step_time));
+      double delta_x = radius * std::sin(angle);
+      double delta_z = radius * (std::cos(angle) - 1);
 
-      // Get desired cartesian pose
-      for (Index i = 0; i < x_d_vec.size(); i++)
-      {
-        x_d_vec[i] = pose[time_offset + i];
-      }
-      Pose x_d(x_d_vec);
-      std::cout << "x_d: " << x_d.to_string() << std::endl;
-      robot.set_cartesian_pose_ref(x_d);
+      /*Pose target_pose = start_pose;
+      Vector3d new_position = target_pose.get_position();
+      new_position[0] += delta_x;
+      new_position[2] += delta_z;
+      target_pose.set_position(new_position);
+
+      robot.set_cartesian_pose_ref(target_pose);*/
+
+      franka::CartesianPose start_pose = robot.get_current_pose().O_T_EE;
+      Eigen::Affine3d start_pose_transform(Eigen::Matrix4d::Map(start_pose.O_T_EE.data()));
+      Pose my_start_pose(start_pose_transform);
+      std::cout << "start_pose: " << my_start_pose.to_string() << std::endl;
+
+      std::array<double, 16> new_pose_arr = robot.get_current_pose().O_T_EE;
+      new_pose_arr[12] += delta_x;
+      new_pose_arr[14] += delta_z;
+      franka::CartesianPose new_pose(new_pose_arr);
+      robot.set_current_pose(new_pose);
       robot.step();
 
       auto t_app_stop = steady_clock::now();
@@ -106,7 +97,6 @@ int main(int argc, char* argv[])
         std::this_thread::sleep_for(std::chrono::duration<double>(dt - t_app_duration.count()));
       }
     }
-
     robot.stop_control();
   }
   catch (const franka::Exception& e)
