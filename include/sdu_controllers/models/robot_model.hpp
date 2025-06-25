@@ -3,7 +3,6 @@
 #define SDU_CONTROLLERS_ROBOT_MODEL_HPP
 
 #include <Eigen/Dense>
-#include <iostream>
 
 namespace sdu_controllers::models
 {

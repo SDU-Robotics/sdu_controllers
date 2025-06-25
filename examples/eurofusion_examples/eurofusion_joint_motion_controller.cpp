@@ -23,9 +23,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  std::cout << "before" << std::endl;
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
-  std::cout << "end" << std::endl;
 
   // Pick up
   double mass = 1000;
@@ -74,7 +72,7 @@ int main()
   q << 0.0027, 0.0004, 0.0, 0.0, -0.0004, -0.062, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
   ddq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-  csv_writer << eigen_to_std_vector(q);
+  csv_writer << eigen_to_std_vector(q); 
 
   std::cout << q << std::endl;
 

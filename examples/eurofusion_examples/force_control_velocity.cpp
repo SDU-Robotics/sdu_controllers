@@ -5,7 +5,6 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-// #include <sdu_controllers/models/breeding_blanket_handling_robot.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -88,7 +87,6 @@ int main()
   q << 0.0, 0., 3., 0., 0., 0.0, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  //
   Matrix4d T;
   VectorXd pos;
   Vector<double, 6> xe, xr;

@@ -42,7 +42,6 @@ namespace sdu_controllers::controllers
     // Matrix3d rot_mat = T.topLeftCorner(3, 3);
 
     MatrixXd Jac = robot_model_->get_jacobian(q);
-    // std::cout << "Jac: " << Jac << std::endl;
 
     MatrixXd JacDot = robot_model_->get_jacobian_dot(q, dq);
 
@@ -50,7 +49,6 @@ namespace sdu_controllers::controllers
 
     VectorXd xf = Kf_ * (f_d - f_e);
 
-    // std::cout << "Xf: " << xf << std::endl;
 
     // Mdinv_ << Md_.inverse();
 

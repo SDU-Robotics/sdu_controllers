@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
-
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 using namespace Eigen;
 

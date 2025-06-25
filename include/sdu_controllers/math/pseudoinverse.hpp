@@ -3,8 +3,9 @@
 //
 // Taken from https://gist.github.com/javidcf/25066cf85e71105d57b6
 
-#ifndef PSEUDOINVERSE_HPP
-#define PSEUDOINVERSE_HPP
+#pragma once
+#ifndef SDU_CONTROLLERS_PSEUDOINVERSE_HPP
+#define SDU_CONTROLLERS_PSEUDOINVERSE_HPP
 
 namespace sdu_controllers::math
 {
@@ -14,21 +15,21 @@ namespace sdu_controllers::math
   {
     typedef typename MatT::Scalar Scalar;
     auto svd = mat.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
-    const auto &singularValues = svd.singularValues();
-    Eigen::Matrix<Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> singularValuesInv(mat.cols(), mat.rows());
-    singularValuesInv.setZero();
-    for (unsigned int i = 0; i < singularValues.size(); ++i) {
-      if (singularValues(i) > tolerance)
+    const auto &singular_values = svd.singularValues();
+    Eigen::Matrix<Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> singular_values_inv(mat.cols(), mat.rows());
+    singular_values_inv.setZero();
+    for (unsigned int i = 0; i < singular_values.size(); ++i) {
+      if (singular_values(i) > tolerance)
       {
-        singularValuesInv(i, i) = Scalar{1} / singularValues(i);
+        singular_values_inv(i, i) = Scalar{1} / singular_values(i);
       }
       else
       {
-        singularValuesInv(i, i) = Scalar{0};
+        singular_values_inv(i, i) = Scalar{0};
       }
     }
-    return svd.matrixV() * singularValuesInv * svd.matrixU().adjoint();
+    return svd.matrixV() * singular_values_inv * svd.matrixU().adjoint();
   }
 }
 
-#endif //PSEUDOINVERSE_HPP
+#endif //SDU_CONTROLLERS_PSEUDOINVERSE_HPP
