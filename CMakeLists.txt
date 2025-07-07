@@ -112,13 +112,31 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+# Create targets file for none install
+export(
+  EXPORT sdu_controllers-config
+  FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdu_controllers-config.cmake"
+  NAMESPACE sdu_controllers::)
+
+# install target config file
 install(
   EXPORT sdu_controllers-config
   NAMESPACE sdu_controllers::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sdu_controllers)
 
+# Install Config file
+install(FILES cmake/sdu_controllersConfig.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sdu_controllers)
+
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Auto find project
+if(NOT WIN32)
+  file(MAKE_DIRECTORY $ENV{HOME}/.cmake/packages/sdu_controllers)
+  file(WRITE "$ENV{HOME}/.cmake/packages/sdu_controllers/sdu_controllers123"
+       "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+endif()
 
 # This prints a summary of found dependencies
 include(FeatureSummary)
