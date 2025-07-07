@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.9)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(POLICY CMP0167) # CMake 3.30 and later
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Set a name and a version number for your project:
 project(
   sdu_controllers
@@ -23,8 +27,10 @@ option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
 
 # Optional hardware examples
-option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
-option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" OFF)
+option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
+       OFF)
+option(BUILD_FRANKA_EXAMPLES
+       "Enable building of examples to be run on Franka robots" OFF)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -34,13 +40,24 @@ add_subdirectory(src)
 
 # compile the examples
 if(BUILD_EXAMPLES)
-add_subdirectory(examples)
+  add_subdirectory(examples)
 endif()
 add_subdirectory(hardware_examples)
 
 # compile the tests
 include(CTest)
 if(BUILD_TESTING)
+  if(NOT EXISTS ext/Catch2/CMakeLists.txt)
+    # If the Catch2 submodule is not present,
+    find_package(Git QUIET)
+    if(Git_FOUND)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    endif()
+
+  endif()
+
   add_subdirectory(ext/Catch2)
   include(./ext/Catch2/contrib/Catch.cmake)
   add_subdirectory(tests)
@@ -51,13 +68,25 @@ if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 if(BUILD_PYTHON)
-  if (CMAKE_VERSION VERSION_LESS 3.18)
+
+  if(NOT EXISTS ext/nanobind/CMakeLists.txt)
+    find_package(Git QUIET)
+    if(Git_FOUND)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    endif()
+  endif()
+  if(CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
   else()
     set(DEV_MODULE Development.Module)
   endif()
 
-  find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+  find_package(
+    Python 3.8
+    COMPONENTS Interpreter ${DEV_MODULE}
+    REQUIRED)
 
   # Add Python bindings
   add_subdirectory(ext/nanobind)
