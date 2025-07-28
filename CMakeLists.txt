@@ -48,14 +48,10 @@ add_subdirectory(hardware_examples)
 include(CTest)
 if(BUILD_TESTING)
   if(NOT EXISTS ext/Catch2/CMakeLists.txt)
-    # If the Catch2 submodule is not present,
-    find_package(Git QUIET)
-    if(Git_FOUND)
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    endif()
-
+    message(
+      FATAL_ERROR
+        "Catch2 submodule not found. Please run 'git submodule update --init --recursive'."
+    )
   endif()
 
   add_subdirectory(ext/Catch2)
@@ -70,12 +66,10 @@ endif()
 if(BUILD_PYTHON)
 
   if(NOT EXISTS ext/nanobind/CMakeLists.txt)
-    find_package(Git QUIET)
-    if(Git_FOUND)
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    endif()
+    message(
+      FATAL_ERROR
+        "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
+    )
   endif()
   if(CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)

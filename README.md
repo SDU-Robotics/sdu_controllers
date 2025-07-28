@@ -39,7 +39,11 @@ The following sequence of commands builds sdu_controllers.
 It assumes that your current working directory is the top-level directory
 of the freshly cloned repository:
 
-```
+``` bash
+# if you plan to build tests or python bindings. Call this first
+git submodule update --init --recursive
+
+# normal build
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
