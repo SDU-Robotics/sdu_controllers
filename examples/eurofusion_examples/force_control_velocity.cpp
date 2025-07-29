@@ -16,6 +16,8 @@ using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
 
+constexpr double pi = 3.14159265358979323846;
+
 int main()
 {
   // Setup writing of output trajectory to csv.
@@ -110,8 +112,8 @@ int main()
 
     // dfd << 0, 0, 0.1 * dt, VectorXd::Zero(3);
     dfd << 0,
-           (M_PI*cos((M_PI * j * dt)/50))/5 * dt,
-           2 * M_PI *cos((M_PI * j * dt)/50) * dt,
+           (pi*cos((pi * j * dt)/50))/5 * dt,
+           2 * pi *cos((pi * j * dt)/50) * dt,
            VectorXd::Zero(3);
 
     fd += dfd;
