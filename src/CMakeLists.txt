@@ -31,7 +31,7 @@ endif(Franka_FOUND)
 add_library(sdu_controllers ${sdu_controllers_SOURCES})
 target_link_libraries(sdu_controllers PUBLIC
     Eigen3::Eigen
-    yaml-cpp
+    yaml-cpp::yaml-cpp
 )
 target_include_directories(
   sdu_controllers PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
