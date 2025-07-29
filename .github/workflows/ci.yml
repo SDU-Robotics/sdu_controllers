@@ -43,7 +43,9 @@ jobs:
           macos: |
             brew: eigen yaml-cpp
           windows: |
-            vcpkg: yaml-cpp
+            github:
+              - path: jbeder/yaml-cpp
+                ref: 0.8.0
             gitlab:
               - path: libeigen/eigen
                 ref: 3.4.0
@@ -97,7 +99,9 @@ jobs:
           macos: |
             brew: eigen yaml-cpp
           windows: |
-            vcpkg: yaml-cpp
+            github:
+              - path: jbeder/yaml-cpp
+                ref: 0.8.0
             gitlab:
               - path: libeigen/eigen
                 ref: 3.4.0
