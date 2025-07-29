@@ -36,7 +36,7 @@ cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # find dependencies
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-find_package(yaml-cpp 0.7.0 REQUIRED NO_MODULE)
+find_package(yaml-cpp CONFIG REQUIRED)
 
 # compile the library
 add_subdirectory(src)
