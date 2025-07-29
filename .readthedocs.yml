@@ -7,6 +7,7 @@ build:
     python: "3.10"
   apt_packages:
     - libeigen3-dev
+    - libyaml-cpp-dev
 
 sphinx:
   configuration: doc/conf.py
@@ -16,8 +17,6 @@ formats: all
 submodules:
   include: all
   recursive: true
-
-
 
 python:
   install:
