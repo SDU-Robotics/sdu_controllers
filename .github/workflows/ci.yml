@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
-        build-type: [Debug, RelWithDebInfo]
+        build-type: [Debug]
         compiler: [gcc, clang]
         exclude:
           # Only default compiler on macos-latest and windows-latest
@@ -29,41 +29,44 @@ jobs:
             compiler: clang
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
 
-    - name: install dependencies
-      uses: SDU-Robotics/github-actions/install-dependencies@master
-      with:
-        compiler: ${{ matrix.compiler }}
-        build-type: ${{ matrix.build-type }}
-        ubuntu: |
-          apt: libeigen3-dev
-        macos: |
-          brew: eigen
-        windows: |
-          gitlab:
-            - path: libeigen/eigen
-              ref: 3.4.0
+      - name: install dependencies
+        uses: SDU-Robotics/github-actions/install-dependencies@master
+        with:
+          compiler: ${{ matrix.compiler }}
+          build-type: ${{ matrix.build-type }}
+          ubuntu: |
+            apt: libeigen3-dev libyaml-cpp-dev
+          macos: |
+            brew: eigen yaml-cpp
+          windows: |
+            github:
+              - path: jbeder/yaml-cpp
+                ref: 0.8.0
+            gitlab:
+              - path: libeigen/eigen
+                ref: 3.4.0
 
-    - name: make build directory
-      run: cmake -E make_directory ${{ github.workspace }}/build
+      - name: make build directory
+        run: cmake -E make_directory ${{ github.workspace }}/build
 
-    - name: configure cmake
-      shell: bash
-      working-directory: ${{ github.workspace }}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCS=OFF
+      - name: configure cmake
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCS=OFF
 
-    - name: build
-      shell: bash
-      working-directory: ${{ github.workspace }}/build
-      run: cmake --build .
+      - name: build
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build .
 
-    - name: run tests
-      shell: bash
-      working-directory: ${{ github.workspace }}/build
-      run: ctest
+      - name: run tests
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: ctest
 
   python-testing:
     name: Python package testing on ${{matrix.os}}
@@ -71,8 +74,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
-        build-type: [ Debug, RelWithDebInfo ]
-        compiler: [ gcc, clang ]
+        build-type: [Release]
+        compiler: [gcc, clang]
         exclude:
           # Only default compiler on macos-latest and windows-latest
           - os: macos-13
@@ -81,33 +84,36 @@ jobs:
             compiler: clang
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      with:
-        submodules: 'recursive'
+        with:
+          submodules: "recursive"
 
-    - name: install dependencies
-      uses: SDU-Robotics/github-actions/install-dependencies@master
-      with:
-        compiler: ${{ matrix.compiler }}
-        build-type: ${{ matrix.build-type }}
-        ubuntu: |
-          apt: libeigen3-dev
-        macos: |
-          brew: eigen
-        windows: |
-          gitlab:
-            - path: libeigen/eigen
-              ref: 3.4.0
+      - name: install dependencies
+        uses: SDU-Robotics/github-actions/install-dependencies@master
+        with:
+          compiler: ${{ matrix.compiler }}
+          build-type: ${{ matrix.build-type }}
+          ubuntu: |
+            apt: libeigen3-dev libyaml-cpp-dev
+          macos: |
+            brew: eigen yaml-cpp
+          windows: |
+            github:
+              - path: jbeder/yaml-cpp
+                ref: 0.8.0
+            gitlab:
+              - path: libeigen/eigen
+                ref: 3.4.0
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.8
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
 
-    - name: Run Python tests
-      shell: bash
-      run: |
-        python -m pip install .
-        python -m pip install -r requirements-dev.txt
-        pytest
+      - name: Run Python tests
+        shell: bash
+        run: |
+          python -m pip install .
+          python -m pip install -r requirements-dev.txt
+          pytest

@@ -1,0 +1,1 @@
+nb_type_0 = type

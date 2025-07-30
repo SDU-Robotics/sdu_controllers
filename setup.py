@@ -8,6 +8,7 @@ setup(
     cmake_args=[
         "-DBUILD_TESTING=OFF",
         "-DBUILD_DOCS=OFF",
+        "-DCMAKE_BUILD_TYPE=Release"
     ],
     cmake_install_dir="python/sdu_controllers",
 )

@@ -15,11 +15,12 @@ build-backend = "setuptools.build_meta"
 # single source of truth for sdu_controllers's version
 [project]
 name = "sdu_controllers"
-version = "0.0.1"
+version = "0.0.2"
 description = "A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU)."
 readme = "README.md"
 maintainers = [
     { name = "Anders Prier Lindvig", email = "anpl@mmmi.sdu.dk" },
+    { name = "Emil Lykke Diget", email = "eld@mmmi.sdu.dk" },
 ]
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -28,7 +29,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
 ]
-dependencies = []
+dependencies = ["numpy"]
 
 # NB: Setuptools-specific build options are currently still stored
 #     in setup.py, as scikit-build is not (yet) supporting PEP621.
