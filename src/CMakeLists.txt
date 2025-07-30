@@ -28,6 +28,10 @@ if(Franka_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
 endif(Franka_FOUND)
 
+if(NOT TARGET yaml-cpp::yaml-cpp)
+  add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
+endif()
+
 add_library(sdu_controllers ${sdu_controllers_SOURCES})
 target_link_libraries(sdu_controllers PUBLIC
     Eigen3::Eigen
