@@ -8,17 +8,19 @@ my_data = genfromtxt('examples/data/joint_trajectory_safe.csv', delimiter=',')
 freq = 500.0
 dt = 1.0 / freq
 Kp_val = 100.0
+Ki_val = 0
 Kd_val = 2 * np.sqrt(Kp_val)
 N_val = 1
 
 Kp = np.diag([Kp_val, Kp_val, Kp_val, Kp_val, Kp_val, Kp_val])
+Ki = np.diag([Ki_val, Ki_val, Ki_val, Ki_val, Ki_val, Ki_val])
 Kd = np.diag([Kd_val, Kd_val, Kd_val, Kd_val, Kd_val, Kd_val])
 N = np.diag([N_val, N_val, N_val, N_val, N_val, N_val])
 
-ur_robot = sdu_controllers.URRobotModel()
-pd_controller = sdu_controllers.PDController(Kp, Kd, N)
-inv_dyn_jnt_space = sdu_controllers.InverseDynamicsJointSpace(ur_robot)
-fwd_dyn = sdu_controllers.ForwardDynamics(ur_robot)
+ur_robot = sdu_controllers.models.URRobotModel()
+pd_controller = sdu_controllers.controllers.PIDController(Kp,Ki, Kd, N,dt)
+inv_dyn_jnt_space = sdu_controllers.math.InverseDynamicsJointSpace(ur_robot)
+fwd_dyn = sdu_controllers.math.ForwardDynamics(ur_robot)
 
 q = np.array([0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0])
 dq = np.zeros(6)

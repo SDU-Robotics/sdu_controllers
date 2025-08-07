@@ -19,8 +19,8 @@
 # sdu_controllers
 
 sdu_controllers is a C++ library that implements fundamental robot controllers.
-The library is developed and maintained by the [SDU Robotics](https://www.sdu.dk/en/forskning/sdurobotics) group at University of Southern Denmark (SDU). 
-Python bindings and a MATLAB Simulink interface is provided making it possible to use it as a Python library or 
+The library is developed and maintained by the [SDU Robotics](https://www.sdu.dk/en/forskning/sdurobotics) group at University of Southern Denmark (SDU).
+Python bindings and a MATLAB Simulink interface is provided making it possible to use it as a Python library or
 in Simulink with very little overhead.
 
 ## Prerequisites
@@ -30,6 +30,7 @@ Building sdu_controllers requires the following software installed:
 * A C++17-compliant compiler
 * CMake `>= 3.9`
 * Eigen3 `>= 3.3` for linear algebra.
+* yaml-cpp for loading robot models.
 * Doxygen (optional, documentation building is skipped if missing)
 * Python `>= 3.8` for building Python bindings
 
@@ -58,8 +59,8 @@ which can be set by adding `-D<var>={ON, OFF}` to the `cmake` call:
 * `BUILD_PYTHON`: Enable building the Python bindings (default: `ON`)
 * `BUILD_EXAMPLES`: Enable building the examples (default: `ON`)
 
-For some controllers, hardware specific examples have been implemented which can be run on a real robot. 
-These are disabled by default. 
+For some controllers, hardware specific examples have been implemented which can be run on a real robot.
+These are disabled by default.
 * `BUILD_UR_EXAMPLES`: Enable building UR specific examples (default: `OFF`)
 
 If you wish to build and install the project as a Python project without
