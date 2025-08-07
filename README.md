@@ -35,16 +35,46 @@ Building sdu_controllers requires the following software installed:
 * Python `>= 3.8` for building Python bindings
 
 ## Building sdu_controllers
+### Dependencies
+In order to build sdu_controllers you must first install the dependencies, see how to do that on your operating system here:
+<p>
+<details open>
+<summary><b>Ubuntu</b></summary>
 
+``` bash
+sudo apt update && sudo apt install libeigen3-dev libyaml-cpp-dev
+```
+</details>
+
+<details>
+<summary><b>Windows</b></summary>
+
+```
+vcpkg install eigen3 yaml-cpp
+```
+</details>
+
+<details>
+<summary><b>macOS</b></summary>
+
+```
+brew install eigen yaml-cpp
+```
+</details>
+</p>
+
+If you plan to build tests and python bindings you must install [Catch2](https://github.com/catchorg/Catch2) and [nanobind](https://github.com/wjakob/nanobind) with:
+
+``` bash
+git submodule update --init --recursive
+```
+
+### Build procedure
 The following sequence of commands builds sdu_controllers.
 It assumes that your current working directory is the top-level directory
 of the freshly cloned repository:
 
 ``` bash
-# if you plan to build tests or python bindings. Call this first
-git submodule update --init --recursive
-
-# normal build
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
