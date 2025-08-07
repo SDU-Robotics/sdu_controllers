@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(POLICY CMP0167) # CMake 3.30 and later
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Set a name and a version number for your project:
 project(
   sdu_controllers
@@ -23,8 +27,10 @@ option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
 
 # Optional hardware examples
-option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots" OFF)
-option(BUILD_FRANKA_EXAMPLES "Enable building of examples to be run on Franka robots" OFF)
+option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
+       OFF)
+option(BUILD_FRANKA_EXAMPLES
+       "Enable building of examples to be run on Franka robots" OFF)
 
 # Add config library as a path such that we can find parameter files used for the robot models.
 file(REAL_PATH "config" CONFIG_FILE_PATH)
@@ -43,13 +49,20 @@ add_subdirectory(src)
 
 # compile the examples
 if(BUILD_EXAMPLES)
-add_subdirectory(examples)
+  add_subdirectory(examples)
 endif()
 add_subdirectory(hardware_examples)
 
 # compile the tests
 include(CTest)
 if(BUILD_TESTING)
+  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/Catch2/CMakeLists.txt)
+    message(
+      FATAL_ERROR
+        "Catch2 submodule not found. Please run 'git submodule update --init --recursive'."
+    )
+  endif()
+
   add_subdirectory(ext/Catch2)
   include(./ext/Catch2/contrib/Catch.cmake)
   add_subdirectory(tests)
@@ -60,13 +73,23 @@ if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 if(BUILD_PYTHON)
-  if (CMAKE_VERSION VERSION_LESS 3.18)
+
+  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind/CMakeLists.txt)
+    message(
+      FATAL_ERROR
+        "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
+    )
+  endif()
+  if(CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
   else()
     set(DEV_MODULE Development.Module)
   endif()
 
-  find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+  find_package(
+    Python 3.8
+    COMPONENTS Interpreter ${DEV_MODULE}
+    REQUIRED)
 
   # Add Python bindings
   add_subdirectory(ext/nanobind)
@@ -92,13 +115,31 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+# Create targets file for none install
+export(
+  EXPORT sdu_controllers-config
+  FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdu_controllers-config.cmake"
+  NAMESPACE sdu_controllers::)
+
+# install target config file
 install(
   EXPORT sdu_controllers-config
   NAMESPACE sdu_controllers::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sdu_controllers)
 
+# Install Config file
+install(FILES cmake/sdu_controllersConfig.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sdu_controllers)
+
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Auto find project
+if(NOT WIN32)
+  file(MAKE_DIRECTORY $ENV{HOME}/.cmake/packages/sdu_controllers)
+  file(WRITE "$ENV{HOME}/.cmake/packages/sdu_controllers/sdu_controllers123"
+       "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+endif()
 
 # This prints a summary of found dependencies
 include(FeatureSummary)

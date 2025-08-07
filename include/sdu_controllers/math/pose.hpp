@@ -123,6 +123,46 @@ namespace sdu_controllers::math
     }
 
     /**
+     * @brief Construct a pose from a vector containing position and orientation the orientation
+     * can be represented as either rotation vector (RX, RY, RZ) or as a quaternion in scalar-first format
+     * (w, x, y, z).
+     *
+     * @param pose_vector std::vector containing [x, y, z, RX, RY, RZ] with orientation as rotation vector or a
+     *  std::vector containing [x, y, z, qw, qx, qy, qz] with orientation as quaternion in scalar-first format
+     * (w, x, y, z).
+     * @throw std::invalid_argument if the vector does not contain 6 or 7 elements.
+     */
+    explicit Pose(const Eigen::VectorXd& pose_vector)
+    {
+      if (pose_vector.size() == 6)
+      {
+        position_ << pose_vector[0], pose_vector[1], pose_vector[2];
+        Eigen::Vector3d angle_axis(pose_vector[3], pose_vector[4], pose_vector[5]);
+        double angle = angle_axis.norm();
+        if (angle < 1e-10)
+        {
+          orientation_ = Eigen::Quaterniond::Identity();
+        }
+        else
+        {
+          Eigen::Vector3d axis = angle_axis / angle;
+          orientation_ = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
+        }
+        orientation_.normalize();
+      }
+      else if (pose_vector.size() == 7)
+      {
+        position_ = Eigen::Vector3d(pose_vector[0], pose_vector[1], pose_vector[2]);
+        orientation_ = Eigen::Quaterniond(pose_vector[3], pose_vector[4], pose_vector[5], pose_vector[6]);
+        orientation_.normalize();
+      }
+      else
+      {
+        throw std::invalid_argument("Pose vector must have either 6 or 7 elements.");
+      }
+    }
+
+    /**
      * @brief Construct a pose from an array containing position and orientation.
      *
      * @param pose_array Array containing [x, y, z, qw, qx, qy, qz] where the quaternion
@@ -282,6 +322,43 @@ namespace sdu_controllers::math
       return to_transform();
     }
 
+
+    /**
+     * @brief Assignment operator to set the pose from another Pose object.
+     *
+     * This allows the Pose to be assigned from another Pose object.
+     *
+     * @param other The Pose object to copy from
+     * @return Reference to this Pose object
+     */
+    Pose& operator=(const Pose& other)
+    {
+
+        position_ = other.position_;
+        orientation_ = other.orientation_;
+        g_pose_io_format_ = other.g_pose_io_format_;
+      
+      return *this;
+    }
+
+    /**
+     * @brief Assignment operator to set the pose from a vector.
+     *
+     * This allows the Pose to be assigned from a std::vector containing either
+     * [x, y, z, RX, RY, RZ] (rotation vector) or [x, y, z, qw, qx, qy, qz] (quaternion).
+     *
+     * @param pose_vector The vector containing the pose data
+     * @return Reference to this Pose object
+     */
+    Pose& operator=(std::vector<double> pose_vector)
+    {
+      Pose new_pose(pose_vector);
+      position_ = new_pose.position_;
+      orientation_ = new_pose.orientation_;
+      g_pose_io_format_ = new_pose.g_pose_io_format_;
+      return *this;
+    }
+
     /**
      * @brief Format the pose as a string according to the specified format.
      *
@@ -319,15 +396,15 @@ namespace sdu_controllers::math
         case PoseFormat::Euler:
         {
           Eigen::Vector3d euler = to_euler_angles("ZYZ");
-          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
-              << "Euler ZYZ [" << euler.x() << ", " << euler.y() << ", " << euler.z() << "] rad";
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], " << "Euler ZYZ ["
+              << euler.x() << ", " << euler.y() << ", " << euler.z() << "] rad";
           break;
         }
         case PoseFormat::AngleAxis:
         {
           Eigen::Vector3d aa = to_angle_axis_vector();
-          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
-              << "Angle-Axis [" << aa.x() << ", " << aa.y() << ", " << aa.z() << "]";
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], " << "Angle-Axis ["
+              << aa.x() << ", " << aa.y() << ", " << aa.z() << "]";
           break;
         }
         case PoseFormat::Matrix:
@@ -350,9 +427,8 @@ namespace sdu_controllers::math
         case PoseFormat::Default:
         default:
         {
-          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], "
-              << "Orientation [" << orientation_.w() << ", " << orientation_.x() << ", " << orientation_.y() << ", "
-              << orientation_.z() << "]";
+          oss << "Position [" << position_.x() << ", " << position_.y() << ", " << position_.z() << "], " << "Orientation ["
+              << orientation_.w() << ", " << orientation_.x() << ", " << orientation_.y() << ", " << orientation_.z() << "]";
           break;
         }
       }

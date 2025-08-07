@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <Eigen/Dense>
 #include <chrono>
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>

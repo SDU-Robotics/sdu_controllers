@@ -22,7 +22,7 @@ if(ur_rtde_FOUND)
 endif(ur_rtde_FOUND)
 
 # Try to find libfranka in order to build Franka Robot HAL
-find_package(Franka 0.9.1)
+find_package(Franka 0.9.1 QUIET)
 
 if(Franka_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
