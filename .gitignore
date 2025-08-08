@@ -178,3 +178,6 @@ cython_debug/
 
 # cmake files
 cmake/sdu_controllers-config.cmake
+
+# IDE files
+.vscode

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <sdu_controllers/kinematics/dh_parameters.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 
@@ -87,6 +88,14 @@ namespace sdu_controllers::math
     MatrixXd Jdot_A = A_full * robot_model->get_jacobian_dot(q, dq);
     return Jdot_A;
   }
+
+  Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(
+      const std::vector<Eigen::Matrix4d> &T_chain,
+      const std::vector<kinematics::DHParam> &dh_parameters);
+
+  Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(
+      Eigen::VectorXd q,
+      const std::vector<kinematics::DHParam> &dh_parameters);
 
   template<class Derived>
   static Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived> &vec)
