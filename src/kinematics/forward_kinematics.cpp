@@ -17,10 +17,10 @@ std::vector<Eigen::Matrix4d> kinematics::forward_kinematics_all(
     DHParam dh = dh_parameters[k];
 
     // Apply the joint value
-    if (false)  // if prismatic
-      dh.d += q(k);
-    else
+    if (dh.is_joint_revolute)
       dh.theta += q(k);
+    else
+      dh.d += q(k);
 
     double cos_alpha = cos(dh.alpha);
     double sin_alpha = sin(dh.alpha);
