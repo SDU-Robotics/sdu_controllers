@@ -40,6 +40,13 @@ namespace sdu_controllers::models
     virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
 
     /**
+     * @brief Get the friction term \f$ \tau_{f} \f$
+     * @param qd [in] the robot joint velocities.
+     * @return the estimated joint torque due to friction.
+     */
+    virtual Eigen::VectorXd get_friction(const Eigen::VectorXd &qd) = 0;
+
+    /**
      * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
      * @returns the jacobian
      */

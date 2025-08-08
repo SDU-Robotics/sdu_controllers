@@ -8,6 +8,7 @@ set(sdu_controllers_SOURCES
       math/inverse_dynamics_joint_space.cpp
       math/forward_dynamics.cpp
       math/math.cpp
+      math/momentum_observer.cpp
       math/rnea.cpp
       models/breeding_blanket_handling_robot.cpp
       models/breeding_blanket_handling_robot_model.cpp

@@ -11,109 +11,118 @@
 namespace sdu_controllers::models
 {
 
-/**
- * This class provides a robot model for a UR robot.
- */
-
-class URRobotModel : public RobotModel
-{
-public:
-  static constexpr uint16_t ROBOT_DOF = 6;
-
-  URRobotModel();
-
-  explicit URRobotModel(URRobot::RobotType robot_type);
-
   /**
-   * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
-   * @param q the robot joint configuration.
-   * @returns the inertia matrix.
+   * This class provides a robot model for a UR robot.
    */
-  Eigen::MatrixXd get_inertia_matrix(const Eigen::VectorXd &q) override;
 
-  /**
-   * @brief Get coriolis matrix \f$ \mathbf{C}(q, \dot{q}) \f$
-   * @param q the robot joint configuration.
-   * @param qd the robot joint configuration.
-   * @returns the coriolis matrix.
-   */
-  Eigen::MatrixXd get_coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &qd) override;
+  class URRobotModel : public RobotModel
+  {
+   public:
+    static constexpr uint16_t ROBOT_DOF = 6;
 
-  /**
-   * @brief Get gravity term \f$ \tau_{g} \f$
-   * @returns the gravity vector
-   */
-  Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
+    URRobotModel();
 
-  /**
-   * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
-   * @returns the jacobian
-   */
-  Eigen::MatrixXd get_jacobian(const Eigen::VectorXd &q) override;
+    explicit URRobotModel(URRobot::RobotType robot_type);
 
-  /**
-   * @brief Get jacobian dot \f$ \mathbf{\dot{J(q, dq)}} \f$
-   * @returns the jacobian dot
-   */
-  Eigen::MatrixXd get_jacobian_dot(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) override;
+    /**
+     * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
+     * @param q the robot joint configuration.
+     * @returns the inertia matrix.
+     */
+    Eigen::MatrixXd get_inertia_matrix(const Eigen::VectorXd &q) override;
 
-  /**
- * @brief Get joint position bounds.
- * @returns the joint position bounds
- */
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override;
+    /**
+     * @brief Get coriolis matrix \f$ \mathbf{C}(q, \dot{q}) \f$
+     * @param q the robot joint configuration.
+     * @param qd the robot joint configuration.
+     * @returns the coriolis matrix.
+     */
+    Eigen::MatrixXd get_coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &qd) override;
 
-  /**
-   * @brief Get joint velocity bounds.
-   * @returns the joint velocity bounds
-   */
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override;
+    /**
+     * @brief Get gravity term \f$ \tau_{g} \f$
+     * @returns the gravity vector
+     */
+    Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
-  /**
-   * @brief Get joint acceleration bounds.
-   * @returns the joint acceleration bounds
-   */
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override;
+    /**
+     * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
+     * @returns the jacobian
+     */
+    Eigen::MatrixXd get_jacobian(const Eigen::VectorXd &q) override;
 
-  /**
-   * @brief Get joint torque bounds.
-   * @returns the joint torque bounds
-   */
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
+    /**
+     * @brief Get jacobian dot \f$ \mathbf{\dot{J(q, dq)}} \f$
+     * @returns the jacobian dot
+     */
+    Eigen::MatrixXd get_jacobian_dot(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) override;
 
-  uint16_t get_dof() const override;
+    /**
+     * @brief Get the friction term \f$ \tau_{f} \f$
+     * @param qd [in] the robot joint velocities.
+     * @return the estimated joint torque due to friction.
+     */
+    Eigen::VectorXd get_friction(const Eigen::VectorXd &qd) override
+    {
+      return Eigen::VectorXd::Zero(ROBOT_DOF);
+    }
 
-  std::vector<double> get_a() override;
+    /**
+     * @brief Get joint position bounds.
+     * @returns the joint position bounds
+     */
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override;
 
-  std::vector<double> get_d() override;
+    /**
+     * @brief Get joint velocity bounds.
+     * @returns the joint velocity bounds
+     */
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override;
 
-  std::vector<double> get_alpha() override;
+    /**
+     * @brief Get joint acceleration bounds.
+     * @returns the joint acceleration bounds
+     */
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override;
 
-  std::vector<double> get_theta() override;
+    /**
+     * @brief Get joint torque bounds.
+     * @returns the joint torque bounds
+     */
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
 
-  std::vector<double> get_m() override;
+    uint16_t get_dof() const override;
 
-  std::vector<bool> get_is_joint_revolute() override;
+    std::vector<double> get_a() override;
 
-  Eigen::Vector3d get_g0();
+    std::vector<double> get_d() override;
 
-  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
+    std::vector<double> get_alpha() override;
 
-  std::vector<Eigen::Matrix3d> get_link_inertia();
+    std::vector<double> get_theta() override;
 
-private:
-  uint16_t dof_{ROBOT_DOF};
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
-  URRobot ur_robot_;
+    std::vector<double> get_m() override;
 
-  std::vector<double> theta;
-  std::vector<bool> is_joint_revolute;
+    std::vector<bool> get_is_joint_revolute() override;
 
-};
+    Eigen::Vector3d get_g0();
 
-} // namespace sdu_controllers::models
+    Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
+
+    std::vector<Eigen::Matrix3d> get_link_inertia();
+
+   private:
+    uint16_t dof_{ ROBOT_DOF };
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds_;
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds_;
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds_;
+    URRobot ur_robot_;
+
+    std::vector<double> theta;
+    std::vector<bool> is_joint_revolute;
+  };
+
+}  // namespace sdu_controllers::models
 
 #endif  // SDU_CONTROLLERS_UR_ROBOT_MODEL_HPP
