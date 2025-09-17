@@ -23,7 +23,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
   double Kp_value = 1000.0;
@@ -36,8 +36,13 @@ int main()
   VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_value;
   VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_value;
 
-  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(), 
-    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt);
+  VectorXd u_max(ROBOT_DOF);
+  // UR5e max and min torque see https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/
+  u_max << 150.0, 150.0, 150.0, 28.0, 28.0, 28.0;
+  VectorXd u_min = -u_max;
+
+  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
+    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model);
 

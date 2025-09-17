@@ -23,7 +23,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
 

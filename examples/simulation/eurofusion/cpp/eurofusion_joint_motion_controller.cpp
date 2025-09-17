@@ -51,8 +51,13 @@ int main()
   VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_value;
   VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_value;
 
-  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(), 
-    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt);
+  VectorXd u_max(ROBOT_DOF);
+  // Breeding blanket robot max and min torque
+  u_max << 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0;
+  VectorXd u_min = -u_max;
+
+  controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
+    Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
   math::RecursiveNewtonEuler rnea(robot_model);
   Vector3d z0;
   z0 << 0.0, 0.0, -1.0;
@@ -72,7 +77,7 @@ int main()
   q << 0.0027, 0.0004, 0.0, 0.0, -0.0004, -0.062, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
   ddq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-  csv_writer << eigen_to_std_vector(q); 
+  csv_writer << eigen_to_std_vector(q);
 
   std::cout << q << std::endl;
 

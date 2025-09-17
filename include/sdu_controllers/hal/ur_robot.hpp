@@ -23,6 +23,7 @@ namespace sdu_controllers::hal
    *  - JOINT_POSITION
    *  - CARTESIAN
    *  - VELOCITY
+   *  - TORQUE
    *
    * where a target reference for the given control mode is set using set_joint_pos_ref(),
    * set_cartesian_pose_ref(), set_joint_vel_ref() or set_cartesian_vel_ref(). To perform the actual control,
@@ -64,7 +65,8 @@ namespace sdu_controllers::hal
       JOINT_POSITION,
       CARTESIAN_POSE,
       JOINT_VELOCITY,
-      CARTESIAN_VELOCITY
+      CARTESIAN_VELOCITY,
+      TORQUE
     };
 
     /**
@@ -141,6 +143,16 @@ namespace sdu_controllers::hal
     bool set_joint_vel_ref(const Eigen::Vector<double, ROBOT_DOF>& dq, double acceleration = 0.5);
 
     /**
+     * Set a joint torque reference target.
+     *
+     * Commands joint torques directly.
+     *
+     * @param dq specifies the target joint velocities \f$\dot{q}\f$.
+     * @param acceleration joint acceleration [rad/s^2] (of leading axis)
+     */
+    bool set_joint_torque_ref(const Eigen::Vector<double, ROBOT_DOF>& torques);
+
+    /**
      * Set a cartesian velocity reference target.
      *
      * Accelerate linearly in Cartesian space and continue with constant tool speed.
@@ -187,6 +199,10 @@ namespace sdu_controllers::hal
      */
     Eigen::VectorXd get_joint_torques();
 
+    Eigen::VectorXd get_actual_joint_currents();
+
+    Eigen::VectorXd get_target_joint_currents();
+
     /**
      * Get the joint positions
      */
@@ -221,6 +237,7 @@ namespace sdu_controllers::hal
     math::Pose cartesian_pose_ref_;
     Eigen::Vector<double, ROBOT_DOF> joint_vel_ref_;
     Eigen::Vector<double, ROBOT_DOF> cartesian_vel_ref_;
+    Eigen::Vector<double, ROBOT_DOF> joint_torque_ref_;
 
     double servo_vel_;
     double servo_acc_;

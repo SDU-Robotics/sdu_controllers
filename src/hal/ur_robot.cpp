@@ -56,6 +56,8 @@ namespace sdu_controllers::hal
             joint_vel_ref_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
           else if (control_mode_ == ControlMode::CARTESIAN_VELOCITY)
             cartesian_vel_ref_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+          else if (control_mode_ == ControlMode::TORQUE)
+            joint_torque_ref_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
           // This code will run once on entry to state
           prev_state_ = curr_state_;
@@ -88,6 +90,8 @@ namespace sdu_controllers::hal
             rtde_control_->servoStop();
           else if (control_mode_ == ControlMode::JOINT_VELOCITY || control_mode_ == ControlMode::CARTESIAN_VELOCITY)
             rtde_control_->speedStop();
+          else if (control_mode_ == ControlMode::TORQUE)
+            rtde_control_->torqueCommand({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
           curr_state_ = ControlStates::STOPPED;
           break;
         }
@@ -104,6 +108,11 @@ namespace sdu_controllers::hal
           Eigen::Vector3d rotvec = cartesian_pose_ref_.to_angle_axis_vector();
           std::vector<double> pose_rotvec{pos[0], pos[1], pos[2], rotvec[0], rotvec[1], rotvec[2]};
           rtde_control_->servoL(pose_rotvec, servo_vel_, servo_acc_, dt_, servo_lookahead_t_, servo_p_gain_);
+        }
+        else if (control_mode_ == ControlMode::TORQUE)
+        {
+          std::vector<double> torques(joint_torque_ref_.begin(), joint_torque_ref_.end());
+          rtde_control_->torqueCommand(torques);
         }
         else if (control_mode_ == ControlMode::UNDEFINED)
         {
@@ -184,6 +193,16 @@ namespace sdu_controllers::hal
     return true;
   }
 
+  bool URRobot::set_joint_torque_ref(const Eigen::Vector<double, ROBOT_DOF>& torques)
+  {
+    // Check if the control mode has been set, otherwise set it to TORQUE.
+    if (control_mode_ == ControlMode::UNDEFINED)
+      set_control_mode(ControlMode::TORQUE);
+
+    joint_torque_ref_ = torques;
+    return true;
+  }
+
   bool URRobot::set_cartesian_vel_ref(const Eigen::Vector<double, ROBOT_DOF> &xd, double acceleration)
   {
     // Check if the control mode has been set, otherwise set it to CARTESIAN_VELOCITY.
@@ -229,6 +248,18 @@ namespace sdu_controllers::hal
   {
     Eigen::VectorXd qd = utils::std_vector_to_eigen(rtde_receive_->getActualQd());
     return qd;
+  }
+
+  Eigen::VectorXd URRobot::get_actual_joint_currents()
+  {
+    Eigen::VectorXd currents = utils::std_vector_to_eigen(rtde_receive_->getActualCurrent());
+    return currents;
+  }
+
+  Eigen::VectorXd URRobot::get_target_joint_currents()
+  {
+    Eigen::VectorXd currents = utils::std_vector_to_eigen(rtde_receive_->getTargetCurrent());
+    return currents;
   }
 
   math::Pose URRobot::get_cartesian_tcp_pose()

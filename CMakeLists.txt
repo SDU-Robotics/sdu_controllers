@@ -51,7 +51,6 @@ add_subdirectory(src)
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
-add_subdirectory(hardware_examples)
 
 # compile the tests
 include(CTest)

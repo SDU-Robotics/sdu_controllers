@@ -10,8 +10,8 @@ namespace sdu_controllers::controllers
   class PIDController : public Controller
   {
    public:
-    explicit PIDController(Eigen::MatrixXd Kp,  Eigen::MatrixXd Ki, 
-                           Eigen::MatrixXd Kd, Eigen::MatrixXd N, double dt);
+    explicit PIDController(Eigen::MatrixXd Kp,  Eigen::MatrixXd Ki,
+                           Eigen::MatrixXd Kd, Eigen::MatrixXd N, double dt, Eigen::VectorXd u_min, Eigen::VectorXd u_max);
 
     /**
      * @brief Step the execution of the controller.
@@ -29,9 +29,13 @@ namespace sdu_controllers::controllers
     void reset() override;
 
    private:
-    Eigen::VectorXd u_, integral_term;
+    Eigen::VectorXd u_, integral_term_;
     Eigen::MatrixXd Kp_, Ki_, Kd_, N_;
-    double dt;
+    double dt_;
+
+    // Minimum and maximum output limits for anti-windup
+    Eigen::VectorXd u_min_;
+    Eigen::VectorXd u_max_;
   };
 }  // namespace sdu_controllers::controllers
 

@@ -1,23 +1,11 @@
-add_executable(sdu_controllers_example sdu_controllers_example.cpp)
-target_link_libraries(sdu_controllers_example PRIVATE sdu_controllers)
+if(BUILD_EXAMPLES)
+    add_subdirectory(simulation)
+endif()
 
-add_executable(admittance_controller admittance_controller.cpp)
-target_link_libraries(admittance_controller PRIVATE sdu_controllers)
+if(BUILD_UR_EXAMPLES)
+    add_subdirectory(hardware/ur)
+endif()
 
-add_executable(joint_motion_controller ur_examples/joint_motion_controller.cpp)
-target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
-
-add_executable(cartesian_motion_controller ur_examples/cartesian_motion_controller.cpp)
-target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
-
-add_executable(force_control_velocity ur_examples/force_control_velocity.cpp)
-target_link_libraries(force_control_velocity PRIVATE sdu_controllers)
-
-add_executable(eurofusion_joint_motion_controller eurofusion_examples/eurofusion_joint_motion_controller.cpp)
-target_link_libraries(eurofusion_joint_motion_controller PRIVATE sdu_controllers)
-
-add_executable(eurofusion_robot_rnea eurofusion_examples/eurofusion_robot_rnea.cpp)
-target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
-
-add_executable(eurofusion_force_control eurofusion_examples/force_control_velocity.cpp)
-target_link_libraries(eurofusion_force_control PRIVATE sdu_controllers)
+if(BUILD_FRANKA_EXAMPLES)
+    add_subdirectory(hardware/franka)
+endif()

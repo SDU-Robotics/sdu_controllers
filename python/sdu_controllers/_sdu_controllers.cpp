@@ -40,9 +40,9 @@ namespace sdu_controllers
     nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
 
     // enums
-    nb::enum_<URRobot::RobotType>(m_models, "RobotType")
-        .value("UR3e", URRobot::RobotType::UR3e)
-        .value("UR5e", URRobot::RobotType::UR5e)
+    nb::enum_<models::URRobot::RobotType>(m_models, "RobotType")
+        .value("UR3e", models::URRobot::RobotType::UR3e)
+        .value("UR5e", models::URRobot::RobotType::UR5e)
         .export_values();
 
     // models
@@ -50,7 +50,7 @@ namespace sdu_controllers
 
     nb::class_<models::URRobotModel, models::RobotModel>(m_models, "URRobotModel")
         .def(nb::init<>())
-        .def(nb::init<URRobot::RobotType>())
+        .def(nb::init<models::URRobot::RobotType>())
         .def("get_inertia_matrix", &models::URRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::URRobotModel::get_coriolis)
         .def("get_gravity", &models::URRobotModel::get_gravity)
@@ -72,14 +72,16 @@ namespace sdu_controllers
     // controllers
     nb::class_<controllers::PIDController>(m_controllers, "PIDController")
         .def(
-            nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
+            nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &,
                          const Eigen::MatrixXd &, const Eigen::MatrixXd &,
-                         double>(),
+                         double, const Eigen::VectorXd &, const Eigen::VectorXd &>(),
             nb::arg("Kp"),
             nb::arg("Ki"),
             nb::arg("Kd"),
             nb::arg("N"),
-            nb::arg("dt"))
+            nb::arg("dt"),
+            nb::arg("u_min"),
+            nb::arg("u_max"))
         .def("step", &controllers::PIDController::step)
         .def("get_output", &controllers::PIDController::get_output)
         .def("reset", &controllers::PIDController::reset);
@@ -99,8 +101,8 @@ namespace sdu_controllers
 
     // Cartesian motion controller
     nb::class_<controllers::OperationalSpaceController>(m_controllers, "OperationalSpaceController")
-        .def(nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, 
-            std::shared_ptr<models::RobotModel>>(), 
+        .def(nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &,
+            std::shared_ptr<models::RobotModel>>(),
             nb::arg("Kp"), nb::arg("Kd"), nb::arg("robot_model"))
         .def("step", &controllers::OperationalSpaceController::step)
         .def("get_output", &controllers::OperationalSpaceController::get_output)
@@ -177,7 +179,7 @@ namespace sdu_controllers
     // Kinematics
     m_kinematics.def("forward_kinematics", &sdu_controllers::kinematics::forward_kinematics,
         nb::arg("q"), nb::arg("robot_model"));
-        
+
   }
 
 }  // namespace sdu_controllers

@@ -7,6 +7,7 @@
 
 constexpr double pi = 3.14159265358979323846;
 
+namespace sdu_controllers::models {
 URRobot::URRobot(RobotType type)
 {
   N = 6;
@@ -19867,3 +19868,4 @@ C[35] = (1.0/2.0)*(dq[0]*(x159*(x234*x133 - x54*x106 + x54*x58 - x89*x239) + x19
 
     return out;
 }
+} // namepace sdu_controllers::models

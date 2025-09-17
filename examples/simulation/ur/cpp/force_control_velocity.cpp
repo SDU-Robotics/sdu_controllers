@@ -30,7 +30,7 @@ int main()
   csv_writer << labels;
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
 
