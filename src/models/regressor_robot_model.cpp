@@ -4,10 +4,10 @@
 using namespace sdu_controllers::models;
 
 RegressorRobotModel::RegressorRobotModel(std::vector<kinematics::DHParam> dh_parameters, const Eigen::Vector3d& g0)
-    : _dh_parameters(std::move(dh_parameters)),
-      _gravity(g0)
+    : dh_parameters_(std::move(dh_parameters)),
+      gravity_(g0)
 {
-  if (_dh_parameters.empty())
+  if (dh_parameters_.empty())
   {
     throw std::runtime_error("RegressorRobotModel: No DH parameters provided");
   }
@@ -97,7 +97,7 @@ Eigen::MatrixXd RegressorRobotModel::get_gravity(const std::vector<double>& q)
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian(const Eigen::VectorXd& q)
 {
-  return math::jacobian(q, _dh_parameters);
+  return math::geometric_jacobian(q, dh_parameters_);
 }
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, const Eigen::VectorXd& dq)
@@ -107,13 +107,13 @@ Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, 
 
 uint16_t RegressorRobotModel::get_dof() const
 {
-  return static_cast<uint16_t>(_dh_parameters.size());
+  return static_cast<uint16_t>(dh_parameters_.size());
 }
 
 std::vector<double> RegressorRobotModel::get_a()
 {
   std::vector<double> a;
-  for (const auto& param : _dh_parameters)
+  for (const auto& param : dh_parameters_)
   {
     a.push_back(param.a);
   }
@@ -123,7 +123,7 @@ std::vector<double> RegressorRobotModel::get_a()
 std::vector<double> RegressorRobotModel::get_d()
 {
   std::vector<double> d;
-  for (const auto& param : _dh_parameters)
+  for (const auto& param : dh_parameters_)
   {
     d.push_back(param.d);
   }
@@ -133,7 +133,7 @@ std::vector<double> RegressorRobotModel::get_d()
 std::vector<double> RegressorRobotModel::get_alpha()
 {
   std::vector<double> alpha;
-  for (const auto& param : _dh_parameters)
+  for (const auto& param : dh_parameters_)
   {
     alpha.push_back(param.alpha);
   }
@@ -143,7 +143,7 @@ std::vector<double> RegressorRobotModel::get_alpha()
 std::vector<double> RegressorRobotModel::get_theta()
 {
   std::vector<double> theta;
-  for (const auto& param : _dh_parameters)
+  for (const auto& param : dh_parameters_)
   {
     theta.push_back(param.theta);
   }
@@ -153,7 +153,7 @@ std::vector<double> RegressorRobotModel::get_theta()
 std::vector<bool> RegressorRobotModel::get_is_joint_revolute()
 {
   std::vector<bool> is_revolute;
-  for (const auto& param : _dh_parameters)
+  for (const auto& param : dh_parameters_)
   {
     is_revolute.push_back(param.is_joint_revolute);  // true if revolute, false if prismatic
   }
@@ -167,7 +167,7 @@ std::vector<double> RegressorRobotModel::get_m()
 
 Eigen::Vector3d RegressorRobotModel::get_g0()
 {
-  return _gravity;
+  return gravity_;
 }
 
 Eigen::Matrix<double, Eigen::Dynamic, 3> RegressorRobotModel::get_CoM()

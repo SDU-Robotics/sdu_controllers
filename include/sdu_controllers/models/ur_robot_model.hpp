@@ -95,11 +95,11 @@ public:
 
   std::vector<bool> get_is_joint_revolute() override;
 
-  Eigen::Vector3d get_g0();
+  Eigen::Vector3d get_g0() override;
 
-  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
+  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() override;
 
-  std::vector<Eigen::Matrix3d> get_link_inertia();
+  std::vector<Eigen::Matrix3d> get_link_inertia() override;
 
 private:
   uint16_t dof_{ROBOT_DOF};

@@ -7,7 +7,6 @@ set(sdu_controllers_SOURCES
       kinematics/forward_kinematics.cpp
       math/inverse_dynamics_joint_space.cpp
       math/forward_dynamics.cpp
-      math/math.cpp
       math/rnea.cpp
       models/breeding_blanket_handling_robot.cpp
       models/breeding_blanket_handling_robot_model.cpp
