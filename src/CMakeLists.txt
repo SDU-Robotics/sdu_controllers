@@ -4,6 +4,7 @@ set(sdu_controllers_SOURCES
       controllers/pid_controller.cpp
       controllers/operational_space_controller.cpp
       controllers/force_control_inner_velocity_loop.cpp
+      kinematics/forward_kinematics.cpp
       math/inverse_dynamics_joint_space.cpp
       math/forward_dynamics.cpp
       math/rnea.cpp
@@ -11,6 +12,7 @@ set(sdu_controllers_SOURCES
       models/breeding_blanket_handling_robot_model.cpp
       models/ur_robot_model.cpp
       models/ur_robot.cpp
+      models/regressor_robot_model.cpp
       safety/safety_verifier.cpp
 )
 
