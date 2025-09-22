@@ -1,95 +1,109 @@
-N: 7                           # Number of joints
-kinematics: 
-  type: "standard"             # Describes DH convention is used 
-  a: [0.0, 0.0, 0.0, 0.0, 0.388, 0.0, 0.0]
-  alpha: [0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0]
-  theta: [-1.5707963267948966, 0.0, 0.0, 0.0, -1.5707963267948966, 0.0, 0.0]
-  d: [-0.4450, 0.0, 0.93, 0.0, 3.3873, 0.0, 0.0]
+dof: 7 # Number of degrees of freedom
+robot_name: breeding_blanket_handling_robot
+
+# Model specific notes:
+# -
+
+# The kinematics can be described as DH parameters and or as 6D frames.
+# If both are available set the preferred 'type' to either 'DH' or 'Frames'.
+kinematics:
+  type: "DH" # selects the kinematic format used
+
+  # The inertial reference frame describes where the reference frame of the inertial parameters are
+  # placed. If you use classic DH parameters, this frame will be placed at the end of the link. If
+  # you have described the robot with Modified DH parameters the frame will be at the start of the link.
+  # Finally if you use 6D frames to describe the robot kinematics, the inertial reference frame is then
+  # given by the placement of the frames which is also typically at the end or start of the link.
+  inertial_ref_frame: "end_of_link_like_DH" # can either be "end_of_link_like_DH" or "start_of_link_like_MDH"
+
+  dh_params:
+    type: "classic" # describes the DH convention used can be either 'classic' (DH) or 'modified' (MDH)
+    a: [0.0, 0.0, 0.0, 0.0, 0.388, 0.0, 0.0]
+    alpha: [0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0]
+    theta: [-1.5707963267948966, 0.0, 0.0, 0.0, -1.5707963267948966, 0.0, 0.0]
+    d: [-0.4450, 0.0, 0.93, 0.0, 3.3873, 0.0, 0.0]
 
 inertial:
   joint_1:
     type: "prismatic"
-    mass: 3368.4000
-    com: [-0.000000, 4.776900, 0.605240]
+    mass: 3368.4000 # kg
+    com: [-0.000000, 4.776900, 0.605240] # meters [m]
     inertia:
       ixx: 490.050000
-      iyy: 1677.100000
-      izz: 1227.300000
       ixy: -0.000001
       ixz: -0.000000
+      iyy: 1677.100000
       iyz: -0.488560
+      izz: 1227.300000
 
   joint_2:
     type: "revolute"
-    mass: 10552.0000
-    com: [-0.000000, -0.575180, 3.108600]
+    mass: 10552.0000 # kg
+    com: [-0.000000, -0.575180, 3.108600] # meters [m]
     inertia:
       ixx: 19753.000000
-      iyy: 19645.000000
-      izz: 2298.700000
       ixy: 0.000000
       ixz: 0.505000
+      iyy: 19645.000000
       iyz: 0.000000
+      izz: 2298.700000
 
   joint_3:
     type: "prismatic"
-    mass: 5283.8000
-    com: [-0.013641, -0.462480, -0.000951]
+    mass: 5283.8000 # kg
+    com: [-0.013641, -0.462480, -0.000951] # meters [m]
     inertia:
       ixx: 24429.000000
-      iyy: 2207.700000
-      izz: 23579.000000
       ixy: -3.165800
       ixz: 0.068544
+      iyy: 2207.700000
       iyz: 1.259700
+      izz: 23579.000000
 
   joint_4:
     type: "revolute"
-    mass: 3821.7056
-    com: [0.000000, -0.000000, 0.373543]
+    mass: 3821.7056 # kg
+    com: [0.000000, -0.000000, 0.373543] # meters [m]
     inertia:
       ixx: 880.330128
-      iyy: 563.862231
-      izz: 967.243483
       ixy: -0.000000
       ixz: 0.000000
+      iyy: 563.862231
       iyz: -0.000000
+      izz: 967.243483
 
   joint_5:
     type: "revolute"
-    mass: 4481.3488
-    com: [-0.230282, 0.006404, -2.012886]
+    mass: 4481.3488 # kg
+    com: [-0.230282, 0.006404, -2.012886] # meters [m]
     inertia:
       ixx: 2332.060209
-      iyy: 2327.892247
-      izz: 199.973559
       ixy: 0.000000
       ixz: 24.208440
+      iyy: 2327.892247
       iyz: -0.136434
+      izz: 199.973559
 
   joint_6:
     type: "revolute"
-    mass: 2517.5834
-    com: [0.000000, 0.690841, 0.000000]
+    mass: 2517.5834 # kg
+    com: [0.000000, 0.690841, 0.000000] # meters [m]
     inertia:
       ixx: 945.939945
-      iyy: 135.861057
-      izz: 1014.327551
       ixy: 0.000007
       ixz: -0.000005
+      iyy: 135.861057
       iyz: -0.000000
+      izz: 1014.327551
 
   joint_7:
     type: "revolute"
-    mass: 1640.4863
-    com: [-0.000000, -0.643067, -0.000001]
+    mass: 1640.4863 # kg
+    com: [-0.000000, -0.643067, -0.000001] # meters [m]
     inertia:
       ixx: 207.020454
-      iyy: 149.112185
-      izz: 255.146028
       ixy: 0.000066
       ixz: -0.000014
+      iyy: 149.112185
       iyz: 0.000035
-
-
-
+      izz: 255.146028

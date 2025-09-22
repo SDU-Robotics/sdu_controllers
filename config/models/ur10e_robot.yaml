@@ -1,5 +1,5 @@
 dof: 6 # Number of degrees of freedom
-robot_name: ur5e
+robot_name: ur10e
 # Model specific notes:
 #
 # - The DH parameters and inertial parameters in this file are from:
@@ -22,10 +22,10 @@ kinematics:
 
   dh_params:
     type: "classic" # describes the DH convention used can be either 'classic' (DH) or 'modified' (MDH)
-    a: [0.0, -0.425, -0.3922, 0.0, 0.0, 0.0]
+    a: [0.0, -0.6127, -0.57155, 0.0, 0.0, 0.0]
     alpha: [1.5707963267948966, 0.0, 0.0, 1.5707963267948966, -1.5707963267948966, 0.0]
     theta: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    d: [0.1625, 0.0, 0.0, 0.1333, 0.0997, 0.0996]
+    d: [0.1807, 0.0, 0.0, 0.17415, 0.11985, 0.11655]
 
   frames:
     # the frames are given as [x, y, z, roll, pitch, yaw] where the position (x,y,z)
@@ -33,7 +33,7 @@ kinematics:
     joint_1:
       x: 0
       y: 0
-      z: 0.1625
+      z: 0.1807
       roll: 0
       pitch: 0
       yaw: 0
@@ -47,7 +47,7 @@ kinematics:
       yaw: 0
 
     joint_3:
-      x: -0.425
+      x: -0.6127
       y: 0
       z: 0
       roll: 0
@@ -55,25 +55,25 @@ kinematics:
       yaw: 0
 
     joint_4:
-      x: -0.3922
+      x: -0.57155
       y: 0
-      z: 0.1333
+      z: 0.17415
       roll: 0
       pitch: 0
       yaw: 0
 
     joint_5:
       x: 0
-      y: -0.0997
-      z: -2.044881182297852e-11
+      y: -0.11985
+      z: -2.458164590756244e-11
       roll: 1.570796327
       pitch: 0
       yaw: 0
 
     joint_6:
       x: 0
-      y: 0.09959999999999999
-      z: -2.042830148012698e-11
+      y: 0.11655
+      z: -2.390480459346185e-11
       roll: 1.570796326589793
       pitch: 3.141592653589793
       yaw: 3.141592653589793
@@ -81,8 +81,8 @@ kinematics:
 inertial:
   joint_1:
     type: "revolute"
-    mass: 3.761 # kg
-    com: [0, -0.02561, 0.00193] # meters [m]
+    mass: 7.369 # kg
+    com: [0.021, 0.0, 0.027] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -93,8 +93,8 @@ inertial:
 
   joint_2:
     type: "revolute"
-    mass: 8.058 # kg
-    com: [0.2125, 0, 0.11336] # meters [m]
+    mass: 13.051 # kg
+    com: [0.38, 0.0, 0.158] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -105,8 +105,8 @@ inertial:
 
   joint_3:
     type: "revolute"
-    mass: 2.846 # kg
-    com: [0.15, 0.0, 0.0265] # meters [m]
+    mass: 3.989 # kg
+    com: [0.24, 0.0, 0.068] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -117,8 +117,8 @@ inertial:
 
   joint_4:
     type: "revolute"
-    mass: 1.37 # kg
-    com: [0, -0.0018, 0.01634] # meters [m]
+    mass: 2.1 # kg
+    com: [0, 0.007, 0.018] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -129,8 +129,8 @@ inertial:
 
   joint_5:
     type: "revolute"
-    mass: 1.3 # kg
-    com: [0, 0.0018,0.01634] # meters [m]
+    mass: 1.98 # kg
+    com: [0, 0.007, 0.018] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -141,8 +141,8 @@ inertial:
 
   joint_6:
     type: "revolute"
-    mass: 0.365 # kg
-    com: [0, 0, -0.001159] # meters [m]
+    mass: 0.615 # kg
+    com: [0, 0, -0.026] # meters [m]
     inertia:
       ixx: 0.0
       ixy: 0.0
@@ -153,14 +153,14 @@ inertial:
 
 joint_limits:
   joint_1:
-    max_torque: 150.0 # Nm
+    max_torque: 330.0 # Nm
     max_velocity: 3.14159265 # rad/s
     max_acceleration: 40.0 # rad/s²
     max_position: 6.28318530 # rad
     min_position: -6.28318530 # rad
 
   joint_2:
-    max_torque: 150.0 # Nm
+    max_torque: 330.0 # Nm
     max_velocity: 3.14159265 # rad/s
     max_acceleration: 40.0 # rad/s²
     max_position: 6.28318530 # rad
@@ -174,21 +174,21 @@ joint_limits:
     min_position: -3.14159265 # rad
 
   joint_4:
-    max_torque: 28.0 # Nm
+    max_torque: 54.0 # Nm
     max_velocity: 3.14159265 # rad/s
     max_acceleration: 40.0 # rad/s²
     max_position: 6.28318530 # rad
     min_position: -6.28318530 # rad
 
   joint_5:
-    max_torque: 28.0 # Nm
+    max_torque: 54.0 # Nm
     max_velocity: 3.14159265 # rad/s
     max_acceleration: 40.0 # rad/s²
     max_position: 6.28318530 # rad
     min_position: -6.28318530 # rad
 
   joint_6:
-    max_torque: 28.0 # Nm
+    max_torque: 54.0 # Nm
     max_velocity: 3.14159265 # rad/s
     max_acceleration: 40.0 # rad/s²
     max_position: 6.28318530 # rad

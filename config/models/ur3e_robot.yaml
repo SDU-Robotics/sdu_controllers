@@ -1,5 +1,5 @@
 dof: 6 # Number of degrees of freedom
-robot_name: ur5e
+robot_name: ur3e
 # Model specific notes:
 #
 # - The DH parameters and inertial parameters in this file are from:
