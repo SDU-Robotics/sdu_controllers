@@ -35,6 +35,8 @@ namespace sdu_controllers::models
 
     is_joint_revolute = {true, true, true, true, true, true};
     theta = {0, 0, 0, 0, 0, 0};
+
+    fkModel_ = kinematics::DHKinematics(ur_robot_.get_a(), ur_robot_.get_d(), ur_robot_.get_alpha(), theta, is_joint_revolute);
   }
 
   URRobotModel::URRobotModel(URRobot::RobotType robot_type) : ur_robot_(robot_type)
@@ -171,6 +173,11 @@ namespace sdu_controllers::models
   std::vector<Eigen::Matrix3d> URRobotModel::get_link_inertia()
   {
     return ur_robot_.get_link_inertia();
+  }
+
+  const kinematics::ForwardKinematics& URRobotModel::get_fk_solver() const
+  {
+    return fkModel_;
   }
 
 }  // namespace sdu_controllers::models

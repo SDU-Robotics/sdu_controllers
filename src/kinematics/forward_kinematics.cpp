@@ -1,38 +1,79 @@
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 
 using namespace sdu_controllers;
+using namespace sdu_controllers::kinematics;
 
-std::vector<Eigen::Matrix4d> kinematics::forward_kinematics_all(
-    const Eigen::VectorXd& q,
-    const std::vector<kinematics::DHParam>& dh_parameters)
+ForwardKinematics::ForwardKinematics(const std::vector<ForwardKinematics::JointType>& jointType) : jointType_(jointType)
 {
-  //  Initialize data
-  Eigen::Matrix4d jTj, bTc = Eigen::Matrix4d::Identity();
+}
 
-  std::vector<Eigen::Matrix4d> T_chain(dh_parameters.size());
-  // Iterate over joints
-  for (size_t k = 0; k < dh_parameters.size(); k++)
+ForwardKinematics::ForwardKinematics(const std::vector<bool>& is_joint_revolute) : jointType_(is_joint_revolute.size())
+{
+  for (size_t i = 0; i < is_joint_revolute.size(); ++i)
   {
-    // Get the joint parameters
-    DHParam dh = dh_parameters[k];
+    jointType_[i] = is_joint_revolute[i] ? ForwardKinematics::REVOLUTE : ForwardKinematics::PRISMATIC;
+  }
+}
 
-    // Apply the joint value
-    if (dh.is_joint_revolute)
-      dh.theta += q(k);
+const std::vector<ForwardKinematics::JointType>& ForwardKinematics::get_joint_types() const
+{
+  return jointType_;
+}
+
+Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(const Eigen::VectorXd& q) const
+{
+  std::vector<Eigen::Matrix4d> T_chain = forward_kinematics_all(q);
+
+  Eigen::Vector3d z_im1, o_im1, o_n;
+  Eigen::Matrix<double, 6, Eigen::Dynamic> J(6, jointType_.size());
+
+  // Get position of end effector
+  o_n = T_chain.back().template block<3, 1>(0, 3);
+
+  // Loop through joints
+  for (int i = 0; i < jointType_.size(); i++)
+  {
+    Eigen::Matrix4d T = T_chain[i];
+
+    // Get z_{i-1}, o_{i-1}
+    // z_{i-1} is the unit vector along the z-axis of the previous joint
+    // o_{i-1} is the position of the center of the previous joint frame
+    if (i > 0)
+    {
+      z_im1 = T_chain[i - 1].block<3, 1>(0, 2);
+      o_im1 = T_chain[i - 1].block<3, 1>(0, 3);
+    }
     else
-      dh.d += q(k);
+    {
+      // Base Position
+      z_im1 = Eigen::Vector3d(0, 0, 1);
+      o_im1 = Eigen::Vector3d(0, 0, 0);
+    }
 
-    double cos_alpha = cos(dh.alpha);
-    double sin_alpha = sin(dh.alpha);
-    double cos_theta = cos(dh.theta);
-    double sin_theta = sin(dh.theta);
+    // Assign the appropriate blocks of the Jacobian
+    // These formulas are from Spong.
+    if (jointType_[i] == ForwardKinematics::REVOLUTE)
+    {
+      // Revolute joint
+      J.template block<3, 1>(0, i) = z_im1.cross(o_n - o_im1);
+      J.template block<3, 1>(3, i) = z_im1;
+    }
+    else if (jointType_[i] == ForwardKinematics::PRISMATIC)
+    {
+      // Prismatic joint
+      J.template block<3, 1>(0, i) = z_im1;
+      J.template block<3, 1>(3, i).fill(0);
+    }
+    else
+    {
+      throw std::runtime_error("ForwardKinematics::geometric_jacobian: Unknown joint type");
+    }
+  }
 
-    // Calculate the transformation matrix
-    jTj << cos_theta, -sin_theta * cos_alpha, sin_theta * sin_alpha, dh.a * cos_theta, sin_theta, cos_theta * cos_alpha,
-        -cos_theta * sin_alpha, dh.a * sin_theta, 0, sin_alpha, cos_alpha, dh.d, 0, 0, 0, 1;
+  return J;
+}
 
-    bTc *= jTj;
-    T_chain[k] = bTc;
-  }  // End of joint for loop
-  return T_chain;
+size_t ForwardKinematics::get_dof() const
+{
+  return jointType_.size();
 }

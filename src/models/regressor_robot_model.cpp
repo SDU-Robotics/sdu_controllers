@@ -2,14 +2,17 @@
 #include <sdu_controllers/models/regressor_robot_model.hpp>
 
 using namespace sdu_controllers::models;
+using namespace sdu_controllers;
 
-RegressorRobotModel::RegressorRobotModel(std::vector<kinematics::DHParam> dh_parameters, const Eigen::Vector3d& g0)
-    : dh_parameters_(std::move(dh_parameters)),
+RegressorRobotModel::RegressorRobotModel(
+    const std::shared_ptr<kinematics::ForwardKinematics>& fkModel,
+    const Eigen::Vector3d& g0)
+    : fk_model_(fkModel),
       gravity_(g0)
 {
-  if (dh_parameters_.empty())
+  if (!fk_model_)
   {
-    throw std::runtime_error("RegressorRobotModel: No DH parameters provided");
+    throw std::runtime_error("RegressorRobotModel: No FK model provided");
   }
 }
 
@@ -97,7 +100,7 @@ Eigen::MatrixXd RegressorRobotModel::get_gravity(const std::vector<double>& q)
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian(const Eigen::VectorXd& q)
 {
-  return math::geometric_jacobian(q, dh_parameters_);
+  return fk_model_->geometric_jacobian(q);
 }
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, const Eigen::VectorXd& dq)
@@ -107,57 +110,7 @@ Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, 
 
 uint16_t RegressorRobotModel::get_dof() const
 {
-  return static_cast<uint16_t>(dh_parameters_.size());
-}
-
-std::vector<double> RegressorRobotModel::get_a()
-{
-  std::vector<double> a;
-  for (const auto& param : dh_parameters_)
-  {
-    a.push_back(param.a);
-  }
-  return a;
-}
-
-std::vector<double> RegressorRobotModel::get_d()
-{
-  std::vector<double> d;
-  for (const auto& param : dh_parameters_)
-  {
-    d.push_back(param.d);
-  }
-  return d;
-}
-
-std::vector<double> RegressorRobotModel::get_alpha()
-{
-  std::vector<double> alpha;
-  for (const auto& param : dh_parameters_)
-  {
-    alpha.push_back(param.alpha);
-  }
-  return alpha;
-}
-
-std::vector<double> RegressorRobotModel::get_theta()
-{
-  std::vector<double> theta;
-  for (const auto& param : dh_parameters_)
-  {
-    theta.push_back(param.theta);
-  }
-  return theta;
-}
-
-std::vector<bool> RegressorRobotModel::get_is_joint_revolute()
-{
-  std::vector<bool> is_revolute;
-  for (const auto& param : dh_parameters_)
-  {
-    is_revolute.push_back(param.is_joint_revolute);  // true if revolute, false if prismatic
-  }
-  return is_revolute;
+  return static_cast<uint16_t>(fk_model_->get_dof());
 }
 
 std::vector<double> RegressorRobotModel::get_m()
@@ -189,4 +142,9 @@ Eigen::MatrixXd RegressorRobotModel::get_friction_regressor(const std::vector<do
 {
   Eigen::VectorXd qd_eigen = Eigen::Map<const Eigen::VectorXd>(qd.data(), qd.size());
   return get_friction_regressor(qd_eigen);
+}
+
+const kinematics::ForwardKinematics& RegressorRobotModel::get_fk_solver() const
+{
+  return *fk_model_;
 }

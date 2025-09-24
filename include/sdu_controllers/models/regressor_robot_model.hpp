@@ -2,7 +2,8 @@
 #define SDU_CONTROLLERS_MODELS_REGRESSOR_ROBOT_MODEL_HPP
 
 #include <Eigen/Core>
-#include <sdu_controllers/kinematics/dh_parameters.hpp>
+#include <memory>
+#include <sdu_controllers/kinematics/dh_kinematics.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <utility>
 #include <vector>
@@ -13,7 +14,7 @@ namespace sdu_controllers::models
   {
    public:
     RegressorRobotModel(
-        std::vector<kinematics::DHParam> dh_parameters,
+        const std::shared_ptr<kinematics::ForwardKinematics>& fkModel,
         const Eigen::Vector3d& g0 = Eigen::Vector3d(0, 0, -9.81));
 
     /**
@@ -76,17 +77,7 @@ namespace sdu_controllers::models
 
     virtual uint16_t get_dof() const override;
 
-    virtual std::vector<double> get_a() override;
-
-    virtual std::vector<double> get_d() override;
-
-    virtual std::vector<double> get_alpha() override;
-
-    virtual std::vector<double> get_theta() override;
-
     virtual std::vector<double> get_m() override;
-
-    virtual std::vector<bool> get_is_joint_revolute() override;
 
     virtual Eigen::Vector3d get_g0() override;
 
@@ -107,13 +98,10 @@ namespace sdu_controllers::models
 
     virtual Eigen::VectorXd get_tau(const Eigen::VectorXd& q, const Eigen::VectorXd& qd, const Eigen::VectorXd& qdd);
 
-    std::vector<kinematics::DHParam> get_dh_parameters() const
-    {
-      return dh_parameters_;
-    }
+    virtual const kinematics::ForwardKinematics& get_fk_solver() const override;
 
    protected:
-    std::vector<kinematics::DHParam> dh_parameters_;
+    std::shared_ptr<kinematics::ForwardKinematics> fk_model_;
     Eigen::Vector3d gravity_;
   };
 }  // namespace sdu_controllers::models

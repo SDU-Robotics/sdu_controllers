@@ -5,6 +5,7 @@ set(sdu_controllers_SOURCES
       controllers/operational_space_controller.cpp
       controllers/force_control_inner_velocity_loop.cpp
       kinematics/forward_kinematics.cpp
+      kinematics/dh_kinematics.cpp
       math/inverse_dynamics_joint_space.cpp
       math/forward_dynamics.cpp
       math/rnea.cpp
