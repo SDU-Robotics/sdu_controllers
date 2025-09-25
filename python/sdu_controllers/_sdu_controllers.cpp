@@ -195,7 +195,8 @@ namespace sdu_controllers
         .def(
             "forward_kinematics",
             &sdu_controllers::kinematics::ForwardKinematics::forward_kinematics,
-            "Get the transformation matrix from base to end-effector" nb::arg("q"))
+            "Get the transformation matrix from base to end-effector",
+            nb::arg("q"))
         .def(
             "forward_kinematics_all",
             &sdu_controllers::kinematics::ForwardKinematics::forward_kinematics_all,
@@ -215,7 +216,8 @@ namespace sdu_controllers
             &sdu_controllers::kinematics::ForwardKinematics::get_dof,
             "Get the degrees of freedom of the kinematic chain");
 
-    nb::class_<sdu_controllers::kinematics::DHKinematics, sdu_controllers::kinematics::ForwardKinematics>(m_kinematics, "DHKinematics") 
+    nb::class_<sdu_controllers::kinematics::DHKinematics, sdu_controllers::kinematics::ForwardKinematics>(
+        m_kinematics, "DHKinematics")
         .def(nb::init<>())
         .def(
             nb::init<
@@ -233,7 +235,6 @@ namespace sdu_controllers
         .def("get_alpha", &sdu_controllers::kinematics::DHKinematics::get_alpha)
         .def("get_d", &sdu_controllers::kinematics::DHKinematics::get_d)
         .def("get_theta", &sdu_controllers::kinematics::DHKinematics::get_theta);
-        
   }
 
 }  // namespace sdu_controllers
