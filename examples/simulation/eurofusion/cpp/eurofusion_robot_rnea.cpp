@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>

@@ -100,7 +100,7 @@ int main()
 
 
     std::cout << "q:" << q << std::endl;
-    MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+    MatrixXd T = robot_model->get_fk_solver().forward_kinematics(q);
     VectorXd pos = T.block<3, 1>(0, 3);
     std::cout << "pos:" << pos << std::endl;
     Matrix3d rot_mat = T.block<3,3>(0, 0);

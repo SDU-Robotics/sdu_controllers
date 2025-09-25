@@ -102,7 +102,7 @@ namespace sdu_controllers::models
 
     std::vector<Eigen::Matrix3d> get_link_inertia() override;
 
-    const kinematics::ForwardKinematics& get_fk_solver() const override;
+    const kinematics::ForwardKinematics &get_fk_solver() const override;
 
    private:
     uint16_t dof_{ ROBOT_DOF };
