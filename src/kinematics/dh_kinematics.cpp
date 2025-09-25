@@ -3,6 +3,12 @@
 using namespace sdu_controllers;
 using namespace sdu_controllers::kinematics;
 
+DHKinematics::DHKinematics()
+    : ForwardKinematics(std::vector<ForwardKinematics::JointType>())
+{
+}
+
+
 DHKinematics::DHKinematics(const std::vector<DHParam>& dh_parameters)
     : ForwardKinematics(std::vector<ForwardKinematics::JointType>())
 {
