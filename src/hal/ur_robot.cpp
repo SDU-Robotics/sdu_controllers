@@ -91,7 +91,7 @@ namespace sdu_controllers::hal
           else if (control_mode_ == ControlMode::JOINT_VELOCITY || control_mode_ == ControlMode::CARTESIAN_VELOCITY)
             rtde_control_->speedStop();
           else if (control_mode_ == ControlMode::TORQUE)
-            rtde_control_->torqueCommand({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+            rtde_control_->directTorque({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
           curr_state_ = ControlStates::STOPPED;
           break;
         }
@@ -112,7 +112,7 @@ namespace sdu_controllers::hal
         else if (control_mode_ == ControlMode::TORQUE)
         {
           std::vector<double> torques(joint_torque_ref_.begin(), joint_torque_ref_.end());
-          rtde_control_->torqueCommand(torques);
+          rtde_control_->directTorque(torques);
         }
         else if (control_mode_ == ControlMode::UNDEFINED)
         {
