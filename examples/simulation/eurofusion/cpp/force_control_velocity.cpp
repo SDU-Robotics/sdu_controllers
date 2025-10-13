@@ -9,8 +9,6 @@
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
 
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
-
 using namespace csv;
 using namespace Eigen;
 using namespace sdu_controllers;
@@ -93,7 +91,7 @@ int main()
   VectorXd pos;
   Vector<double, 6> xe, xr;
 
-  T = kinematics::forward_kinematics(q, robot_model);
+  T = robot_model->get_fk_solver().forward_kinematics(q);
   xr << T.block<3, 1>(0, 3),
         VectorXd::Zero(3);
 
@@ -124,7 +122,7 @@ int main()
     //add_noise_to_vector(q_meas, 0.0, 0.001);
     //add_noise_to_vector(dq_meas, 0.0, 0.001);
 
-    T = kinematics::forward_kinematics(q_meas, robot_model);
+    T = robot_model->get_fk_solver().forward_kinematics(q_meas);
     pos = T.block<3, 1>(0, 3);
     xe << pos,
           VectorXd::Zero(3);
@@ -174,7 +172,7 @@ int main()
     }
 
     // std::cout << "q:" << q << std::endl;
-    MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+    MatrixXd T = robot_model->get_fk_solver().forward_kinematics(q);
     VectorXd pos = T.block<3, 1>(0, 3);
     // std::cout << "pos:" << pos << std::endl;
     Matrix3d rot_mat = T.topLeftCorner(3, 3);

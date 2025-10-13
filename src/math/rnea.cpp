@@ -1,12 +1,10 @@
-#include <sdu_controllers/math/rnea.hpp>
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
-
 #include <Eigen/Geometry>
+#include <sdu_controllers/kinematics/forward_kinematics.hpp>
+#include <sdu_controllers/math/rnea.hpp>
 
 namespace sdu_controllers::math
 {
-  RecursiveNewtonEuler::RecursiveNewtonEuler(std::shared_ptr<models::RobotModel> robot_model)
-    : robot_model(robot_model)
+  RecursiveNewtonEuler::RecursiveNewtonEuler(std::shared_ptr<models::RobotModel> robot_model) : robot_model(robot_model)
   {
     const int N = robot_model->get_dof();
     omega = Eigen::MatrixXd::Zero(3, N);
@@ -29,8 +27,11 @@ namespace sdu_controllers::math
     this->z0 = z0;
   }
 
-  Eigen::VectorXd RecursiveNewtonEuler::forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
-        const Eigen::VectorXd &tau, const Eigen::VectorXd &he)
+  Eigen::VectorXd RecursiveNewtonEuler::forward_dynamics(
+      const Eigen::VectorXd &q,
+      const Eigen::VectorXd &dq,
+      const Eigen::VectorXd &tau,
+      const Eigen::VectorXd &he)
   {
     Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
     // Get C(q, dq) dq + g(q)
@@ -45,10 +46,8 @@ namespace sdu_controllers::math
 
   Eigen::MatrixXd RecursiveNewtonEuler::inertia(const Eigen::VectorXd &q)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
-                    he0 = Eigen::VectorXd::Zero(6),
-                    ddq_bar = Eigen::VectorXd::Zero(q.rows()),
-                    tau_tmp = Eigen::VectorXd::Zero(q.rows());
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()), he0 = Eigen::VectorXd::Zero(6),
+                    ddq_bar = Eigen::VectorXd::Zero(q.rows()), tau_tmp = Eigen::VectorXd::Zero(q.rows());
 
     Eigen::MatrixXd B = Eigen::MatrixXd::Zero(q.rows(), q.rows());
 
@@ -70,8 +69,7 @@ namespace sdu_controllers::math
 
   Eigen::VectorXd RecursiveNewtonEuler::velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
-                    he0 = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()), he0 = Eigen::VectorXd::Zero(6);
     Eigen::MatrixXd Cdq = Eigen::MatrixXd::Zero(q.rows(), q.rows());
 
     Eigen::Vector3d ddp0_original = this->ddp0;
@@ -86,26 +84,31 @@ namespace sdu_controllers::math
 
   Eigen::VectorXd RecursiveNewtonEuler::gravity(const Eigen::VectorXd &q)
   {
-    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()),
-                    he0 = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()), he0 = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd grav = Eigen::VectorXd::Zero(q.rows());
 
     grav = inverse_dynamics(q, zero_vec, zero_vec, he0);
     return grav;
   }
 
-  Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
-        const Eigen::VectorXd &ddq, const Eigen::VectorXd &he)
-  {    
-    std::vector<Eigen::Matrix4d> T = kinematics::forward_kinematics_all(q, robot_model);
+  Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(
+      const Eigen::VectorXd &q,
+      const Eigen::VectorXd &dq,
+      const Eigen::VectorXd &ddq,
+      const Eigen::VectorXd &he)
+  {
+    std::vector<Eigen::Matrix4d> T = robot_model->get_fk_solver().forward_kinematics_all(q);
     forward(dq, ddq, T);
     backward(he, T);
     return tau;
   }
 
-  void RecursiveNewtonEuler::forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T)
+  void
+  RecursiveNewtonEuler::forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T)
   {
     Eigen::Vector3d r_, Rci, zi;
+
+    std::vector<kinematics::ForwardKinematics::JointType> joint_type = robot_model->get_fk_solver().get_joint_types();
 
     for (int i = 0; i < robot_model->get_dof(); ++i)
     {
@@ -120,15 +123,13 @@ namespace sdu_controllers::math
 
       Rci = T[i].block<3, 3>(0, 0) * CoM(i, Eigen::all).transpose();
 
-      if (robot_model->get_is_joint_revolute().at(i))
-      { // revolute joint
+      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
+      {  // revolute joint
         if (i == 0)
         {
           omega(Eigen::all, i) = omega0 + dq(i) * z0;
-          domega(Eigen::all, i) = domega0 + ddq(i) * z0 +
-            dq(i) * omega0.cross(z0);
-          ddp(Eigen::all, i) = ddp0 + domega0.cross(r_) +
-              omega0.cross(omega0.cross(r_));
+          domega(Eigen::all, i) = domega0 + ddq(i) * z0 + dq(i) * omega0.cross(z0);
+          ddp(Eigen::all, i) = ddp0 + domega0.cross(r_) + omega0.cross(omega0.cross(r_));
         }
         else
         {
@@ -141,23 +142,19 @@ namespace sdu_controllers::math
           // ddp(:, i) = ddp(:, i - 1) + cross(domega(:, i), r_) + ...
           //     cross(omega(:, i), cross(omega(:, i), r_));
           omega(Eigen::all, i) = omega(Eigen::all, i - 1) + dq(i) * zi;
-          domega(Eigen::all, i) = domega(Eigen::all, i - 1) + ddq(i) * zi +
-            dq(i) * omega(Eigen::all, i - 1).cross(zi);
-          ddp(Eigen::all, i) = ddp(Eigen::all, i - 1) +
-            domega(Eigen::all, i).cross(r_) +
-              omega(Eigen::all, i).cross(
-                omega(Eigen::all, i).cross(r_));
+          domega(Eigen::all, i) = domega(Eigen::all, i - 1) + ddq(i) * zi + dq(i) * omega(Eigen::all, i - 1).cross(zi);
+          ddp(Eigen::all, i) = ddp(Eigen::all, i - 1) + domega(Eigen::all, i).cross(r_) +
+                               omega(Eigen::all, i).cross(omega(Eigen::all, i).cross(r_));
         }
       }
-      else
-      { // prismatic joint
+      else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::PRISMATIC)
+      {  // prismatic joint
         if (i == 0)
         {
           omega(Eigen::all, i) = omega0;
           domega(Eigen::all, i) = domega0;
-          ddp(Eigen::all, i) = ddp0 + ddq(i) * z0 +
-            2 * dq(i) * omega0.cross(z0) + domega0.cross(r_) + omega0.cross(omega0.cross(r_));
-
+          ddp(Eigen::all, i) =
+              ddp0 + ddq(i) * z0 + 2 * dq(i) * omega0.cross(z0) + domega0.cross(r_) + omega0.cross(omega0.cross(r_));
         }
         else
         {
@@ -172,17 +169,15 @@ namespace sdu_controllers::math
           //     cross(omega(:, i), cross(omega(:, i), r_));
           omega(Eigen::all, i) = omega(Eigen::all, i - 1);
           domega(Eigen::all, i) = domega(Eigen::all, i - 1);
-          ddp(Eigen::all, i) = ddp(Eigen::all, i - 1) + ddq(i) * zi +
-            2 * dq(i) * omega(Eigen::all, i).cross(zi) +
-              domega(Eigen::all, i).cross(r_) +
-                omega(Eigen::all, i).cross(omega(Eigen::all, i).cross(r_));
+          ddp(Eigen::all, i) = ddp(Eigen::all, i - 1) + ddq(i) * zi + 2 * dq(i) * omega(Eigen::all, i).cross(zi) +
+                               domega(Eigen::all, i).cross(r_) + omega(Eigen::all, i).cross(omega(Eigen::all, i).cross(r_));
         }
+      }else {
+        throw std::runtime_error("Unknown joint type");
       }
 
       ddpc(Eigen::all, i) = ddp(Eigen::all, i) + domega(Eigen::all, i).cross(Rci) +
-        omega(Eigen::all, i).cross(
-          omega(Eigen::all, i).cross(Rci)
-        );
+                            omega(Eigen::all, i).cross(omega(Eigen::all, i).cross(Rci));
     }
   }
 
@@ -192,6 +187,8 @@ namespace sdu_controllers::math
     Eigen::Matrix3d R;
     Eigen::Matrix3d Ibase;
     std::vector<double> m = robot_model->get_m();
+
+    std::vector<kinematics::ForwardKinematics::JointType> joint_type = robot_model->get_fk_solver().get_joint_types();
 
     for (int i = robot_model->get_dof() - 1; i >= 0; --i)
     {
@@ -215,22 +212,18 @@ namespace sdu_controllers::math
         Eigen::Vector3d mu_e = he(Eigen::seqN(3, 3));
 
         f(Eigen::all, i) = f_e + m[i] * ddpc(Eigen::all, i);
-        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) +
-          mu_e + f_e.cross(Rci) +
-            Ibase * domega(Eigen::all, i) +
-              omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
+        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) + mu_e + f_e.cross(Rci) + Ibase * domega(Eigen::all, i) +
+                            omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
       }
       else
       {
         f(Eigen::all, i) = f(Eigen::all, i + 1) + m[i] * ddpc(Eigen::all, i);
-        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) +
-          mu(Eigen::all, i + 1) + f(Eigen::all, i + 1).cross(Rci) +
-            Ibase * domega(Eigen::all, i) +
-              omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
+        mu(Eigen::all, i) = -f(Eigen::all, i).cross(r_ + Rci) + mu(Eigen::all, i + 1) + f(Eigen::all, i + 1).cross(Rci) +
+                            Ibase * domega(Eigen::all, i) + omega(Eigen::all, i).cross(Ibase * omega(Eigen::all, i));
       }
 
-      if (robot_model->get_is_joint_revolute().at(i))
-      { // Revolute
+      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
+      {  // Revolute
         if (i == 0)
         {
           tau(i) = mu(Eigen::all, i).transpose() * z0;
@@ -244,8 +237,8 @@ namespace sdu_controllers::math
           tau(i) = mu(Eigen::all, i).transpose() * zi;
         }
       }
-      else
-      { // Prismatic
+      else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::PRISMATIC)
+      {  // Prismatic
         if (i == 0)
         {
           tau(i) = f(Eigen::all, i).transpose() * z0;
@@ -257,6 +250,10 @@ namespace sdu_controllers::math
           tau(i) = f(Eigen::all, i).transpose() * zi;
         }
       }
+      else
+      {
+        throw std::runtime_error("Unknown joint type");
+      }
     }
   }
-}
+}  // namespace sdu_controllers::math

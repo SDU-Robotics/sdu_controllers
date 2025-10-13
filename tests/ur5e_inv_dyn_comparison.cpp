@@ -58,7 +58,7 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+  MatrixXd T = robot_model->get_fk_solver().forward_kinematics(q);
 
   // Read input trajectory from file
   std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe.csv");

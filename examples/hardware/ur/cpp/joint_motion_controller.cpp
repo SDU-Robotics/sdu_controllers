@@ -6,7 +6,6 @@
 #include <sdu_controllers/controllers/pid_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>

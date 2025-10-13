@@ -1,6 +1,7 @@
+#include <yaml-cpp/yaml.h>
+
 #include <iostream>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
-#include <yaml-cpp/yaml.h>
 
 using namespace Eigen;
 
@@ -8,8 +9,8 @@ namespace sdu_controllers::models
 {
   BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel() : bb_robot_(), RobotModel()
   {
-    YAML::Node config = YAML::LoadFile(std::string(CONFIG_FILE_PATH) +
-      std::string("/models/breeding_blanket_handling_robot.yaml"));
+    YAML::Node config =
+        YAML::LoadFile(std::string(CONFIG_FILE_PATH) + std::string("/models/breeding_blanket_handling_robot.yaml"));
 
     // std::cout << config["N"] << std::endl;
 
@@ -25,8 +26,8 @@ namespace sdu_controllers::models
     constexpr double pi = 3.14159265358979323846;
     constexpr double pi_2 = 1.5707963267948966;
 
-    q_low << -25, -pi/2, 0.935, -2 * pi, -2 * pi, -2 * pi, -5;
-    q_high << 8, pi/2, 4.66, 2 * pi, 2 * pi, 2 * pi, 5;
+    q_low << -25, -pi / 2, 0.935, -2 * pi, -2 * pi, -2 * pi, -5;
+    q_high << 8, pi / 2, 4.66, 2 * pi, 2 * pi, 2 * pi, 5;
     dq_low << -pi, -pi, -pi, -pi, -pi, -pi, -pi;
     dq_high << pi, pi, pi, pi, pi, pi, pi;
     ddq_low << -40.0, -40.0, -40.0, -40.0, -40.0, -40.0, -40.0;
@@ -34,16 +35,16 @@ namespace sdu_controllers::models
     torque_low << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
     torque_high << 150.0, 150.0, 150.0, 28.0, 28.0, 28.0, 28.0;
 
-    joint_pos_bounds_ = { q_low, q_high};
-    joint_vel_bounds_ = { dq_low, dq_high};
-    joint_acc_bounds_ = { ddq_low, ddq_high};
-    joint_torque_bounds_ = {torque_low, torque_high};
+    joint_pos_bounds_ = { q_low, q_high };
+    joint_vel_bounds_ = { dq_low, dq_high };
+    joint_acc_bounds_ = { ddq_low, ddq_high };
+    joint_torque_bounds_ = { torque_low, torque_high };
 
     a_ = config["kinematics"]["a"].as<std::vector<double>>();
     d_ = config["kinematics"]["d"].as<std::vector<double>>();
     alpha_ = config["kinematics"]["alpha"].as<std::vector<double>>();
     theta_ = config["kinematics"]["theta"].as<std::vector<double>>();
-  
+
     std::vector<std::vector<std::vector<double>>> temp_inertia_;
     std::vector<std::vector<double>> temp_com_;
     // m_ = { 3.368400e+03, 10552, 5.283800e+03, 3.821706e+03, 4.481349e+03, 2.517583e+03, 1.640486e+03};
@@ -111,12 +112,12 @@ namespace sdu_controllers::models
     bb_robot_.set_dh_params(a_[4], d_[0], d_[2], d_[4]);
 
     // m
-    double * m_tmp;
+    double* m_tmp;
     m_tmp = m_.data();
     bb_robot_.set_m(m_tmp);
 
     // com
-    double com_tmp [ROBOT_DOF][3];
+    double com_tmp[ROBOT_DOF][3];
 
     for (size_t i = 0; i < ROBOT_DOF; ++i)
       for (size_t j = 0; j < 3; ++j)
@@ -125,7 +126,7 @@ namespace sdu_controllers::models
     bb_robot_.set_com(com_tmp);
 
     // inertia
-    double inertia_tmp [ROBOT_DOF][3][3];
+    double inertia_tmp[ROBOT_DOF][3][3];
 
     for (size_t i = 0; i < ROBOT_DOF; ++i)
       for (size_t j = 0; j < 3; ++j)
@@ -134,6 +135,7 @@ namespace sdu_controllers::models
 
     bb_robot_.set_link_inertia(inertia_tmp);
 
+    fkModel_ = kinematics::DHKinematics(a_, d_, alpha_, theta_, is_joint_revolute_);
   }
 
   MatrixXd BreedingBlanketHandlingRobotModel::get_inertia_matrix(const VectorXd& q)
@@ -218,12 +220,12 @@ namespace sdu_controllers::models
   {
     return link_inertia_;
   }
-  std::vector<bool> BreedingBlanketHandlingRobotModel::get_is_joint_revolute() 
+  std::vector<bool> BreedingBlanketHandlingRobotModel::get_is_joint_revolute()
   {
     return is_joint_revolute_;
   }
 
-  void BreedingBlanketHandlingRobotModel::set_tcp_mass(double &mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia)
+  void BreedingBlanketHandlingRobotModel::set_tcp_mass(double& mass, Eigen::Vector3d& com, Eigen::Matrix3d inertia)
   {
     // self._m[5] = self._m_default[5] + mass
     // com_new = (numpy.asarray(self._com_default[5]) * self._m_default[5] + numpy.asarray(com) * mass)/self._m[5]
@@ -250,27 +252,24 @@ namespace sdu_controllers::models
 
     Eigen::Matrix3d offset_matrix_a, offset_matrix_b;
 
-    offset_matrix_a << pow(r(1), 2) + pow(r(2), 2),                  -r(0)*r(1),                  -r(0)*r(2),
-                                        -r(0)*r(1), pow(r(0), 2) + pow(r(2), 2),                  -r(1)*r(2),
-                                        -r(0)*r(2),                  -r(1)*r(2), pow(r(0), 2) + pow(r(1), 2);
+    offset_matrix_a << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2), -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2),
+        -r(1) * r(2), -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
 
     r = -com + com_new;
-    offset_matrix_b << pow(r(1), 2) + pow(r(2), 2),                  -r(0)*r(1),                  -r(0)*r(2),
-                                        -r(0)*r(1), pow(r(0), 2) + pow(r(2), 2),                  -r(1)*r(2),
-                                        -r(0)*r(2),                  -r(1)*r(2), pow(r(0), 2) + pow(r(1), 2);
+    offset_matrix_b << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2), -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2),
+        -r(1) * r(2), -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
 
-    Eigen::Matrix3d new_inertia = link_inertia_default_[N - 1] +
-      m_default_[N - 1] * offset_matrix_a +
-      inertia + mass * offset_matrix_b;
+    Eigen::Matrix3d new_inertia =
+        link_inertia_default_[N - 1] + m_default_[N - 1] * offset_matrix_a + inertia + mass * offset_matrix_b;
 
     link_inertia_[N - 1] << new_inertia;
 
     // set bb_robot variables
-    double * m_tmp = &m_[0];
+    double* m_tmp = &m_[0];
     bb_robot_.set_m(m_tmp);
 
     // com
-    double com_tmp [ROBOT_DOF][3];
+    double com_tmp[ROBOT_DOF][3];
 
     for (size_t i = 0; i < ROBOT_DOF; ++i)
       for (size_t j = 0; j < 3; ++j)
@@ -279,7 +278,7 @@ namespace sdu_controllers::models
     bb_robot_.set_com(com_tmp);
 
     // inertia
-    double inertia_tmp [ROBOT_DOF][3][3];
+    double inertia_tmp[ROBOT_DOF][3][3];
 
     for (size_t i = 0; i < ROBOT_DOF; ++i)
       for (size_t j = 0; j < 3; ++j)
@@ -288,5 +287,10 @@ namespace sdu_controllers::models
 
     bb_robot_.set_link_inertia(inertia_tmp);
   }
-  
-} 
+
+  const kinematics::ForwardKinematics& BreedingBlanketHandlingRobotModel::get_fk_solver() const
+  {
+    return fkModel_;
+  }
+
+}  // namespace sdu_controllers::models
