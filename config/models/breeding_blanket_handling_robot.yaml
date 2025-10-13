@@ -107,3 +107,53 @@ inertial:
       iyy: 149.112185
       iyz: 0.000035
       izz: 255.146028
+
+joint_limits:
+  joint_1:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 8.0 # m
+    min_position: -25.0 # m
+
+  joint_2:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 5.0 # rad
+    min_position: -5.0 # rad
+
+  joint_3:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 4.66 # m
+    min_position: 0.935 # m
+
+  joint_4:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 0.1745 # rad
+    min_position: -0.1745 # rad
+
+  joint_5:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 3.14159265 # rad
+    min_position: -3.14159265 # rad
+
+  joint_6:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 3.14159265 # rad
+    min_position: -3.14159265 # rad
+
+  joint_7:
+    max_torque: 1000.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 0.3491 # rad
+    min_position: -0.3491 # rad

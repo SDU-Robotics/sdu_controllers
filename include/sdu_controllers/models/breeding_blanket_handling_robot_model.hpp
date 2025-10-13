@@ -77,7 +77,7 @@ public:
    */
   std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override;
 
-  uint16_t get_dof() const;
+  uint16_t get_dof() const override;
 
   std::vector<double> get_a() override;
 
@@ -93,9 +93,9 @@ public:
 
   Eigen::Vector3d get_g0() override;
 
-  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM();
+  Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() override;
 
-  std::vector<Eigen::Matrix3d> get_link_inertia();
+  std::vector<Eigen::Matrix3d> get_link_inertia() override;
 
   void set_tcp_mass(double &mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia);
 
