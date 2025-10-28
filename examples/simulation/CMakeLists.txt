@@ -1,20 +1,9 @@
-add_executable(admittance_controller general/cpp/admittance_controller.cpp)
-target_link_libraries(admittance_controller PRIVATE sdu_controllers)
+add_example(admittance_controller general/cpp)
 
-add_executable(joint_motion_controller ur/cpp/joint_motion_controller.cpp)
-target_link_libraries(joint_motion_controller PRIVATE sdu_controllers)
+add_example(joint_motion_controller ur/cpp)
+add_example(cartesian_motion_controller ur/cpp)
+add_example(force_control_velocity ur/cpp)
 
-add_executable(cartesian_motion_controller ur/cpp/cartesian_motion_controller.cpp)
-target_link_libraries(cartesian_motion_controller PRIVATE sdu_controllers)
-
-add_executable(force_control_velocity ur/cpp/force_control_velocity.cpp)
-target_link_libraries(force_control_velocity PRIVATE sdu_controllers)
-
-add_executable(eurofusion_joint_motion_controller eurofusion/cpp/eurofusion_joint_motion_controller.cpp)
-target_link_libraries(eurofusion_joint_motion_controller PRIVATE sdu_controllers)
-
-add_executable(eurofusion_robot_rnea eurofusion/cpp/eurofusion_robot_rnea.cpp)
-target_link_libraries(eurofusion_robot_rnea PRIVATE sdu_controllers)
-
-add_executable(eurofusion_force_control eurofusion/cpp/force_control_velocity.cpp)
-target_link_libraries(eurofusion_force_control PRIVATE sdu_controllers)
+add_example(eurofusion_joint_motion_controller eurofusion/cpp)
+add_example(eurofusion_robot_rnea eurofusion/cpp)
+add_example(eurofusion_force_control eurofusion/cpp)

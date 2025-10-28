@@ -1,3 +1,9 @@
+macro(add_example example_name folder)
+    add_executable(${example_name} ${folder}/${example_name}.cpp)
+    target_link_libraries(${example_name} PRIVATE sdu_controllers ${ARGN})
+endmacro()
+
+
 if(BUILD_EXAMPLES)
     add_subdirectory(simulation)
 endif()
