@@ -7,6 +7,8 @@
 #include <sdu_controllers/math/pose.hpp>
 #include <sdu_controllers/utils/csv.hpp>
 #include <vector>
+#include <optional>
+#include <yaml-cpp/yaml.h>
 
 namespace sdu_controllers::utils
 {
@@ -132,6 +134,30 @@ namespace sdu_controllers::utils
   }
 
   /**
+   * @brief Parse a YAML sequence node of numbers directly into an Eigen::VectorXd.
+   * @returns Eigen::VectorXd with the numbers or std::nullopt on invalid node or conversion failure.
+   */
+  inline std::optional<Eigen::VectorXd> yaml_node_to_eigen_vector(const YAML::Node &node)
+  {
+    if (!node || !node.IsSequence())
+      return std::nullopt;
+
+    Eigen::VectorXd v(static_cast<int>(node.size()));
+    try
+    {
+      for (std::size_t i = 0; i < node.size(); ++i)
+      {
+        v(static_cast<int>(i)) = node[i].as<double>();
+      }
+      return v;
+    }
+    catch (const YAML::BadConversion &)
+    {
+      return std::nullopt;
+    }
+  }
+
+  /**
    * @brief Converts a std::array of doubles to an Eigen::Vector<double, N>
    *
    * This function takes a std::array of doubles and converts it to an Eigen::Vector<double, N>.
@@ -233,6 +259,24 @@ namespace sdu_controllers::utils
     }
 
     return pose;
+  }
+
+  static std::string data_path(const std::string &rel)
+  {
+  #ifdef PROJECT_SOURCE_DIR
+    return std::string(PROJECT_SOURCE_DIR) + "/data/" + rel;
+  #else
+    return "data/" + rel;
+  #endif
+  }
+
+  static std::string project_path(const std::string &rel)
+  {
+  #ifdef PROJECT_SOURCE_DIR
+    return std::string(PROJECT_SOURCE_DIR) + "/" + rel;
+  #else
+    return rel;
+  #endif
   }
 
 }  // namespace sdu_controllers::utils

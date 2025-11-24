@@ -2,8 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
@@ -70,8 +68,6 @@ int main()
   Kf.block<3, 3>(3, 3) = Kf_rot.asDiagonal();
 
   controllers::ForceControlInnerVelocityLoop controller(Kp, Kd, Md, Kf, robot_model);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
 
   Vector<double, 6> fd, fe, dfd;
   fd << 0, 0, 0,
@@ -90,6 +86,7 @@ int main()
   Matrix4d T;
   VectorXd pos;
   Vector<double, 6> xe, xr;
+  Vector<double, 6> he = VectorXd::Zero(6);
 
   T = robot_model->get_fk_solver().forward_kinematics(q);
   xr << T.block<3, 1>(0, 3),
@@ -97,9 +94,9 @@ int main()
 
   // Get safety bounds of robot.
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds = robot_model->get_joint_pos_bounds();
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_vel_bounds = robot_model->get_joint_vel_bounds();
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_acc_bounds = robot_model->get_joint_acc_bounds();
-  std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_torque_bounds = robot_model->get_joint_torque_bounds();
+  Eigen::VectorXd joint_max_vel = robot_model->get_joint_max_vel();
+  Eigen::VectorXd joint_max_acc = robot_model->get_joint_max_acc();
+  Eigen::VectorXd joint_max_torque = robot_model->get_joint_max_torque();
 
   // Control loop
   double t_end = 100; //dt * 5;
@@ -133,20 +130,20 @@ int main()
     controller.step(fd, fe, q_meas, dq_meas);
     VectorXd y = controller.get_output();
     std::cout << "y: " << y << std::endl;
-    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+    VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
     std::cout << "tau: " << tau << std::endl;
 
     // Simulation
-    VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
+    VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
     std::cout << "ddq: " << ddq << std::endl;
 
     // Check bounds
     for (size_t i = 0; i < ROBOT_DOF; ++i)
     {
-      if (ddq[i] < joint_acc_bounds.first[i])
-        ddq[i] = joint_acc_bounds.first[i];
-      else if (ddq[i] > joint_acc_bounds.second[i])
-        ddq[i] = joint_acc_bounds.second[i];
+      if (ddq[i] < -joint_max_acc[i])
+        ddq[i] = -joint_max_acc[i];
+      else if (ddq[i] > joint_max_acc[i])
+        ddq[i] = joint_max_acc[i];
     }
 
     // integrate to get velocity
@@ -154,10 +151,10 @@ int main()
 
     for (size_t i = 0; i < ROBOT_DOF; ++i)
     {
-      if (dq[i] < joint_vel_bounds.first[i])
-        dq[i] = joint_vel_bounds.first[i];
-      else if (dq[i] > joint_vel_bounds.second[i])
-        dq[i] = joint_vel_bounds.second[i];
+      if (dq[i] < -joint_max_vel[i])
+        dq[i] = -joint_max_vel[i];
+      else if (dq[i] > joint_max_vel[i])
+        dq[i] = joint_max_vel[i];
     }
 
     // integrate to get position

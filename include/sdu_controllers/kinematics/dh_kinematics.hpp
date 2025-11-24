@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SDU_CONTROLLERS_DH_KINEMATICS_HPP
 #define SDU_CONTROLLERS_DH_KINEMATICS_HPP
 
@@ -44,6 +45,22 @@ namespace sdu_controllers::kinematics
         const std::vector<double>& alpha,
         const std::vector<double>& d,
         const std::vector<double>& theta,
+        const std::vector<bool>& is_joint_revolute);
+
+    /**
+     * @brief Construct a DHKinematics object using DH parameters
+     * @param a [in] Vector of link lengths
+     * @param alpha [in] Vector of link twists
+     * @param d [in] Vector of link offsets
+     * @param theta [in] Vector of joint angles
+     * @param is_joint_revolute [in] Vector indicating if each joint is revolute (true) or prismatic (false)
+     * @throws std::runtime_error if input vectors are not of the same size or are empty
+     */
+    DHKinematics(
+        const Eigen::VectorXd& a,
+        const Eigen::VectorXd& alpha,
+        const Eigen::VectorXd& d,
+        const Eigen::VectorXd& theta,
         const std::vector<bool>& is_joint_revolute);
 
     /**

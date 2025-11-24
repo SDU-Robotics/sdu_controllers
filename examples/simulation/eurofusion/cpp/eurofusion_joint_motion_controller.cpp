@@ -2,12 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/pid_controller.hpp>
-#include <sdu_controllers/math/rnea.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
-
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-
 #include <sdu_controllers/utils/utility.hpp>
 
 using namespace csv;
@@ -58,13 +53,13 @@ int main()
 
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
-  math::RecursiveNewtonEuler rnea(robot_model);
-  Vector3d z0;
-  z0 << 0.0, 0.0, -1.0;
-  rnea.set_z0(z0);
 
-  math::InverseDynamicsJointSpace inv_dyn(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
+  //math::RecursiveNewtonEuler rnea(robot_model);
+  //Vector3d z0;
+  //z0 << 0.0, 0.0, -1.0;
+  //rnea.set_z0(z0);
+  //math::InverseDynamicsJointSpace inv_dyn(robot_model);
+  //math::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
@@ -85,7 +80,7 @@ int main()
   Vector<double, 6> he = VectorXd::Zero(6);
 
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe_bb.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("joint_trajectory_safe_bb.csv"));
 
   // Control loop
   for (const std::vector<double>& trajectory_point : input_trajectory)
@@ -110,20 +105,17 @@ int main()
     // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
     pid_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
     VectorXd y = pid_controller.get_output();
-    // tau << rnea.inverse_dynamics(q_meas, dq_meas, y, he);
-    tau << inv_dyn.inverse_dynamics(y, q_meas, dq_meas);
+    tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
 
     // Simulation
     // ddq = rnea.forward_dynamics(q, dq, tau, he);
-    ddq = fwd_dyn.forward_dynamics(q, dq, tau);
-
+    ddq = robot_model->forward_dynamics(q, dq, tau);
     // integrate to get velocity
     dq += ddq * dt;
     // integrate to get position
     q += dq * dt;
 
     std::cout << "q: " << q << std::endl;
-
     csv_writer << eigen_to_std_vector(q);
   }
   output_filestream.close();

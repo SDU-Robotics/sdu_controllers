@@ -15,13 +15,14 @@
 #include <sdu_controllers/math/rnea.hpp>
 
 // models
-#include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
+#include <sdu_controllers/models/parameter_robot_model.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
+#include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 
 // kinematics
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
+#include <sdu_controllers/kinematics/dh_kinematics.hpp>
 #include <sdu_controllers/sdu_controllers.hpp>
 
 namespace nb = nanobind;
@@ -39,28 +40,32 @@ namespace sdu_controllers
     nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
 
     // enums
-    nb::enum_<models::URRobot::RobotType>(m_models, "RobotType")
-        .value("UR3e", models::URRobot::RobotType::UR3e)
-        .value("UR5e", models::URRobot::RobotType::UR5e)
+    nb::enum_<models::URRobotModel::RobotType>(m_models, "RobotType")
+        .value("ur3e", models::URRobotModel::RobotType::ur3e)
+        .value("ur5e", models::URRobotModel::RobotType::ur5e)
+        .value("ur10e", models::URRobotModel::RobotType::ur10e)
         .export_values();
 
     // models
-    nb::class_<models::RobotModel>(m_models, "RobotModel");
+    nb::class_<models::ParameterRobotModel>(m_models, "ParameterRobotModel");
 
-    nb::class_<models::URRobotModel, models::RobotModel>(m_models, "URRobotModel")
-        .def(nb::init<>())
-        .def(nb::init<models::URRobot::RobotType>())
+    nb::class_<models::URRobotModel, models::ParameterRobotModel>(m_models, "URRobotModel")
+        .def(nb::init<models::URRobotModel::RobotType>())
+        .def(nb::init<const std::string &>())
+        .def(nb::init<const models::RobotParameters &>())
         .def("get_inertia_matrix", &models::URRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::URRobotModel::get_coriolis)
         .def("get_gravity", &models::URRobotModel::get_gravity)
         .def("get_dof", &models::URRobotModel::get_dof)
         .def("get_joint_pos_bounds", &models::URRobotModel::get_joint_pos_bounds)
-        .def("get_joint_vel_bounds", &models::URRobotModel::get_joint_vel_bounds)
-        .def("get_joint_acc_bounds", &models::URRobotModel::get_joint_acc_bounds)
-        .def("get_joint_torque_bounds", &models::URRobotModel::get_joint_torque_bounds);
+        .def("get_joint_max_vel", &models::URRobotModel::get_joint_max_vel)
+        .def("get_joint_max_acc", &models::URRobotModel::get_joint_max_acc)
+        .def("get_joint_max_torque", &models::URRobotModel::get_joint_max_torque);
 
-    nb::class_<models::BreedingBlanketHandlingRobotModel, models::RobotModel>(m_models, "BreedingBlanketHandlingRobotModel")
+    nb::class_<models::BreedingBlanketHandlingRobotModel, models::ParameterRobotModel>(m_models, "BreedingBlanketHandlingRobotModel")
         .def(nb::init<>())
+        .def(nb::init<const std::string &>())
+        .def(nb::init<const models::RobotParameters &>())
         .def("get_inertia_matrix", &models::BreedingBlanketHandlingRobotModel::get_inertia_matrix)
         .def("get_coriolis", &models::BreedingBlanketHandlingRobotModel::get_coriolis)
         .def("get_gravity", &models::BreedingBlanketHandlingRobotModel::get_gravity)
@@ -145,7 +150,7 @@ namespace sdu_controllers
     nb::module_ eigen = nb::module_::import_("numpy");
     nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m_math, "RecursiveNewtonEuler")
         .def(
-            nb::init<std::shared_ptr<sdu_controllers::models::RobotModel>>(),
+            nb::init<sdu_controllers::models::RobotModel&>(),
             "Initialize the RecursiveNewtonEuler algorithm with a robot model",
             nb::arg("robot_model"))
         .def(
@@ -162,8 +167,7 @@ namespace sdu_controllers
             "Compute forward dynamics: q̈ = H(q)⁻¹(τ - C(q,q̇)q̇ - g(q))",
             nb::arg("q"),
             nb::arg("dq"),
-            nb::arg("tau"),
-            nb::arg("he"))
+            nb::arg("tau"))
         .def(
             "inertia",
             &sdu_controllers::math::RecursiveNewtonEuler::inertia,

@@ -2,10 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -28,7 +25,7 @@ int main()
   csv_writer << labels;
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
 
@@ -67,12 +64,12 @@ int main()
   Kf.block<3, 3>(3, 3) = Kf_rot.asDiagonal();
 
   controllers::ForceControlInnerVelocityLoop controller(Kp, Kd, Md, Kf, robot_model);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
 
   Vector<double, 6> fd, fe;
   fd << 10, 0, 5,
         VectorXd::Ones(3) * 0;
+
+  Vector<double, 6> he = VectorXd::Zero(6);
 
   double Kenv_el = 100;
   VectorXd Kenv_vec = VectorXd::Ones(6) * Kenv_el;
@@ -117,11 +114,11 @@ int main()
     controller.step(fd, fe, q_meas, dq_meas);
     VectorXd y = controller.get_output();
     std::cout << "y: " << y << std::endl;
-    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+    VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
     std::cout << "tau: " << tau << std::endl;
 
     // Simulation
-    VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
+    VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
     // integrate to get velocity
     dq += ddq * dt;
     // integrate to get position

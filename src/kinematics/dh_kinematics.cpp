@@ -1,4 +1,5 @@
 #include <sdu_controllers/kinematics/dh_kinematics.hpp>
+#include <sdu_controllers/utils/utility.hpp>
 
 using namespace sdu_controllers;
 using namespace sdu_controllers::kinematics;
@@ -24,9 +25,9 @@ DHKinematics::DHKinematics(const std::vector<DHParam>& dh_parameters)
     d_.push_back(param.d);
     theta_.push_back(param.theta);
     if (param.is_joint_revolute)
-      jointType_.push_back(ForwardKinematics::REVOLUTE);
+      joint_type_.push_back(ForwardKinematics::REVOLUTE);
     else
-      jointType_.push_back(ForwardKinematics::PRISMATIC);
+      joint_type_.push_back(ForwardKinematics::PRISMATIC);
   }
 }
 
@@ -53,6 +54,29 @@ DHKinematics::DHKinematics(
   theta_ = theta;
 }
 
+DHKinematics::DHKinematics(
+    const Eigen::VectorXd& a,
+    const Eigen::VectorXd& alpha,
+    const Eigen::VectorXd& d,
+    const Eigen::VectorXd& theta,
+    const std::vector<bool>& is_joint_revolute)
+    : ForwardKinematics(is_joint_revolute)
+{
+  if (a.size() != alpha.size() || a.size() != d.size() || a.size() != theta.size() || a.size() != is_joint_revolute.size())
+  {
+    throw std::runtime_error("DHKinematics: DH parameter vectors must have the same size");
+  }
+  if (a.size() == 0)
+  {
+    throw std::runtime_error("DHKinematics: No DH parameters provided");
+  }
+
+  a_ = utils::eigen_to_std_vector(a);
+  alpha_ = utils::eigen_to_std_vector(alpha);
+  d_ = utils::eigen_to_std_vector(d);
+  theta_ = utils::eigen_to_std_vector(theta);
+}
+
 Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
 {
   if (q.size() != a_.size())
@@ -71,7 +95,7 @@ Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
     double cos_alpha = std::cos(alpha_[i]);
     double sin_alpha = std::sin(alpha_[i]);
 
-    if (jointType_[i] == ForwardKinematics::REVOLUTE)
+    if (joint_type_[i] == ForwardKinematics::REVOLUTE)
     {  // revolute joint
       qi = q[i] + theta_[i];
 
@@ -98,7 +122,7 @@ Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
       A_i(3, 2) = 0;
       A_i(3, 3) = 1;
     }
-    else if (jointType_[i] == ForwardKinematics::PRISMATIC)
+    else if (joint_type_[i] == ForwardKinematics::PRISMATIC)
     {  // prismatic joint
 
       double cos_theta = std::cos(theta_[i]);
@@ -161,7 +185,7 @@ std::vector<Eigen::Matrix4d> DHKinematics::forward_kinematics_all(const Eigen::V
   {
     double cos_alpha = std::cos(alpha_[i]);
     double sin_alpha = std::sin(alpha_[i]);
-    if (jointType_[i] == ForwardKinematics::REVOLUTE)
+    if (joint_type_[i] == ForwardKinematics::REVOLUTE)
     {  // revolute joint
       qi = q[i] + theta_[i];
 
@@ -188,7 +212,7 @@ std::vector<Eigen::Matrix4d> DHKinematics::forward_kinematics_all(const Eigen::V
       A_i(3, 2) = 0;
       A_i(3, 3) = 1;
     }
-    else if (jointType_[i] == ForwardKinematics::PRISMATIC)
+    else if (joint_type_[i] == ForwardKinematics::PRISMATIC)
     {  // prismatic joint
 
       double cos_theta = std::cos(theta_[i]);

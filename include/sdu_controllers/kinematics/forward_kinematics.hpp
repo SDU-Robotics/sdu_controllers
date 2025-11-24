@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SDU_CONTROLLERS_FORWARD_KINEMATICS_HPP
 #define SDU_CONTROLLERS_FORWARD_KINEMATICS_HPP
 
@@ -51,11 +52,11 @@ namespace sdu_controllers::kinematics
     size_t get_dof() const;
 
    protected:
-    ForwardKinematics(const std::vector<ForwardKinematics::JointType>& jointType);
+    ForwardKinematics(const std::vector<ForwardKinematics::JointType>& joint_type);
     ForwardKinematics(const std::vector<bool>& is_joint_revolute);
     virtual ~ForwardKinematics() = default;
 
-    std::vector<ForwardKinematics::JointType> jointType_;
+    std::vector<ForwardKinematics::JointType> joint_type_;
   };
 }  // namespace sdu_controllers::kinematics
 

@@ -13,7 +13,7 @@ namespace sdu_controllers::math
   class RecursiveNewtonEuler
   {
     public:
-      explicit RecursiveNewtonEuler(std::shared_ptr<models::RobotModel> robot_model);
+      explicit RecursiveNewtonEuler(models::RobotModel &robot_model);
 
       ~RecursiveNewtonEuler() = default;
 
@@ -21,11 +21,12 @@ namespace sdu_controllers::math
         const Eigen::VectorXd &ddq, const Eigen::VectorXd &he);
 
       Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
-        const Eigen::VectorXd &tau, const Eigen::VectorXd &he);
+        const Eigen::VectorXd &tau);
 
       void set_z0(const Eigen::Vector3d &z0);
 
       Eigen::MatrixXd inertia(const Eigen::VectorXd &q);
+      Eigen::MatrixXd coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd gravity(const Eigen::VectorXd &q);
 
@@ -34,13 +35,13 @@ namespace sdu_controllers::math
 
       void backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);
 
-      std::shared_ptr<models::RobotModel> robot_model;
+      models::RobotModel &robot_model_;
 
-      Eigen::Matrix<double, 3, Eigen::Dynamic> omega, domega, ddp, ddpc, f, mu;
-      Eigen::VectorXd tau;
-      Eigen::Vector3d omega0, domega0, ddp0, z0;
-      Eigen::Matrix<double, Eigen::Dynamic, 3> CoM;
-      std::vector<Eigen::Matrix3d> link_inertia;
+      Eigen::Matrix<double, 3, Eigen::Dynamic> omega_, domega_, ddp_, ddpc_, f_, mu_;
+      Eigen::VectorXd tau_;
+      Eigen::Vector3d omega0_, domega0_, ddp0_, z0_;
+      Eigen::Matrix<double, Eigen::Dynamic, 3> CoM_;
+      std::vector<Eigen::Matrix3d> link_inertia_;
   };
 
 } // namespace sdu_controllers::math

@@ -18,8 +18,33 @@ namespace sdu_controllers::models
   {
    public:
     explicit RobotModel() = default;
-
     virtual ~RobotModel() = default;
+
+    /**
+     * @brief Calculate the inverse dynamics.
+     *
+     * Uses the recursive newton euler algorithm. (TODO: add reference to book)
+     *
+     * @param y auxiliary control input.
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @returns the computed torques for the joint actuators \f$ \tau \f$
+     */
+    virtual Eigen::VectorXd inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
+      const Eigen::VectorXd &ddq, const Eigen::VectorXd &he) = 0;
+
+
+    /**
+     * @brief Calculate the forward dynamics.
+     *
+     * Uses the recursive newton euler algorithm. (TODO: add reference to book)
+     *
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @param tau joint torques of the robot
+     * @returns the acceleration \f$ \ddot{q} \f$
+     */
+    virtual Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau) = 0;
 
     /**
      * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
@@ -61,26 +86,28 @@ namespace sdu_controllers::models
     virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() = 0;
 
     /**
-     * @brief Get joint velocity bounds.
-     * @returns the joint velocity bounds
+     * @brief Get maximum joint velocity.
+     * @returns the maximum joint velocity
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_vel() = 0;
 
     /**
-     * @brief Get joint acceleration bounds.
-     * @returns the joint acceleration bounds
+     * @brief Get maximum joint acceleration.
+     * @returns the maximum joint acceleration
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_acc() = 0;
 
     /**
-     * @brief Get joint torque bounds.
-     * @returns the joint torque bounds
+     * @brief Get maximum joint torque.
+     * @returns the maximum joint torque
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_torque() = 0;
 
     virtual uint16_t get_dof() const = 0;
 
     virtual std::vector<double> get_m() = 0;
+
+    virtual std::vector<bool> get_is_joint_revolute() = 0;
 
     virtual Eigen::Vector3d get_g0() = 0;
 

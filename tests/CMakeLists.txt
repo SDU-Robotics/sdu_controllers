@@ -1,5 +1,6 @@
-add_executable(tests tests.cpp sdu_controllers_t.cpp)
+add_executable(tests tests.cpp)
 target_link_libraries(tests PUBLIC sdu_controllers Catch2::Catch2)
+target_compile_definitions(tests PRIVATE PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
 add_executable(rnea_test rnea_test.cpp)
 target_link_libraries(rnea_test PUBLIC sdu_controllers Catch2::Catch2)

@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
     // Read input trajectory from file
     const uint8_t time_offset = 1;
-    std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/franka_cartesian_trajectory_circle.csv");
+    std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(data_path("franka_cartesian_trajectory_circle.csv"));
 
     // First generate trajectory that moves the robot to the start of the circle to avoid any jumps.
     //std::vector<double> start_pose_vec(7);

@@ -7,7 +7,6 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -67,7 +66,7 @@ int main(int argc, char* argv[])
   URRobot robot(robot_ip, freq);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
   VectorXd Kp_vec(ROBOT_DOF);
@@ -98,7 +97,7 @@ int main(int argc, char* argv[])
   robot.move_joints(q_init);
 
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../../../data/joint_trajectory_safe_new.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("joint_trajectory_safe_new.csv"));
 
   // Offline safety verification of the input trajectory.
   //  - checks joint position, velocity and acceleration limits.

@@ -58,22 +58,22 @@ namespace sdu_controllers::models
     virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override = 0;
 
     /**
-     * @brief Get joint velocity bounds.
-     * @returns the joint velocity bounds
+     * @brief Get maximum joint velocity.
+     * @returns the maximum joint velocity
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_vel() override;
 
     /**
-     * @brief Get joint acceleration bounds.
-     * @returns the joint acceleration bounds
+     * @brief Get maximum joint acceleration.
+     * @returns the maximum joint acceleration
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_acc() override;
 
     /**
-     * @brief Get joint torque bounds.
-     * @returns the joint torque bounds
+     * @brief Get maximum joint torque.
+     * @returns the maximum joint torque
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_torque() override;
 
     virtual uint16_t get_dof() const override;
 

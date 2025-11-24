@@ -1,12 +1,11 @@
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
 #include <sdu_controllers/math/rnea.hpp>
+#include "sdu_controllers/models/robot_model.hpp"
 
 using namespace csv;
 using namespace Eigen;
@@ -23,7 +22,7 @@ int main()
     "tau0", "tau1", "tau2", "tau3", "tau4", "tau5", "tau6"});
 
   // Initialize robot model and parameters
-  // auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
+  // auto robot_model = std::make_shared<models::URRobotModel>(URRobotModel::RobotType::ur5e);
   auto robot_model = std::make_shared<models::BreedingBlanketHandlingRobotModel>();
   double freq = 1000.0;
   double dt = 1.0 / freq;
@@ -32,16 +31,16 @@ int main()
 
   // math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   // math::ForwardDynamics fwd_dyn(robot_model);
+  // math::RecursiveNewtonEuler rnea(robot_model);
 
-  math::RecursiveNewtonEuler rnea(robot_model);
-  Eigen::Vector3d z0;
-  z0 << 0, 0, -1;
-  rnea.set_z0(z0);
+
+  //Eigen::Vector3d z0;
+  //z0 << 0, 0, -1;
+  //rnea.set_z0(z0);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
   VectorXd ddq_d(ROBOT_DOF);
-
   // VectorXd q(ROBOT_DOF);
   // VectorXd dq(ROBOT_DOF);
   // VectorXd ddq(ROBOT_DOF);
@@ -53,13 +52,12 @@ int main()
   //
   Vector<double, 6> he;
   he.setZero();
-  //
   // Eigen::VectorXd tau = rnea.inverse_dynamics(q, dq, ddq, he);
   // std::cout << "tau\n" << tau << std::endl;
   Eigen::VectorXd tau;
 
   // Load trajectory
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/breeder_trajectory_interpolated.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("breeder_trajectory_interpolated.csv"));
   // std::vector<double> xData = {0., 5, 10, 12, 20, 25, 30, 35, 45, 50, 80};
   // std::vector<std::vector<double>> yData = {
   //   {0.0027, 2.115, 2.685, 2.685, 2.7168, 2.8036, 1.5, 0.7636, -4.768, -7.5, -24.5273},
@@ -87,11 +85,12 @@ int main()
       // ddq_d[i] = -sin(j * dt + double(i)/double(ROBOT_DOF));
     }
 
-    tau << rnea.inverse_dynamics(q_d, dq_d, ddq_d, he);
+    tau = robot_model->inverse_dynamics(q_d, dq_d, ddq_d, he);
 
-    VectorXd temp(1 + q_d.size() + tau.size());
-    temp << j * dt, q_d, tau;
-    csv_writer << eigen_to_std_vector(temp);
+    std::cout << "tau: " << tau << std::endl;
+    //VectorXd temp(1 + q_d.size() + tau.size());
+    //temp << j * dt, q_d, tau;
+    //csv_writer << eigen_to_std_vector(temp);
 
     ++j;
   }

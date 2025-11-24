@@ -182,3 +182,4 @@ cmake/sdu_controllers-config.cmake
 # IDE files
 .vscode
 .vscode/settings.json
+compile_commands.json

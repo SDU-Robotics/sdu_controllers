@@ -5,7 +5,6 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -23,7 +22,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
 
@@ -50,8 +49,8 @@ int main()
   Kd.block<3, 3>(3,3) = Kd_orient_vec.asDiagonal();
 
   controllers::OperationalSpaceController osc_controller(Kp, Kd, robot_model);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
+  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  //math::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd x_d(6);
   VectorXd dx_d(6);
@@ -59,11 +58,12 @@ int main()
 
   VectorXd q(ROBOT_DOF);
   VectorXd dq(ROBOT_DOF);
+  Vector<double, 6> he = VectorXd::Zero(6);
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/cartesian_trajectory_safe.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("cartesian_trajectory_safe.csv"));
 
   // Control loop
   for (size_t j=0; j<input_trajectory.size(); j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
@@ -88,11 +88,11 @@ int main()
     osc_controller.step(x_d, dx_d, ddx_d, q_meas, dq_meas);
     VectorXd y = osc_controller.get_output();
     std::cout << "y: " << y << std::endl;
-    VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+    VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
     std::cout << "tau: " << tau << std::endl;
 
     // Simulation
-    VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
+    VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
     // integrate to get velocity
     dq += ddq * dt;
     // integrate to get position
