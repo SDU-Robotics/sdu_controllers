@@ -24,24 +24,31 @@ Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(c
 {
   std::vector<Eigen::Matrix4d> T_chain = forward_kinematics_all(q);
 
+  return geometric_jacobian(q, T_chain);
+}
+
+Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(
+    const Eigen::VectorXd& q,
+    const std::vector<Eigen::Matrix4d>& fk_matrices) const
+{
   Eigen::Vector3d z_im1, o_im1, o_n;
   Eigen::Matrix<double, 6, Eigen::Dynamic> J(6, joint_type_.size());
 
   // Get position of end effector
-  o_n = T_chain.back().template block<3, 1>(0, 3);
+  o_n = fk_matrices.back().template block<3, 1>(0, 3);
 
   // Loop through joints
   for (int i = 0; i < joint_type_.size(); i++)
   {
-    Eigen::Matrix4d T = T_chain[i];
+    Eigen::Matrix4d T = fk_matrices[i];
 
     // Get z_{i-1}, o_{i-1}
     // z_{i-1} is the unit vector along the z-axis of the previous joint
     // o_{i-1} is the position of the center of the previous joint frame
     if (i > 0)
     {
-      z_im1 = T_chain[i - 1].block<3, 1>(0, 2);
-      o_im1 = T_chain[i - 1].block<3, 1>(0, 3);
+      z_im1 = fk_matrices[i - 1].block<3, 1>(0, 2);
+      o_im1 = fk_matrices[i - 1].block<3, 1>(0, 3);
     }
     else
     {

@@ -14,64 +14,25 @@
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/math/rnea.hpp>
 
-// models
-#include <sdu_controllers/models/robot_model.hpp>
-#include <sdu_controllers/models/parameter_robot_model.hpp>
-#include <sdu_controllers/models/ur_robot_model.hpp>
-#include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
-
 // kinematics
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/kinematics/dh_kinematics.hpp>
+#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/sdu_controllers.hpp>
 
 namespace nb = nanobind;
 
 namespace sdu_controllers
 {
+  nb::module_ create_robot_models_module(nb::module_ &main_module);
+
   NB_MODULE(_sdu_controllers, m)
   {
     m.doc() = "Python Bindings for sdu_controllers";
-    m.def("add_one", &add_one, "Increments an integer value");
 
-    nb::module_ m_models = m.def_submodule("models", "Submodule containing robot model definitions.");
+    nb::module_ m_models = create_robot_models_module(m);
     nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
     nb::module_ m_math = m.def_submodule("math", "Submodule containing math utility functions.");
     nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
-
-    // enums
-    nb::enum_<models::URRobotModel::RobotType>(m_models, "RobotType")
-        .value("ur3e", models::URRobotModel::RobotType::ur3e)
-        .value("ur5e", models::URRobotModel::RobotType::ur5e)
-        .value("ur10e", models::URRobotModel::RobotType::ur10e)
-        .export_values();
-
-    // models
-    nb::class_<models::ParameterRobotModel>(m_models, "ParameterRobotModel");
-
-    nb::class_<models::URRobotModel, models::ParameterRobotModel>(m_models, "URRobotModel")
-        .def(nb::init<models::URRobotModel::RobotType>())
-        .def(nb::init<const std::string &>())
-        .def(nb::init<const models::RobotParameters &>())
-        .def("get_inertia_matrix", &models::URRobotModel::get_inertia_matrix)
-        .def("get_coriolis", &models::URRobotModel::get_coriolis)
-        .def("get_gravity", &models::URRobotModel::get_gravity)
-        .def("get_dof", &models::URRobotModel::get_dof)
-        .def("get_joint_pos_bounds", &models::URRobotModel::get_joint_pos_bounds)
-        .def("get_joint_max_vel", &models::URRobotModel::get_joint_max_vel)
-        .def("get_joint_max_acc", &models::URRobotModel::get_joint_max_acc)
-        .def("get_joint_max_torque", &models::URRobotModel::get_joint_max_torque);
-
-    nb::class_<models::BreedingBlanketHandlingRobotModel, models::ParameterRobotModel>(m_models, "BreedingBlanketHandlingRobotModel")
-        .def(nb::init<>())
-        .def(nb::init<const std::string &>())
-        .def(nb::init<const models::RobotParameters &>())
-        .def("get_inertia_matrix", &models::BreedingBlanketHandlingRobotModel::get_inertia_matrix)
-        .def("get_coriolis", &models::BreedingBlanketHandlingRobotModel::get_coriolis)
-        .def("get_gravity", &models::BreedingBlanketHandlingRobotModel::get_gravity)
-        .def("get_dof", &models::BreedingBlanketHandlingRobotModel::get_dof)
-        .def("set_tcp_mass", &models::BreedingBlanketHandlingRobotModel::set_tcp_mass)
-        .def("get_CoM", &models::BreedingBlanketHandlingRobotModel::get_CoM);
 
     // controllers
     nb::class_<controllers::PIDController>(m_controllers, "PIDController")
@@ -150,7 +111,7 @@ namespace sdu_controllers
     nb::module_ eigen = nb::module_::import_("numpy");
     nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m_math, "RecursiveNewtonEuler")
         .def(
-            nb::init<sdu_controllers::models::RobotModel&>(),
+            nb::init<sdu_controllers::models::RobotModel &>(),
             "Initialize the RecursiveNewtonEuler algorithm with a robot model",
             nb::arg("robot_model"))
         .def(
@@ -212,9 +173,17 @@ namespace sdu_controllers
             "Get the type of each joint in the kinematic chain")
         .def(
             "geometric_jacobian",
-            &sdu_controllers::kinematics::ForwardKinematics::geometric_jacobian,
+            nb::overload_cast<const Eigen::VectorXd &>(
+                &sdu_controllers::kinematics::ForwardKinematics::geometric_jacobian, nb::const_),
             "Compute the geometric Jacobian at the given joint configuration",
             nb::arg("q"))
+        .def(
+            "geometric_jacobian",
+            nb::overload_cast<const Eigen::VectorXd &, const std::vector<Eigen::Matrix4d> &>(
+                &sdu_controllers::kinematics::ForwardKinematics::geometric_jacobian, nb::const_),
+            "Compute the geometric Jacobian at the given joint configuration using precomputed forward kinematics matrices",
+            nb::arg("q"),
+            nb::arg("fk_matrices"))
         .def(
             "get_dof",
             &sdu_controllers::kinematics::ForwardKinematics::get_dof,

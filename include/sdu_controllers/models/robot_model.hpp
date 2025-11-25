@@ -22,12 +22,10 @@ namespace sdu_controllers::models
 
     /**
      * @brief Calculate the inverse dynamics.
-     *
-     * Uses the recursive newton euler algorithm. (TODO: add reference to book)
-     *
-     * @param y auxiliary control input.
      * @param q robot joint positions.
      * @param dq robot joint velocities.
+     * @param ddq robot joint accelerations.
+     * @param he end-effector wrench.
      * @returns the computed torques for the joint actuators \f$ \tau \f$
      */
     virtual Eigen::VectorXd inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
@@ -36,9 +34,6 @@ namespace sdu_controllers::models
 
     /**
      * @brief Calculate the forward dynamics.
-     *
-     * Uses the recursive newton euler algorithm. (TODO: add reference to book)
-     *
      * @param q robot joint positions.
      * @param dq robot joint velocities.
      * @param tau joint torques of the robot
@@ -103,18 +98,40 @@ namespace sdu_controllers::models
      */
     virtual Eigen::VectorXd get_joint_max_torque() = 0;
 
+    /**
+     * @brief Get the degrees of freedom of the robot.
+     * @returns the number of degrees of freedom
+     */
     virtual uint16_t get_dof() const = 0;
 
+    /**
+     * @brief Get the masses of the robot links.
+     * @returns vector containing the mass of each link
+     */
     virtual std::vector<double> get_m() = 0;
-
-    virtual std::vector<bool> get_is_joint_revolute() = 0;
-
+    
+    /**
+     * @brief Get the gravity vector in base frame.
+     * @returns the 3D gravity vector
+     */
     virtual Eigen::Vector3d get_g0() = 0;
 
+    /**
+     * @brief Get the center of mass positions for each link.
+     * @returns matrix where each row contains the 3D center of mass position for a link
+     */
     virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() = 0;
 
+    /**
+     * @brief Get the inertia tensors for each link.
+     * @returns vector of 3x3 inertia matrices for each link
+     */
     virtual std::vector<Eigen::Matrix3d> get_link_inertia() = 0;
 
+    /**
+     * @brief Get the forward kinematics solver instance.
+     * @returns reference to the forward kinematics solver
+     */
     virtual const kinematics::ForwardKinematics &get_fk_solver() const = 0;
   };
 

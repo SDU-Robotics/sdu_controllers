@@ -122,8 +122,6 @@ namespace sdu_controllers::models
 
     std::vector<double> get_m() override;
 
-    std::vector<bool> get_is_joint_revolute() override;
-
     Eigen::Vector3d get_g0() override;
 
     Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() override;
