@@ -426,11 +426,6 @@ namespace sdu_controllers::models
     return mass_;
   }
 
-  std::vector<bool> ParameterRobotModel::get_is_joint_revolute()
-  {
-    return is_joint_revolute_;
-  }
-
   Eigen::Vector3d ParameterRobotModel::get_g0()
   {
     return g0_;

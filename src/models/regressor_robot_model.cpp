@@ -12,8 +12,28 @@ RegressorRobotModel::RegressorRobotModel(
 {
   if (!fk_model_)
   {
-    throw std::runtime_error("RegressorRobotModel: No FK model provided");
+    throw std::invalid_argument("RegressorRobotModel: No FK model provided");
   }
+}
+
+Eigen::VectorXd RegressorRobotModel::inverse_dynamics(
+    const Eigen::VectorXd& q,
+    const Eigen::VectorXd& dq,
+    const Eigen::VectorXd& ddq,
+    const Eigen::VectorXd& he)
+{
+  return get_regressor(q, dq, ddq) * get_parameters() + get_friction_regressor(dq) * get_friction_parameters();
+}
+
+Eigen::VectorXd
+RegressorRobotModel::forward_dynamics(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const Eigen::VectorXd& tau)
+{
+  Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows());
+
+  // Get C(q, dq) dq + g(q)
+  Eigen::VectorXd tau_bar = inverse_dynamics(q, dq, zero_vec, zero_vec);
+  Eigen::MatrixXd B = get_inertia_matrix(q);
+  return B.lu().solve(tau - tau_bar);
 }
 
 Eigen::MatrixXd RegressorRobotModel::get_inertia_matrix(const Eigen::VectorXd& q)
@@ -88,7 +108,7 @@ Eigen::MatrixXd RegressorRobotModel::get_gravity(const Eigen::VectorXd& q)
   Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()), he0 = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd grav = Eigen::VectorXd::Zero(q.rows());
 
-  grav = get_tau(q, zero_vec, zero_vec);
+  grav = get_regressor(q, zero_vec, zero_vec) * get_parameters();
   return grav;
 }
 
@@ -105,7 +125,21 @@ Eigen::MatrixXd RegressorRobotModel::get_jacobian(const Eigen::VectorXd& q)
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, const Eigen::VectorXd& dq)
 {
-  throw std::runtime_error("RegressorRobotModel: get_jacobian_dot not implemented");
+  const double dt = 1e-6;
+
+  // Calculate the Jacobian at the current configuration q
+  Eigen::MatrixXd J_current = get_jacobian(q);
+
+  // Estimate the configuration at the next time step (q_next) using Euler integration
+  Eigen::VectorXd q_next = q + (dq * dt);
+
+  // Calculate the Jacobian at the predicted next configuration
+  Eigen::MatrixXd J_next = get_jacobian(q_next);
+
+  // Compute the numerical derivative
+  Eigen::MatrixXd J_dot = (J_next - J_current) / dt;
+
+  return J_dot;
 }
 
 uint16_t RegressorRobotModel::get_dof() const
@@ -133,11 +167,6 @@ std::vector<Eigen::Matrix3d> RegressorRobotModel::get_link_inertia()
   throw std::runtime_error("RegressorRobotModel: get_link_inertia not implemented");
 }
 
-Eigen::VectorXd RegressorRobotModel::get_tau(const Eigen::VectorXd& q, const Eigen::VectorXd& qd, const Eigen::VectorXd& qdd)
-{
-  return get_regressor(q, qd, qdd) * get_parameters() + get_friction_regressor(qd) * get_friction_parameters();
-}
-
 Eigen::MatrixXd RegressorRobotModel::get_friction_regressor(const std::vector<double>& qd) const
 {
   Eigen::VectorXd qd_eigen = Eigen::Map<const Eigen::VectorXd>(qd.data(), qd.size());
@@ -148,3 +177,5 @@ const kinematics::ForwardKinematics& RegressorRobotModel::get_fk_solver() const
 {
   return *fk_model_;
 }
+
+

@@ -46,6 +46,16 @@ namespace sdu_controllers::kinematics
     virtual Eigen::Matrix<double, 6, Eigen::Dynamic> geometric_jacobian(const Eigen::VectorXd& q) const;
 
     /**
+     * @brief Compute the geometric Jacobian at the given joint configuration using precomputed forward kinematics matrices
+     * @param q Joint configuration
+     * @param fk_matrices Precomputed forward kinematics matrices for each joint
+     * @return The 6xDOF geometric Jacobian matrix
+     */
+    virtual Eigen::Matrix<double, 6, Eigen::Dynamic> geometric_jacobian(
+        const Eigen::VectorXd& q,
+        const std::vector<Eigen::Matrix4d>& fk_matrices) const;
+
+    /**
      * @brief Get the degrees of freedom of the kinematic chain
      * @return Number of degrees of freedom
      */
