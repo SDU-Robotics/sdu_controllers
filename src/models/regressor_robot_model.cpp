@@ -31,7 +31,13 @@ Eigen::VectorXd RegressorRobotModel::inverse_dynamics(
     const Eigen::VectorXd& ddq,
     const Eigen::VectorXd& he)
 {
-  return get_regressor(q, dq, ddq) * get_parameters() + get_friction_regressor(dq) * get_friction_parameters();
+  Eigen::VectorXd tau_he = Eigen::VectorXd::Zero(q.rows());
+  if (he.size() == 6)
+  {
+    Eigen::MatrixXd J = fk_model_->geometric_jacobian(q);
+    tau_he = J.transpose() * he;
+  }
+  return get_regressor(q, dq, ddq) * get_parameters() + get_friction_regressor(dq) * get_friction_parameters() + tau_he;
 }
 
 Eigen::VectorXd
