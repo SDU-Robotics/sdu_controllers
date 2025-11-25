@@ -41,7 +41,7 @@ include(CMakePrintHelpers)
 cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # find dependencies
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
 # Eigen: Disable fast math be default.
 add_definitions(-DEIGEN_FAST_MATH=0)
 
