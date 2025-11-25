@@ -4,6 +4,15 @@
 using namespace sdu_controllers::models;
 using namespace sdu_controllers;
 
+namespace Eigen
+{
+  namespace indexing
+  {
+
+  }
+  using Eigen::indexing::all;
+}  // namespace Eigen
+
 RegressorRobotModel::RegressorRobotModel(
     const std::shared_ptr<kinematics::ForwardKinematics>& fkModel,
     const Eigen::Vector3d& g0)
@@ -177,5 +186,3 @@ const kinematics::ForwardKinematics& RegressorRobotModel::get_fk_solver() const
 {
   return *fk_model_;
 }
-
-
