@@ -20,7 +20,7 @@ def main():
         x_desired = get_circle_target(start_position, t*dt)
         ref_traj.append(x_desired)
 
-    adm_controller = sdu_controllers.controllers.AdmittanceControllerPosition(frequency)
+    adm_controller = sdu_controllers.controllers.AdmittanceControllerCartesiann(frequency)
     adm_controller.set_mass_matrix_position(np.identity(3) * 22.5)
     adm_controller.set_stiffness_matrix_position(np.identity(3) * 54)
     adm_controller.set_damping_matrix_position(np.identity(3) * 160)

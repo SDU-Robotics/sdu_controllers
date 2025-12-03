@@ -2,7 +2,7 @@
 
 #include <Eigen/Dense>
 #include <chrono>
-#include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/controllers/admittance_controller_cartesian.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
   // Initialize admittance control
   VectorXd u;
-  AdmittanceControllerPosition adm_controller(frequency);
+  AdmittanceControllerCartesian adm_controller(frequency);
 
   std::string robot_ip = "127.0.0.1";
   if (argc > 1)
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
       // Get current position
       T_base_tcp = robot.get_cartesian_tcp_pose();
-      std::vector<double> ft = robot.get_tcp_forces();
+      Eigen::Vector<double, 6> ft = robot.get_tcp_forces();
 
       // Transform into compliant coordinate system (tip?)
       Affine3d T_base_tip = T_base_tcp * T_tcp_tip;
@@ -104,8 +104,8 @@ int main(int argc, char* argv[])
       Vector3d f_base_tip = T_base_tip.rotation() * ft_tip.block<3, 1>(3, 0);
 
       // Step controller
-      adm_controller.step(f_base_tip, ft_tip.block<3, 1>(0, 0), pos_init, quat_init_vec);
-      u = adm_controller.get_output();
+      adm_controller.step(f_base_tip, ft_tip.block<3, 1>(0, 0));
+      u = adm_controller.get_position_output(pos_init, quat_init_vec);
 
       // Rotate output from tip to TCP before sending it to the robot
       Affine3d T_base_tip_out = Pose(eigen_to_std_vector(u));

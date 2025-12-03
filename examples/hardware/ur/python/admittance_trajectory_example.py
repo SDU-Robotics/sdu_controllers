@@ -79,7 +79,7 @@ def main():
     rtde_control.zeroFtSensor()
     time.sleep(0.2)
 
-    adm_controller = sdu_controllers.AdmittanceControllerPosition(frequency)
+    adm_controller = sdu_controllers.AdmittanceControllerCartesian(frequency)
     adm_controller.set_mass_matrix_position(np.identity(3) * 22.5)
     adm_controller.set_stiffness_matrix_position(np.identity(3) * 54)
     adm_controller.set_damping_matrix_position(np.identity(3) * 65)

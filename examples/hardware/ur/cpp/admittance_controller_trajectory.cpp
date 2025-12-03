@@ -1,7 +1,7 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
-#include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/controllers/admittance_controller_cartesian.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <sdu_controllers/math/pose.hpp>
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 
   // Initialize admittance control
   VectorXd u;
-  AdmittanceControllerPosition adm_controller(frequency);
+  AdmittanceControllerCartesian adm_controller(frequency);
   adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
   adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
   adm_controller.set_damping_matrix_position(Vector3d(200, 200, 200).asDiagonal());
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
       // Get current position
       T_base_tcp = robot.get_cartesian_tcp_pose();
-      std::vector<double> ft = robot.get_tcp_forces();
+      Eigen::Vector<double, 6> ft = robot.get_tcp_forces();
 
       // Transform into compliant coordinate system (tip)
       T_base_tip = T_base_tcp * T_tcp_tip;
@@ -118,8 +118,8 @@ int main(int argc, char* argv[])
       x_desired = get_circle_target(pos_init, counter);
 
       // Step controller
-      adm_controller.step(f_base_tip, ft_tip.block<3, 1>(0, 0), x_desired, quat_init_vec);
-      u = adm_controller.get_output();
+      adm_controller.step(f_base_tip, ft_tip.block<3, 1>(0, 0));;
+      u = adm_controller.get_position_output(x_desired, quat_init_vec);
 
       // Rotate output from tip to TCP before sending it to the robot
       Affine3d T_base_tip_out = Pose(eigen_to_std_vector(u));

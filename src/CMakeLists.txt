@@ -1,6 +1,6 @@
 set(sdu_controllers_SOURCES
       sdu_controllers.cpp
-      controllers/admittance_controller_position.cpp
+      controllers/admittance_controller_cartesian.cpp
       controllers/pid_controller.cpp
       controllers/operational_space_controller.cpp
       controllers/force_control_inner_velocity_loop.cpp

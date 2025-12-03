@@ -8,7 +8,7 @@ Controllers:
 
 * :ref:`Controller <controller-api>`
 * :ref:`PDController <pd-controller-api>`
-* :ref:`AdmittanceControllerPosition <admittance-controller-position-api>`
+* :ref:`AdmittanceControllerCartesian <admittance-controller-position-api>`
 * :ref:`OperationalSpaceController <operational-space-controller-api>`
 
 Math:
@@ -49,10 +49,10 @@ PDController
 
 .. _admittance-controller-position-api:
 
-AdmittanceControllerPosition
+AdmittanceControllerCartesian
 ============================
 
-.. doxygenclass:: sdu_controllers::controllers::AdmittanceControllerPosition
+.. doxygenclass:: sdu_controllers::controllers::AdmittanceControllerCartesian
     :project: sdu_controllers
     :members:
 

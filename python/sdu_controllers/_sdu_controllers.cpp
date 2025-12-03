@@ -4,7 +4,7 @@
 #include <nanobind/stl/vector.h>
 
 // controllers
-#include <sdu_controllers/controllers/admittance_controller_position.hpp>
+#include <sdu_controllers/controllers/admittance_controller_cartesian.hpp>
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/controllers/pid_controller.hpp>
@@ -95,18 +95,20 @@ namespace sdu_controllers
         .def("get_output", &controllers::PIDController::get_output)
         .def("reset", &controllers::PIDController::reset);
 
-    nb::class_<controllers::AdmittanceControllerPosition>(m_controllers, "AdmittanceControllerPosition")
+    nb::class_<controllers::AdmittanceControllerCartesian>(m_controllers, "AdmittanceControllerCartesian")
         .def(nb::init<const double>(), nb::arg("frequency"))
-        .def("step", &controllers::AdmittanceControllerPosition::step)
-        .def("get_output", &controllers::AdmittanceControllerPosition::get_output)
-        .def("reset", &controllers::AdmittanceControllerPosition::reset)
-        .def("set_mass_matrix_position", &controllers::AdmittanceControllerPosition::set_mass_matrix_position)
-        .def("set_mass_matrix_orientation", &controllers::AdmittanceControllerPosition::set_mass_matrix_orientation)
-        .def("set_stiffness_matrix_position", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_position)
+        .def("step", &controllers::AdmittanceControllerCartesian::step)
+        .def("get_output", &controllers::AdmittanceControllerCartesian::get_output)
+        .def("get_position_output", &controllers::AdmittanceControllerCartesian::get_position_output)
+        .def("get_velocity_output", &controllers::AdmittanceControllerCartesian::get_velocity_output)
+        .def("reset", &controllers::AdmittanceControllerCartesian::reset)
+        .def("set_mass_matrix_position", &controllers::AdmittanceControllerCartesian::set_mass_matrix_position)
+        .def("set_mass_matrix_orientation", &controllers::AdmittanceControllerCartesian::set_mass_matrix_orientation)
+        .def("set_stiffness_matrix_position", &controllers::AdmittanceControllerCartesian::set_stiffness_matrix_position)
         .def(
-            "set_stiffness_matrix_orientation", &controllers::AdmittanceControllerPosition::set_stiffness_matrix_orientation)
-        .def("set_damping_matrix_position", &controllers::AdmittanceControllerPosition::set_damping_matrix_position)
-        .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation);
+            "set_stiffness_matrix_orientation", &controllers::AdmittanceControllerCartesian::set_stiffness_matrix_orientation)
+        .def("set_damping_matrix_position", &controllers::AdmittanceControllerCartesian::set_damping_matrix_position)
+        .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerCartesian::set_damping_matrix_orientation);
 
     // Cartesian motion controller
     nb::class_<controllers::OperationalSpaceController>(m_controllers, "OperationalSpaceController")

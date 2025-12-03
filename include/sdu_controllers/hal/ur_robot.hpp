@@ -249,6 +249,9 @@ namespace sdu_controllers::hal
     double servo_p_gain_;
     double servo_lookahead_t_;
 
+    double speedl_acceleration_;
+    double speedl_time_;
+
     double deceleration_rate_;
     double vel_tool_acceleration_;
   };

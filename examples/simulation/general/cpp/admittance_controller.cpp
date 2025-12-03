@@ -1,8 +1,8 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
-#include <sdu_controllers/controllers/admittance_controller_position.hpp>
-#include <sdu_controllers/utils/utility.hpp>
+#include "sdu_controllers/controllers/admittance_controller_cartesian.hpp"
+#include "sdu_controllers/utils/utility.hpp"
 
 constexpr double pi = 3.14159265358979323846;
 
@@ -55,7 +55,7 @@ int main()
 
   // Compute admittance trajectory
   VectorXd u;
-  controllers::AdmittanceControllerPosition adm_controller;
+  controllers::AdmittanceControllerCartesian adm_controller;
   adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
   adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
   adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160).asDiagonal());
@@ -83,8 +83,8 @@ int main()
     }
 
     // Step controller
-    adm_controller.step(f, mu, x_desired, quat_init);
-    u = adm_controller.get_output();
+    adm_controller.step(f, mu);
+    u = adm_controller.get_position_output(x_desired, quat_init);
 
     adm_pos[0] = u[0];
     adm_pos[1] = u[1];

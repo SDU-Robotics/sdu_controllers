@@ -27,7 +27,7 @@ classdef admittance_controller < matlab.System
 
             frequency = 1/obj.sample_time;
             obj.adm_contr = ...
-                obj.sdu_controllers.controllers.AdmittanceControllerPosition(frequency);
+                obj.sdu_controllers.controllers.AdmittanceControllerCartesian(frequency);
 
             obj.adm_contr.set_mass_matrix_position(obj.Mp);
             obj.adm_contr.set_stiffness_matrix_position(obj.Kp);
