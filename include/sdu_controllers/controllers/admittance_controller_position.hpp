@@ -34,7 +34,7 @@ namespace sdu_controllers::controllers
    * \f$ d\epsilon_{cd}^{d} = \frac{1}{2}\Delta\omega_{cd}^{d}dt \f$
    *
    *
-   * The output of the controller is a cartesian pose with the orientation described as a quaternion (scalar-first).
+   * The output of the controller is by default a cartesian pose with the orientation described as a quaternion (scalar-first).
    *
    * The admittance parameters default to:
    *
@@ -105,6 +105,12 @@ namespace sdu_controllers::controllers
      * @returns the new pose as \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
      */
     Eigen::VectorXd get_output() override;
+
+    /**
+     * @brief Get the output of the controller. Updates when the step() function is called.
+     * @returns the new  \f$[x, y, z, q_{w}, q_{x}, q_{y}, q_{z}]\f$
+     */
+    Eigen::VectorXd get_velocity_output();
 
     /**
      * @brief Reset internal controller variables.

@@ -78,6 +78,13 @@ namespace sdu_controllers::controllers
     return u_;
   }
 
+  Eigen::VectorXd AdmittanceControllerPosition::get_velocity_output()
+  {
+    Eigen::VectorXd dx_c = xd_desired_ + dx_e_;
+    Eigen::VectorXd omega_c = self._omega_desired;
+    return u_;
+  }
+
   void AdmittanceControllerPosition::set_mass_matrix_position(const Eigen::Matrix3d &mass)
   {
     M_ = mass;

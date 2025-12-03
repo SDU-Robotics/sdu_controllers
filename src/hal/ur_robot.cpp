@@ -109,6 +109,11 @@ namespace sdu_controllers::hal
           std::vector<double> pose_rotvec{pos[0], pos[1], pos[2], rotvec[0], rotvec[1], rotvec[2]};
           rtde_control_->servoL(pose_rotvec, servo_vel_, servo_acc_, dt_, servo_lookahead_t_, servo_p_gain_);
         }
+        else if (control_mode_ == ControlMode::CARTESIAN_VELOCITY)
+        {
+          // use cartesian_vel_ref_!
+          //rtde_control_->speedL(const std::vector<double> &xd)
+        }
         else if (control_mode_ == ControlMode::TORQUE)
         {
           std::vector<double> torques(joint_torque_ref_.begin(), joint_torque_ref_.end());
@@ -267,9 +272,16 @@ namespace sdu_controllers::hal
     return math::Pose(rtde_receive_->getActualTCPPose());
   }
 
-  std::vector<double> URRobot::get_tcp_forces()
+  Eigen::VectorXd URRobot::get_cartesian_tcp_velocity()
   {
-    return rtde_receive_->getActualTCPForce();
+    Eigen::VectorXd tcp_velocity = utils::std_vector_to_eigen(rtde_receive_->getActualTCPSpeed());
+    return tcp_velocity;
+  }
+
+  Eigen::VectorXd URRobot::get_tcp_forces()
+  {
+    Eigen::VectorXd tcp_forces = utils::std_vector_to_eigen(rtde_receive_->getActualTCPForce());
+    return tcp_forces;
   }
 
 };  // namespace sdu_controllers::hal

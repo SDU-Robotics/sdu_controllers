@@ -219,9 +219,14 @@ namespace sdu_controllers::hal
     math::Pose get_cartesian_tcp_pose();
 
     /**
+     * Get the cartesian tcp velocity.
+     */
+    Eigen::VectorXd get_cartesian_tcp_velocity();
+
+    /**
      * @returns Generalized forces in the TCP.
      */
-    std::vector<double> get_tcp_forces();
+    Eigen::VectorXd get_tcp_forces();
 
    private:
     std::shared_ptr<ur_rtde::RTDEReceiveInterface> rtde_receive_;

@@ -42,7 +42,7 @@ In order to build sdu_controllers you must first install the dependencies, see h
 <summary><b>Ubuntu</b></summary>
 
 ``` bash
-sudo apt update && sudo apt install libeigen3-dev libyaml-cpp-dev
+sudo apt update && sudo apt install libeigen3-dev libyaml-cpp-dev python3-dev
 ```
 </details>
 
