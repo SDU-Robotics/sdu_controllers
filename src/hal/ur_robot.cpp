@@ -27,8 +27,7 @@ namespace sdu_controllers::hal
     servo_p_gain_ = 2000;  // proportional gain
     servo_lookahead_t_ = 0.03;  // lookahead time
 
-    speedl_acceleration_ = 0.25;
-    speedl_time_ = dt_;
+    speedl_acceleration_ = 0.5;
 
     deceleration_rate_ = 10.0; // m/s^2
     vel_tool_acceleration_ = 35.0;  // 1.4  # m/s^2
@@ -118,7 +117,7 @@ namespace sdu_controllers::hal
           //rtde_control_->speedL(const std::vector<double> &xd)
           // map Vector<double, ROBOT_DOF> to std::vector<double>
           std::vector<double> vel(cartesian_vel_ref_.data(), cartesian_vel_ref_.data() + cartesian_vel_ref_.size());
-          rtde_control_->speedL(vel, speedl_acceleration_, speedl_time_);
+          rtde_control_->speedL(vel, speedl_acceleration_);
         }
         else if (control_mode_ == ControlMode::TORQUE)
         {
