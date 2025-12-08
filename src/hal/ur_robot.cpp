@@ -117,7 +117,7 @@ namespace sdu_controllers::hal
           //rtde_control_->speedL(const std::vector<double> &xd)
           // map Vector<double, ROBOT_DOF> to std::vector<double>
           std::vector<double> vel(cartesian_vel_ref_.data(), cartesian_vel_ref_.data() + cartesian_vel_ref_.size());
-          rtde_control_->speedL(vel, speedl_acceleration_);
+          rtde_control_->speedL(vel, speedl_acceleration_, dt_);
         }
         else if (control_mode_ == ControlMode::TORQUE)
         {
