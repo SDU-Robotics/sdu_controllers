@@ -228,6 +228,10 @@ namespace sdu_controllers::hal
      */
     Eigen::VectorXd get_tcp_forces();
 
+    // For data recording
+    void start_file_recording(std::string &);
+    void stop_file_recording();
+
    private:
     std::shared_ptr<ur_rtde::RTDEReceiveInterface> rtde_receive_;
     std::shared_ptr<ur_rtde::RTDEControlInterface> rtde_control_;
