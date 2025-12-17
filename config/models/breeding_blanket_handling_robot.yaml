@@ -16,144 +16,145 @@ kinematics:
   # given by the placement of the frames which is also typically at the end or start of the link.
   inertial_ref_frame: "end_of_link_like_DH" # can either be "end_of_link_like_DH" or "start_of_link_like_MDH"
 
+
   dh_params:
-    type: "classic" # describes the DH convention used can be either 'classic' (DH) or 'modified' (MDH)
-    a: [0.0, 0.0, 0.0, 0.0, 0.388, 0.0, 0.0]
+    type: "classic" # Describes DH convention is used can be either 'classic' (DH) or 'modified' (MDH)
+    a: [0.0, 0.0, 0.468, -0.468, 0.438, 0.0, 0.0]
     alpha: [0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0, -1.5707963267948966, 0.0]
     theta: [-1.5707963267948966, 0.0, 0.0, 0.0, -1.5707963267948966, 0.0, 0.0]
-    d: [-0.4450, 0.0, 0.93, 0.0, 3.3873, 0.0, 0.0]
+    d: [-0.0, 0.0, 0.93, 0.0, 3.0323, 0.0, 0.0]
 
 inertial:
   joint_1:
     type: "prismatic"
-    mass: 3368.4000 # kg
-    com: [-0.000000, 4.776900, 0.605240] # meters [m]
+    mass: 3523.6000 # kg
+    com: [0.0462320000000003, 4.6455000000000002, 0.7246200000000000] # meters [m]
     inertia:
-      ixx: 490.050000
-      ixy: -0.000001
-      ixz: -0.000000
-      iyy: 1677.100000
-      iyz: -0.488560
-      izz: 1227.300000
+      ixx: 15940.7319999999999709
+      iyy: 4172.8239999999996144
+      izz: 18582.5329999999994470
+      ixy: 108.1039999999992745
+      ixz: -141.9999999999999716
+      iyz: 233.7580000000000098
 
   joint_2:
     type: "revolute"
-    mass: 10552.0000 # kg
-    com: [-0.000000, -0.575180, 3.108600] # meters [m]
+    mass: 10415.0000  # kg
+    com: [-0.0000267980000000, -0.9320799999999998, 3.2787999999999999] # meters [m]
     inertia:
-      ixx: 19753.000000
-      ixy: 0.000000
-      ixz: 0.505000
-      iyy: 19645.000000
-      iyz: 0.000000
-      izz: 2298.700000
+      ixx: 40567.7660000000032596
+      iyy: 39813.9970000000030268
+      izz: 3000.9760000000001128
+      ixy: 0.2490000000000611
+      ixz: 998.5159999999999627
+      iyz: -0.6270000000022542
 
   joint_3:
     type: "prismatic"
-    mass: 5283.8000 # kg
-    com: [-0.013641, -0.462480, -0.000951] # meters [m]
+    mass: 5509.2000 # kg
+    com: [-0.4842530000000000, -0.9025200000000000, -0.0028617000000000] # meters [m]
     inertia:
-      ixx: 24429.000000
-      ixy: -3.165800
-      ixz: 0.068544
-      iyy: 2207.700000
-      iyz: 1.259700
-      izz: 23579.000000
+      ixx: 2908.0639999999998508
+      iyy: 2113.3659999999999854
+      izz: 2919.8499999999999091
+      ixy: 6.8049999999999997
+      ixz: 0.2550000000000000
+      iyz: -109.9599999999999937
 
   joint_4:
     type: "revolute"
-    mass: 3821.7056 # kg
-    com: [0.000000, -0.000000, 0.373543] # meters [m]
+    mass: 2987.8000 # kg
+    com: [0.0259800000000000, 0.0000000004822200, 0.0515730000000000] # meters [m]
     inertia:
-      ixx: 880.330128
-      ixy: -0.000000
-      ixz: 0.000000
-      iyy: 563.862231
-      iyz: -0.000000
-      izz: 967.243483
+      ixx: 705.0610000000000355
+      iyy: 522.9439999999999600
+      izz: 655.8440000000000509
+      ixy: 0.0000000000000000
+      ixz: 0.0000000000000000
+      iyz: -12.2159999999999904
 
   joint_5:
     type: "revolute"
-    mass: 4481.3488 # kg
-    com: [-0.230282, 0.006404, -2.012886] # meters [m]
+    mass: 4453.5000 # kg
+    com: [-0.2682599999999999, -0.0000000687380000, -2.0652500000000003] # meters [m]
     inertia:
-      ixx: 2332.060209
-      ixy: 0.000000
-      ixz: 24.208440
-      iyy: 2327.892247
-      iyz: -0.136434
-      izz: 199.973559
+      ixx: 4341.2989999999999782
+      iyy: 4547.9350000000004002
+      izz: 423.3799999999999955
+      ixy: 0.0000000000000000
+      ixz: -728.8680000000000518
+      iyz: 0.0000000000000000
 
   joint_6:
     type: "revolute"
-    mass: 2517.5834 # kg
-    com: [0.000000, 0.690841, 0.000000] # meters [m]
+    mass: 2501.6000 # kg
+    com: [-0.0000000000007461, 0.6950800000000000, -0.0000000000000111] # meters [m]
     inertia:
-      ixx: 945.939945
-      ixy: 0.000007
-      ixz: -0.000005
-      iyy: 135.861057
-      iyz: -0.000000
-      izz: 1014.327551
+      ixx: 938.3519999999999754
+      iyy: 134.5780000000000030
+      izz: 1006.2380000000000564
+      ixy: 0.0000000000000000
+      ixz: 0.0000000000000000
+      iyz: 0.0000000000000534
 
   joint_7:
     type: "revolute"
-    mass: 1640.4863 # kg
-    com: [-0.000000, -0.643067, -0.000001] # meters [m]
+    mass: 2359.6000 # kg
+    com: [0.0000002655700000, -0.8878200000000001, -0.0000056360000000] # meters [m]
     inertia:
-      ixx: 207.020454
-      ixy: 0.000066
-      ixz: -0.000014
-      iyy: 149.112185
-      iyz: 0.000035
-      izz: 255.146028
+      ixx: 572.3419999999999845
+      iyy: 184.7949999999999875
+      izz: 630.2889999999999873
+      ixy: -0.0120000000000000
+      ixz: 0.0000000000000000
+      iyz: 0.0000000000000000
 
 joint_limits:
   joint_1:
-    max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
-    max_acceleration: 40.0 # rad/s²
+    max_torque: 1000.0 # N
+    max_velocity: 0.01 # m/s
+    max_acceleration: 40.0 # m/s²
     max_position: 8.0 # m
     min_position: -25.0 # m
 
   joint_2:
     max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
+    max_velocity: 0.0070 # rad/s
     max_acceleration: 40.0 # rad/s²
-    max_position: 5.0 # rad
-    min_position: -5.0 # rad
+    max_position: 0.1396 # rad
+    min_position: -0.1396 # rad
 
   joint_3:
-    max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
-    max_acceleration: 40.0 # rad/s²
-    max_position: 4.66 # m
-    min_position: 0.935 # m
+    max_torque: 1000.0 # N
+    max_velocity: 0.005  # m/s
+    max_acceleration: 40.0 # m/s²
+    max_position: 3.7 # m
+    min_position: 0 # m
 
   joint_4:
     max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
+    max_velocity: 0.002 # rad/s
     max_acceleration: 40.0 # rad/s²
-    max_position: 0.1745 # rad
-    min_position: -0.1745 # rad
+    max_position: 0.0349 # rad
+    min_position: -0.0349 # rad
 
   joint_5:
     max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
+    max_velocity: 0.88 # rad/s
     max_acceleration: 40.0 # rad/s²
-    max_position: 3.14159265 # rad
-    min_position: -3.14159265 # rad
+    max_position: 6.28318530718 # rad
+    min_position: -6.28318530718  # rad
 
   joint_6:
     max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
+    max_velocity: 0.88 # rad/s
     max_acceleration: 40.0 # rad/s²
-    max_position: 3.14159265 # rad
-    min_position: -3.14159265 # rad
+    max_position: 6.28318530718 # rad
+    min_position: -6.28318530718 # rad
 
   joint_7:
     max_torque: 1000.0 # Nm
-    max_velocity: 3.14159265 # rad/s
+    max_velocity: 0.002 # rad/s
     max_acceleration: 40.0 # rad/s²
-    max_position: 0.3491 # rad
-    min_position: -0.3491 # rad
+    max_position: 0.1396 # rad
+    min_position: -0.1396 # rad
