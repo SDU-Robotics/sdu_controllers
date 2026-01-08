@@ -91,7 +91,7 @@ namespace sdu_controllers
         .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics, nb::arg("q"), nb::arg("dq"), nb::arg("tau"));
 
     // Recursive Newton-Euler Algorithm
-    nb::class_<math::RecursiveNewtonEuler>(m_math, "RecursiveNewtonEuler")
+    nb::class_<math::RecursiveNewtonEuler>(m, "RecursiveNewtonEuler")
         .def(
             nb::init<models::RobotModel &>(),
             "Initialize the RecursiveNewtonEuler algorithm with a robot model",
@@ -132,7 +132,7 @@ namespace sdu_controllers
             &math::RecursiveNewtonEuler::set_z0,
             "Set the z-axis of the base frame",
             nb::arg("z0"));
-            
+
     // Linear algebra utilities
     m.def(
         "rot_vel_transform",
