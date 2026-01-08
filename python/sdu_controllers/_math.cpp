@@ -25,9 +25,6 @@ namespace sdu_controllers
     nb::module_ m = main_module.def_submodule("math", "Submodule containing math utilities.");
     m.doc() = "Python bindings for sdu_controllers math utilities.";
 
-    // Ensure core module (and RobotModel bindings) are available for type conversions
-    nb::module_::import_("sdu_controllers._sdu_controllers");
-
     // Pose utilities
     nb::class_<math::Pose>(m, "Pose")
         .def(nb::init<>(), "Default pose (zero position, identity rotation).")
