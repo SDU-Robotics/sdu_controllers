@@ -8,12 +8,12 @@ __all__ = (
 
 import numpy as _np
 
+from ._sdu_controllers import math
 from ._sdu_controllers import models
 from ._sdu_controllers import controllers
 
 from ._sdu_controllers.controllers import PIDController as _original_PIDController
 
-from ._sdu_controllers import math
 from ._sdu_controllers import kinematics
 
 # Export the version given in project metadata
