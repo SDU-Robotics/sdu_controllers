@@ -76,6 +76,7 @@ namespace sdu_controllers
             nb::arg("q"),
             nb::arg("dq"));
 
+    /* TODO: NOT YET IMPLEMENTED
     nb::class_<math::InverseDynamicsCartesianSpace, math::InverseDynamics>(m, "InverseDynamicsCartesianSpace")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
         .def(
@@ -84,7 +85,7 @@ namespace sdu_controllers
             nb::arg("y"),
             nb::arg("x_ee"),
             nb::arg("dx_ee"),
-            nb::arg("ddx_ee"));
+            nb::arg("ddx_ee"));*/
 
     nb::class_<math::ForwardDynamics>(m, "ForwardDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
