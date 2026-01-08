@@ -9,11 +9,6 @@
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/controllers/pid_controller.hpp>
 
-// dynamics
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/math/rnea.hpp>
-
 // kinematics
 #include <sdu_controllers/kinematics/dh_kinematics.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
@@ -24,6 +19,7 @@ namespace nb = nanobind;
 namespace sdu_controllers
 {
   nb::module_ create_robot_models_module(nb::module_ &main_module);
+  nb::module_ create_math_module(nb::module_ &main_module);
 
   NB_MODULE(_sdu_controllers, m)
   {
@@ -31,7 +27,7 @@ namespace sdu_controllers
 
     nb::module_ m_models = create_robot_models_module(m);
     nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
-    nb::module_ m_math = m.def_submodule("math", "Submodule containing math utility functions.");
+    nb::module_ m_math = create_math_module(m);
     nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
 
     // controllers
@@ -97,59 +93,6 @@ namespace sdu_controllers
         .def("step", &controllers::ForceControlInnerVelocityLoop::step)
         .def("get_output", &controllers::ForceControlInnerVelocityLoop::get_output)
         .def("reset", &controllers::ForceControlInnerVelocityLoop::reset);
-
-    // math
-    nb::class_<math::InverseDynamicsJointSpace>(m_math, "InverseDynamicsJointSpace")
-        .def(nb::init<std::shared_ptr<models::RobotModel>>())
-        .def("inverse_dynamics", &math::InverseDynamicsJointSpace::inverse_dynamics);
-
-    nb::class_<math::ForwardDynamics>(m_math, "ForwardDynamics")
-        .def(nb::init<std::shared_ptr<models::RobotModel>>())
-        .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics);
-
-    // Recursive Newton-Euler Algorithm
-    nb::module_ eigen = nb::module_::import_("numpy");
-    nb::class_<sdu_controllers::math::RecursiveNewtonEuler>(m_math, "RecursiveNewtonEuler")
-        .def(
-            nb::init<sdu_controllers::models::RobotModel &>(),
-            "Initialize the RecursiveNewtonEuler algorithm with a robot model",
-            nb::arg("robot_model"))
-        .def(
-            "inverse_dynamics",
-            &sdu_controllers::math::RecursiveNewtonEuler::inverse_dynamics,
-            "Compute inverse dynamics: τ = H(q)q̈ + C(q,q̇)q̇ + g(q)",
-            nb::arg("q"),
-            nb::arg("dq"),
-            nb::arg("ddq"),
-            nb::arg("he"))
-        .def(
-            "forward_dynamics",
-            &sdu_controllers::math::RecursiveNewtonEuler::forward_dynamics,
-            "Compute forward dynamics: q̈ = H(q)⁻¹(τ - C(q,q̇)q̇ - g(q))",
-            nb::arg("q"),
-            nb::arg("dq"),
-            nb::arg("tau"))
-        .def(
-            "inertia",
-            &sdu_controllers::math::RecursiveNewtonEuler::inertia,
-            "Compute the joint-space inertia matrix H(q)",
-            nb::arg("q"))
-        .def(
-            "velocity_product",
-            &sdu_controllers::math::RecursiveNewtonEuler::velocity_product,
-            "Compute the velocity product term C(q,q̇)q̇ from the manipulator equation",
-            nb::arg("q"),
-            nb::arg("dq"))
-        .def(
-            "gravity",
-            &sdu_controllers::math::RecursiveNewtonEuler::gravity,
-            "Compute the gravity forces g(q)",
-            nb::arg("q"))
-        .def(
-            "set_z0",
-            &sdu_controllers::math::RecursiveNewtonEuler::set_z0,
-            "Set the z-axis of the base frame",
-            nb::arg("z0"));
 
     nb::enum_<kinematics::ForwardKinematics::JointType>(m_kinematics, "JointType")
         .value("REVOLUTE", kinematics::ForwardKinematics::JointType::REVOLUTE)
