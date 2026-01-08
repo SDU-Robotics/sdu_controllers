@@ -322,7 +322,6 @@ namespace sdu_controllers::math
       return to_transform();
     }
 
-
     /**
      * @brief Assignment operator to set the pose from another Pose object.
      *

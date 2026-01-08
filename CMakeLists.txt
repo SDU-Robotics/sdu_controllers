@@ -41,7 +41,7 @@ include(CMakePrintHelpers)
 cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # find dependencies
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
 # Eigen: Disable fast math be default.
 add_definitions(-DEIGEN_FAST_MATH=0)
 
@@ -98,7 +98,9 @@ if(BUILD_PYTHON)
 
   # Compile the nanobind module
   nanobind_add_module(_sdu_controllers
-                      python/sdu_controllers/_sdu_controllers.cpp)
+                      python/sdu_controllers/_sdu_controllers.cpp
+                      python/sdu_controllers/_robot_models.cpp
+                      python/sdu_controllers/_math.cpp)
   target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 
   # Install the Python module shared library

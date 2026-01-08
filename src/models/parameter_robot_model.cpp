@@ -177,7 +177,7 @@ namespace sdu_controllers::models
           std::cout << "Found the DH parameters using these instead.";
         }
       }
-      else if (kinematics_type == "DH" or tried_to_use_frames)
+      else if (kinematics_type == "DH" || tried_to_use_frames)
       {
         params.dof = static_cast<uint16_t>(root["dof"].as<int>());
         auto a_opt = utils::yaml_node_to_eigen_vector(root["kinematics"]["dh_params"]["a"]);
@@ -424,11 +424,6 @@ namespace sdu_controllers::models
   std::vector<double> ParameterRobotModel::get_m()
   {
     return mass_;
-  }
-
-  std::vector<bool> ParameterRobotModel::get_is_joint_revolute()
-  {
-    return is_joint_revolute_;
   }
 
   Eigen::Vector3d ParameterRobotModel::get_g0()
