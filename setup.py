@@ -7,6 +7,8 @@ setup(
     zip_safe=False,
     cmake_args=[
         "-DBUILD_TESTING=OFF",
+        "-DBUILD_PYTHON=ON",
+        "-DBUILD_PYTHON_STUBS=ON",
         "-DBUILD_DOCS=OFF",
         "-DCMAKE_BUILD_TYPE=Release"
     ],

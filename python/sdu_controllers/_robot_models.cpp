@@ -66,7 +66,18 @@ namespace sdu_controllers
         .def("get_parameters", &models::RegressorRobotModel::get_parameters)
         .def("get_friction_parameters", &models::RegressorRobotModel::get_friction_parameters);
 
-    nb::class_<models::ParameterRobotModel>(m_models, "ParameterRobotModel");
+    nb::class_<models::ParameterRobotModel, models::RobotModel>(m_models, "ParameterRobotModel")
+        .def(nb::init<>())
+        .def(nb::init<const std::string &>())
+        .def(nb::init<const models::RobotParameters &>())
+        .def("set_robot_parameters", &models::ParameterRobotModel::set_robot_parameters, nb::arg("params"))
+        .def("set_com", &models::ParameterRobotModel::set_com, nb::arg("com"))
+        .def("set_link_inertia", &models::ParameterRobotModel::set_link_inertia, nb::arg("link_inertia"))
+        .def("set_mass", &models::ParameterRobotModel::set_mass, nb::arg("mass"))
+        .def_static(
+            "load_parameters_from_yaml",
+            &models::ParameterRobotModel::load_parameters_from_yaml,
+            nb::arg("filepath"));
 
     nb::class_<models::URRobotModel, models::ParameterRobotModel>(m_models, "URRobotModel")
         .def(nb::init<models::URRobotModel::RobotType>())
