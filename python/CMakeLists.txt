@@ -1,3 +1,4 @@
+
 # Compile the nanobind module
 nanobind_add_module(_sdu_controllers sdu_controllers/_sdu_controllers.cpp
                     sdu_controllers/_robot_models.cpp sdu_controllers/_math.cpp)
@@ -6,7 +7,14 @@ target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 # Install the Python module shared library
 install(TARGETS _sdu_controllers DESTINATION .)
 
-if(BUILD_PYTHON_STUBS)
+# Check if nanobind is available as a Python import
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import nanobind"
+  RESULT_VARIABLE nanobind_NOT_FOUND
+  OUTPUT_QUIET ERROR_QUIET)
+
+if(BUILD_PYTHON_STUBS AND NOT nanobind_NOT_FOUND)
+
   # Automatic stub generation
   add_custom_command(
     TARGET _sdu_controllers
@@ -35,4 +43,8 @@ if(BUILD_PYTHON_STUBS)
   # Generate py.typed marker for PEP 561 compliance
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/py.typed "")
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/py.typed DESTINATION .)
+elseif(nanobind_NOT_FOUND AND BUILD_PYTHON_STUBS)
+  message(WARNING
+          "nanobind Python package not found; skipping generation of type stubs")
+
 endif()
