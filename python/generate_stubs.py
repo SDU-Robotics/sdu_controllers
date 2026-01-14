@@ -29,19 +29,6 @@ for attr_name in dir(_sdu_controllers):
         except Exception as e:
             pass
 
-# Print main stubs
-print("\n" + "="*80)
-print("Main module stubs:")
-print("="*80)
-print(main_stubs if main_stubs.strip() else "[Empty - bindings may not be fully exposed]")
-
-# Print submodule stubs
-for name, stubs_content in submodules.items():
-    print("\n" + "="*80)
-    print(f"Stubs for {name}:")
-    print("="*80)
-    print(stubs_content if stubs_content.strip() else f"[Empty for {name}]")
-
 # Save to files
 with open("sdu_controllers.pyi", "w") as f:
     f.write(main_stubs)
@@ -49,10 +36,3 @@ with open("sdu_controllers.pyi", "w") as f:
 for name, stubs_content in submodules.items():
     with open(f"{name}.pyi", "w") as f:
         f.write(stubs_content)
-
-print("\n" + "="*80)
-print("Stubs written to:")
-print(f"  - sdu_controllers.pyi (main module)")
-for name in submodules.keys():
-    print(f"  - sdu_controllers.{name}.pyi (submodule)")
-print("="*80)
