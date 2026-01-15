@@ -29,21 +29,39 @@ namespace sdu_controllers
   {
     m.doc() = "Python Bindings for sdu_controllers";
 
-    // Add the installed module's config directory (if present) to the config search paths
-    try
-    {
-      std::filesystem::path module_path = std::filesystem::path(nb::str(m.attr("__file__"))).parent_path();
-      sdu_controllers::utils::ConfigFolder(module_path / "config");
-    }
-    catch (...)
-    {
-      // If discovering the module path fails, continue without adding it
-    }
-
     nb::module_ m_models = create_robot_models_module(m);
     nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
     nb::module_ m_math = create_math_module(m);
     nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
+    nb::module_ m_utils = m.def_submodule("utils", "Submodule containing utility functions.");
+
+    // utils
+    nb::class_<utils::ConfigFolder>(m_utils, "ConfigFolder")
+        .def(
+            nb::init<std::string>(),
+            nb::arg("path"),
+            "Add a configuration folder to the search paths. If the folder does not exist, it is not added.")
+        .def_static(
+            "get_default_config_path",
+            []() { return utils::ConfigFolder::get_default_config_path().string(); },
+            "Get the first valid configuration folder from the search paths.")
+        .def_static(
+            "find_config_file",
+            [](const std::string &filename) { return utils::ConfigFolder::find_config_file(filename).string(); },
+            nb::arg("filename"),
+            "Find a configuration file by searching through the configuration folders and their subdirectories.")
+        .def_static(
+            "get_config_dirs",
+            []() {
+              std::vector<std::string> dirs;
+              for (const auto &dir : utils::ConfigFolder::get_config_dirs())
+              {
+                dirs.push_back(dir.string());
+              }
+              return dirs;
+            },
+            "Get all configuration folders in the search paths.");
+
 
     // controllers
     nb::class_<controllers::PIDController>(m_controllers, "PIDController")
@@ -166,6 +184,10 @@ namespace sdu_controllers
         .def("get_alpha", &sdu_controllers::kinematics::DHKinematics::get_alpha)
         .def("get_d", &sdu_controllers::kinematics::DHKinematics::get_d)
         .def("get_theta", &sdu_controllers::kinematics::DHKinematics::get_theta);
+
+
+
+
   }
 
 }  // namespace sdu_controllers

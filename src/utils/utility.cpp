@@ -16,8 +16,9 @@ std::filesystem::path ConfigFolder::get_default_config_path()
   // Return the first valid configuration directory from the list
   if (!config_dirs_.empty())
   {
-    for (const auto &config_dir : config_dirs_)
+    for (auto it = config_dirs_.rbegin(); it != config_dirs_.rend(); ++it)
     {
+      const auto &config_dir = *it;
       if (!std::filesystem::exists(config_dir))
       {
         continue;

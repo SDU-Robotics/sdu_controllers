@@ -292,6 +292,15 @@ namespace sdu_controllers::utils
     ConfigFolder(std::filesystem::path path);
 
     /**
+     * @brief Add a configuration folder to the search paths.
+     * if the folder does not exist, it is not added.
+     * @param path [in] The path to the configuration folder.
+     */
+    ConfigFolder(const std::string &path) : ConfigFolder(std::filesystem::path(path))
+    {
+    }
+
+    /**
      * @brief Get the first valid configuration folder from the search paths.
      * @throws std::runtime_error if no valid configuration folder is found.
      * @return the path to the first valid configuration folder.
@@ -305,6 +314,15 @@ namespace sdu_controllers::utils
      * @return The path to the found configuration file, or an empty path if not found.
      */
     static std::filesystem::path find_config_file(const std::string &filename);
+
+    /**
+     * @brief Get the list of configuration directories.
+     * @return A vector of paths to the configuration directories.
+     */
+    static std::vector<std::filesystem::path> get_config_dirs()
+    {
+      return config_dirs_;
+    }
 
    private:
     static std::vector<std::filesystem::path> config_dirs_;

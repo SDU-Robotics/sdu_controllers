@@ -10,13 +10,17 @@ namespace sdu_controllers::models
 {
   URRobotModel::URRobotModel(RobotType robot_type)
       : URRobotModel(
-            robot_type == RobotType::ur3e   ? utils::project_path("config/models/ur3e_robot.yaml")
-            : robot_type == RobotType::ur5e ? utils::project_path("config/models/ur5e_robot.yaml")
-                                            : utils::project_path("config/models/ur10e_robot.yaml"))
+            robot_type == RobotType::ur3e   ? utils::ConfigFolder::find_config_file("ur3e_robot.yaml")
+            : robot_type == RobotType::ur5e ? utils::ConfigFolder::find_config_file("ur5e_robot.yaml")
+                                            : utils::ConfigFolder::find_config_file("ur10e_robot.yaml"))
   {
   }
 
   URRobotModel::URRobotModel(const std::string &yaml_filepath) : ParameterRobotModel(yaml_filepath)
+  {
+  }
+
+  URRobotModel::URRobotModel(const std::filesystem::path &yaml_filepath) : ParameterRobotModel(yaml_filepath.string())
   {
   }
 

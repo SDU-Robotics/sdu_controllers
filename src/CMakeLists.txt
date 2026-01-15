@@ -14,6 +14,7 @@ set(sdu_controllers_SOURCES
       models/regressor_robot_model.cpp
       models/parameter_robot_model.cpp
       safety/safety_verifier.cpp
+      utils/utility.cpp
 )
 
 # Try to find ur_rtde in order to build UR Robot HAL

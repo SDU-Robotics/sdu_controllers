@@ -1,8 +1,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include <iostream>
-#include <sdu_controllers/models/parameter_robot_model.hpp>
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
+#include <sdu_controllers/models/parameter_robot_model.hpp>
 #include <sdu_controllers/utils/utility.hpp>
 
 using namespace Eigen;
@@ -10,19 +10,12 @@ using namespace Eigen;
 namespace sdu_controllers::models
 {
   BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel()
-    : BreedingBlanketHandlingRobotModel(utils::project_path("config/models/breeding_blanket_handling_robot.yaml"))
+      : BreedingBlanketHandlingRobotModel(utils::ConfigFolder::find_config_file("breeding_blanket_handling_robot.yaml"))
   {
   }
 
-  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const std::string &yaml_filepath) : ParameterRobotModel(yaml_filepath)
-  {
-    // Initialize default mass, com and link inertia
-    mass_default_ = this->get_m();
-    com_default_ = this->get_CoM();
-    link_inertia_default_ = this->get_link_inertia();
-  }
-
-  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const RobotParameters &params) : ParameterRobotModel(params)
+  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const std::string &yaml_filepath)
+      : ParameterRobotModel(yaml_filepath)
   {
     // Initialize default mass, com and link inertia
     mass_default_ = this->get_m();
@@ -30,7 +23,16 @@ namespace sdu_controllers::models
     link_inertia_default_ = this->get_link_inertia();
   }
 
-  void BreedingBlanketHandlingRobotModel::set_tcp_mass(double mass, Eigen::Vector3d& com, Eigen::Matrix3d inertia)
+  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const RobotParameters &params)
+      : ParameterRobotModel(params)
+  {
+    // Initialize default mass, com and link inertia
+    mass_default_ = this->get_m();
+    com_default_ = this->get_CoM();
+    link_inertia_default_ = this->get_link_inertia();
+  }
+
+  void BreedingBlanketHandlingRobotModel::set_tcp_mass(double mass, Eigen::Vector3d &com, Eigen::Matrix3d inertia)
   {
     // self._m[5] = self._m_default[5] + mass
     // com_new = (numpy.asarray(self._com_default[5]) * self._m_default[5] + numpy.asarray(com) * mass)/self._m[5]
@@ -54,9 +56,12 @@ namespace sdu_controllers::models
     std::vector<Eigen::Matrix3d> new_link_inertia = link_inertia_default_;
 
     // Ensure correct sizes (defensive)
-    if ((int)new_mass.size() < N) new_mass.resize(N, 0.0);
-    if (new_com.rows() < N) new_com.conservativeResize(N, 3);
-    if ((int)new_link_inertia.size() < N) new_link_inertia.resize(N, Eigen::Matrix3d::Zero());
+    if ((int)new_mass.size() < N)
+      new_mass.resize(N, 0.0);
+    if (new_com.rows() < N)
+      new_com.conservativeResize(N, 3);
+    if ((int)new_link_inertia.size() < N)
+      new_link_inertia.resize(N, Eigen::Matrix3d::Zero());
 
     // Update mass for the TCP (last link)
     new_mass[N - 1] = mass_default_[N - 1] + mass;
@@ -71,14 +76,12 @@ namespace sdu_controllers::models
 
     Eigen::Matrix3d offset_matrix_a, offset_matrix_b;
 
-    offset_matrix_a << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2),
-        -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2), -r(1) * r(2),
-        -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
+    offset_matrix_a << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2), -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2),
+        -r(1) * r(2), -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
 
     r = -com + com_new;
-    offset_matrix_b << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2),
-        -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2), -r(1) * r(2),
-        -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
+    offset_matrix_b << pow(r(1), 2) + pow(r(2), 2), -r(0) * r(1), -r(0) * r(2), -r(0) * r(1), pow(r(0), 2) + pow(r(2), 2),
+        -r(1) * r(2), -r(0) * r(2), -r(1) * r(2), pow(r(0), 2) + pow(r(1), 2);
 
     Eigen::Matrix3d new_inertia =
         link_inertia_default_[N - 1] + mass_default_[N - 1] * offset_matrix_a + inertia + mass * offset_matrix_b;
