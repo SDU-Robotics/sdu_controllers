@@ -26,6 +26,7 @@ option(BUILD_PYTHON_STUBS "Enable building of python Stubs" ${BUILD_PYTHON})
 option(BUILD_DOCS "Enable building of documentation" ON)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
+option(BUILD_FOR_PIP_INSTALL "Enable Install commands suitable for pip installations" OFF)
 
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
