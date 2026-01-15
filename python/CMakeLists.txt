@@ -7,6 +7,8 @@ target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 # Install the Python module shared library
 install(TARGETS _sdu_controllers DESTINATION .)
 
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/config DESTINATION .)
+
 # Check if nanobind is available as a Python import
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -c "import nanobind"

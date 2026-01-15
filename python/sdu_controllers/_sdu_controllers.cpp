@@ -1,7 +1,11 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+
+#include <filesystem>
+#include <sdu_controllers/utils/utility.hpp>
 
 // controllers
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
@@ -24,6 +28,17 @@ namespace sdu_controllers
   NB_MODULE(_sdu_controllers, m)
   {
     m.doc() = "Python Bindings for sdu_controllers";
+
+    // Add the installed module's config directory (if present) to the config search paths
+    try
+    {
+      std::filesystem::path module_path = std::filesystem::path(nb::str(m.attr("__file__"))).parent_path();
+      sdu_controllers::utils::ConfigFolder(module_path / "config");
+    }
+    catch (...)
+    {
+      // If discovering the module path fails, continue without adding it
+    }
 
     nb::module_ m_models = create_robot_models_module(m);
     nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
