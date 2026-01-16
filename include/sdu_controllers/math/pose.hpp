@@ -48,6 +48,16 @@ namespace sdu_controllers::math
     }
 
     /**
+     * @brief Copy constructor.
+     *
+     * Creates a new pose as a copy of another pose.
+     * @param other The pose to copy
+     */
+    Pose(const Pose& other) : position_(other.position_), orientation_(other.orientation_)
+    {
+    }
+
+    /**
      * @brief Construct a pose from position and orientation.
      *
      * @param position The 3D position vector
@@ -188,6 +198,19 @@ namespace sdu_controllers::math
     }
 
     /**
+     * @brief Construct a pose from a 4x4 transformation matrix.
+     *
+     * @param transform The 4x4 homogeneous transformation matrix
+     */
+    explicit Pose(const Eigen::Matrix4d& transform)
+    {
+      Eigen::Affine3d affine(transform);
+      position_ = affine.translation();
+      orientation_ = Eigen::Quaterniond(affine.rotation());
+      orientation_.normalize();
+    }
+
+    /**
      * @brief Get the position component of the pose.
      * @return The 3D position vector
      */
@@ -307,6 +330,37 @@ namespace sdu_controllers::math
       transform.translation() = position_;
       transform.rotate(orientation_);
       return transform;
+    }
+
+    /**
+     * @brief Get the pose as a 6D vector with position and angle-axis orientation.
+     * @return std::vector<double> containing [X, Y, Z, Rx, Ry, Rz] where Rx, Ry, Rz represent
+     *         the rotation as an angle-axis (equivalent axis-angle) representation in radians.
+     */
+    std::vector<double> to_pose6d_std() const
+    {
+      Eigen::AngleAxisd angle_axis(orientation_);
+      Eigen::Vector3d rotation_vector = angle_axis.angle() * angle_axis.axis();
+      
+      return std::vector<double>{
+        position_.x(), position_.y(), position_.z(),
+        rotation_vector.x(), rotation_vector.y(), rotation_vector.z()
+      };
+    }
+
+    /**
+     * @brief Get the pose as a 6D Eigen vector with position and angle-axis orientation.
+     * @return Eigen::VectorXd containing [X, Y, Z, Rx, Ry, Rz] where Rx, Ry, Rz represent
+     *         the rotation as an angle-axis (equivalent axis-angle) representation in radians.
+     */
+    Eigen::VectorXd to_pose6d_eigen() const
+    {
+      Eigen::AngleAxisd angle_axis(orientation_);
+      Eigen::Vector3d rotation_vector = angle_axis.angle() * angle_axis.axis();
+      
+      Eigen::VectorXd result(6);
+      result << position_, rotation_vector;
+      return result;
     }
 
     /**
