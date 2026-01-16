@@ -24,11 +24,10 @@ Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(c
 {
   std::vector<Eigen::Matrix4d> T_chain = forward_kinematics_all(q);
 
-  return geometric_jacobian(q, T_chain);
+  return geometric_jacobian(T_chain);
 }
 
 Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(
-    const Eigen::VectorXd& q,
     const std::vector<Eigen::Matrix4d>& fk_matrices) const
 {
   Eigen::Vector3d z_im1, o_im1, o_n;

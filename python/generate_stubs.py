@@ -9,7 +9,7 @@ print("Generating stubs for sdu_controllers...")
 # Generate stubs for main module
 sg_main = StubGen(_sdu_controllers)
 sg_main.put(_sdu_controllers)
-main_stubs = sg_main.get()
+main_stubs = sg_main.get().replace("_sdu_robotics", "sdu_robotics")
 
 # Try to generate stubs for submodules
 submodules = {}
@@ -23,7 +23,7 @@ for attr_name in dir(_sdu_controllers):
                 try:
                     sg = StubGen(attr)
                     sg.put(attr)
-                    submodules[attr_name] = sg.get()
+                    submodules[attr_name] = sg.get().replace("_sdu_robotics", "sdu_robotics")
                 except Exception as e:
                     print(f"    Warning: Could not generate stubs for {attr_name}: {e}")
         except Exception as e:
