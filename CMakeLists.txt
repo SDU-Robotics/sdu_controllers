@@ -22,9 +22,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Compilation options
 option(BUILD_PYTHON "Enable building of Python bindings" ON)
+option(BUILD_PYTHON_STUBS "Enable building of python Stubs" ${BUILD_PYTHON})
 option(BUILD_DOCS "Enable building of documentation" ON)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
+option(BUILD_FOR_PIP_INSTALL "Enable Install commands suitable for pip installations" OFF)
 
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
@@ -96,15 +98,7 @@ if(BUILD_PYTHON)
   # Add Python bindings
   add_subdirectory(ext/nanobind)
 
-  # Compile the nanobind module
-  nanobind_add_module(_sdu_controllers
-                      python/sdu_controllers/_sdu_controllers.cpp
-                      python/sdu_controllers/_robot_models.cpp
-                      python/sdu_controllers/_math.cpp)
-  target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
-
-  # Install the Python module shared library
-  install(TARGETS _sdu_controllers DESTINATION .)
+ add_subdirectory(python)
 endif()
 
 # Add an alias target for use if this project is included as a subproject in

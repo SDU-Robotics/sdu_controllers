@@ -7,6 +7,8 @@ requires = [
     "wheel",
     "scikit-build",
     "cmake>=3.9",
+    "nanobind>=2.10.0",
+    "typing-extensions",
 ]
 build-backend = "setuptools.build_meta"
 
