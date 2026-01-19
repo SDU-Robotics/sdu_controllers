@@ -30,9 +30,9 @@ for attr_name in dir(_sdu_controllers):
             pass
 
 # Save to files
-with open("sdu_controllers.pyi", "w") as f:
+with open("sdu_controllers.pyi", "w", encoding="utf-8") as f:
     f.write(main_stubs)
 
 for name, stubs_content in submodules.items():
-    with open(f"{name}.pyi", "w") as f:
+    with open(f"{name}.pyi", "w", encoding="utf-8") as f:
         f.write(stubs_content)

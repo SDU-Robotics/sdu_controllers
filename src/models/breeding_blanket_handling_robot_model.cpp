@@ -23,6 +23,15 @@ namespace sdu_controllers::models
     link_inertia_default_ = this->get_link_inertia();
   }
 
+  BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const std::filesystem::path &yaml_filepath)
+      : ParameterRobotModel(yaml_filepath)
+  {
+    // Initialize default mass, com and link inertia
+    mass_default_ = this->get_m();
+    com_default_ = this->get_CoM();
+    link_inertia_default_ = this->get_link_inertia();
+  }
+
   BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const RobotParameters &params)
       : ParameterRobotModel(params)
   {
