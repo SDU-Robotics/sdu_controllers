@@ -17,7 +17,7 @@ set(sdu_controllers_SOURCES
 )
 
 # Try to find ur_rtde in order to build UR Robot HAL
-find_package(ur_rtde 1.6.2 QUIET)
+find_package(ur_rtde QUIET)
 
 if(ur_rtde_FOUND)
     list(APPEND sdu_controllers_SOURCES hal/ur_robot.cpp)
