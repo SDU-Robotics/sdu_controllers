@@ -5,10 +5,10 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
+#include <vector>
 
 using namespace csv;
 using namespace Eigen;
@@ -23,7 +23,8 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
   double Kp_value = 1000.0;
@@ -43,8 +44,8 @@ int main()
 
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
+  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  //math::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
@@ -55,13 +56,16 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
+  Vector<double, 6> he = VectorXd::Zero(6);
+
   // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe.csv");
+  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("joint_trajectory_safe.csv"));
 
   // Offline safety verification of the input trajectory.
   //  - checks joint position, velocity and acceleration limits.
   safety::SafetyVerifier safety_verifier(robot_model);
   bool is_trajectory_safe = safety_verifier.verify_trajectory_safety(input_trajectory);
+  size_t j = 0.0;
   if (is_trajectory_safe)
   {
     // Control loop
@@ -87,18 +91,22 @@ int main()
       pid_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
       VectorXd y = pid_controller.get_output();
       std::cout << "y: " << y << std::endl;
-      VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+
+      VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
       std::cout << "tau: " << tau << std::endl;
 
       // Simulation
-      VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
+      VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
       // integrate to get velocity
       dq += ddq * dt;
       // integrate to get position
       q += dq * dt;
 
       std::cout << "q:" << q << std::endl;
-      csv_writer << eigen_to_std_vector(q);
+      VectorXd temp(1 + q.size());
+      temp << j * dt, q;
+      csv_writer << eigen_to_std_vector(temp);
+      j++;
     }
     output_filestream.close();
   }

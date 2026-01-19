@@ -1,0 +1,203 @@
+dof: 6 # Number of degrees of freedom
+robot_name: ur3e
+# Model specific notes:
+#
+# - The DH parameters and inertial parameters in this file are from:
+#   https://www.universal-robots.com/articles/ur/application-installation/dh-parameters-for-calculations-of-kinematics-and-dynamics/
+#   which uses the classic DH format. If you want to use the Modified DH format look at the
+#   Universal Robots ROS2 Robot description package here:
+#   https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/tree/rolling/config/ur5e
+
+# The kinematics can be described as DH parameters and or as 6D frames.
+# If both are available set the preferred 'type' to either 'DH' or 'Frames'.
+kinematics:
+  type: "DH" # selects the kinematic format used
+
+  # The inertial reference frame describes where the reference frame of the inertial parameters are
+  # placed. If you use classic DH parameters, this frame will be placed at the end of the link. If
+  # you have described the robot with Modified DH parameters the frame will be at the start of the link.
+  # Finally if you use 6D frames to describe the robot kinematics, the inertial reference frame is then
+  # given by the placement of the frames which is also typically at the end or start of the link.
+  inertial_ref_frame: "end_of_link_like_DH" # can either be "end_of_link_like_DH" or "start_of_link_like_MDH"
+
+  dh_params:
+    type: "classic" # describes the DH convention used can be either 'classic' (DH) or 'modified' (MDH)
+    a: [0.0, -0.425, -0.3922, 0.0, 0.0, 0.0]
+    alpha:
+      [
+        1.5707963267948966,
+        0.0,
+        0.0,
+        1.5707963267948966,
+        -1.5707963267948966,
+        0.0,
+      ]
+    theta: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    d: [0.1625, 0.0, 0.0, 0.1333, 0.0997, 0.0996]
+
+  frames:
+    # the frames are given as [x, y, z, roll, pitch, yaw] where the position (x,y,z)
+    # is in meters [m] and roll-pitch-yaw (roll, pitch, yaw) is in radians following [XYZ] convention.
+    joint_1:
+      x: 0
+      y: 0
+      z: 0.1625
+      roll: 0
+      pitch: 0
+      yaw: 0
+
+    joint_2:
+      x: 0
+      y: 0
+      z: 0
+      roll: 1.570796327
+      pitch: 0
+      yaw: 0
+
+    joint_3:
+      x: -0.425
+      y: 0
+      z: 0
+      roll: 0
+      pitch: 0
+      yaw: 0
+
+    joint_4:
+      x: -0.3922
+      y: 0
+      z: 0.1333
+      roll: 0
+      pitch: 0
+      yaw: 0
+
+    joint_5:
+      x: 0
+      y: -0.0997
+      z: -2.044881182297852e-11
+      roll: 1.570796327
+      pitch: 0
+      yaw: 0
+
+    joint_6:
+      x: 0
+      y: 0.09959999999999999
+      z: -2.042830148012698e-11
+      roll: 1.570796326589793
+      pitch: 3.141592653589793
+      yaw: 3.141592653589793
+
+inertial:
+  joint_1:
+    type: "revolute"
+    mass: 3.761 # kg
+    com: [0.0, -0.02, 0.0] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0
+
+  joint_2:
+    type: "revolute"
+    mass: 8.058 # kg
+    com: [0.13, 0.0, 0.1157] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0
+
+  joint_3:
+    type: "revolute"
+    mass: 2.846 # kg
+    com: [0.05, 0.0, 0.0238] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0
+
+  joint_4:
+    type: "revolute"
+    mass: 1.37 # kg
+    com: [0.0, 0.0, 0.01] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0
+
+  joint_5:
+    type: "revolute"
+    mass: 1.3 # kg
+    com: [0.0, 0.0, 0.01] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0
+
+  joint_6:
+    type: "revolute"
+    mass: 0.365 # kg
+    com: [0.0, 0.0, -0.02] # meters [m]
+    inertia:
+      ixx: 0.0
+      ixy: 0.0
+      ixz: 0.0
+      iyy: 0.0
+      iyz: 0.0
+      izz: 0.0001
+
+joint_limits:
+  joint_1:
+    max_torque: 150.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 6.28318530 # rad
+    min_position: -6.28318530 # rad
+
+  joint_2:
+    max_torque: 150.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 6.28318530 # rad
+    min_position: -6.28318530 # rad
+
+  joint_3:
+    max_torque: 150.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 3.14159265 # rad
+    min_position: -3.14159265 # rad
+
+  joint_4:
+    max_torque: 28.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 6.28318530 # rad
+    min_position: -6.28318530 # rad
+
+  joint_5:
+    max_torque: 28.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 6.28318530 # rad
+    min_position: -6.28318530 # rad
+
+  joint_6:
+    max_torque: 28.0 # Nm
+    max_velocity: 3.14159265 # rad/s
+    max_acceleration: 40.0 # rad/s²
+    max_position: 6.28318530 # rad
+    min_position: -6.28318530 # rad

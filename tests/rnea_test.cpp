@@ -4,7 +4,6 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -23,16 +22,17 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
 
   uint16_t ROBOT_DOF = robot_model->get_dof();
 
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
 
-  math::RecursiveNewtonEuler rnea(robot_model);
+  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  //math::ForwardDynamics fwd_dyn(robot_model);
+
+  //math::RecursiveNewtonEuler rnea(*robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
@@ -41,7 +41,7 @@ int main()
   VectorXd q(ROBOT_DOF);
   VectorXd dq(ROBOT_DOF);
   VectorXd ddq(ROBOT_DOF);
-  q << 1, 1, 1, 1, 1, 1; // 1.5707, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
+  q << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0; // 1.5707, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << q;
   ddq << q;
   // dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -49,18 +49,21 @@ int main()
   Vector<double, 6> he;
   he.setZero();
 
-  Eigen::VectorXd tau = rnea.inverse_dynamics(q, dq, ddq, he);
+  Eigen::VectorXd tau = robot_model->inverse_dynamics(q, dq, ddq, he);
   std::cout << "tau\n" << tau << std::endl;
 
-  tau = inv_dyn_jnt_space.inverse_dynamics(ddq, q, dq);
-  std::cout << "tau\n" << tau << std::endl;
+  //tau = inv_dyn_jnt_space.inverse_dynamics(ddq, q, dq);
+  //std::cout << "tau\n" << tau << std::endl;
 
-  Eigen::MatrixXd B = rnea.inertia(q);
-  Eigen::VectorXd Cdq = rnea.velocity_product(q, dq);
-  Eigen::VectorXd grav = rnea.gravity(q);
+  Eigen::MatrixXd B = robot_model->get_inertia_matrix(q);
+  std::cout << "B" << B << std::endl;
+  Eigen::MatrixXd C = robot_model->get_coriolis(q, dq);
+  std::cout << "C" << C << std::endl;
+  Eigen::VectorXd grav = robot_model->get_gravity(q);
+  std::cout << "grav" << grav << std::endl;
 
   std::cout << "B ddq + C dq + grav\n"
-    << B * ddq + Cdq + grav << std::endl;
+    << B * ddq + C*dq + grav << std::endl;
 
   //  // Control loop
   //  for (const std::vector<double>& trajectory_point : input_trajectory)

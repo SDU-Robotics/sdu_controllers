@@ -41,7 +41,7 @@ plt.style.use('latex_plot.mplstyle')
 trajectory_in = []
 trajectory_out = []
 
-with open('../examples/data/cartesian_trajectory_safe.csv') as csv_file:
+with open('../data/cartesian_trajectory_safe.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:

@@ -2,19 +2,61 @@
 #define SDU_CONTROLLERS_MODELS_REGRESSOR_ROBOT_MODEL_HPP
 
 #include <Eigen/Core>
-#include <sdu_controllers/kinematics/dh_parameters.hpp>
+#include <memory>
+#include <sdu_controllers/kinematics/dh_kinematics.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <utility>
 #include <vector>
 
 namespace sdu_controllers::models
 {
+  /**
+   * @brief Regressor-based robot model for dynamics computation.
+   * This class implements a robot model using regressor matrices to compute dynamics.
+   * It inherits from the RobotModel base class and provides implementations for inverse and forward dynamics,
+   * as well as methods to retrieve inertia, coriolis, gravity, jacobian, and jacobian dot matrices.
+   *
+   * This class is an abstract base class and requires derived classes to implement methods for obtaining
+   * the regressor matrices and friction regressor matrices, as well as other robot-specific parameters, such as joint
+   * limits.
+   */
   class RegressorRobotModel : public sdu_controllers::models::RobotModel
   {
    public:
+    /**
+     * @brief Construct a new Regressor Robot Model.
+     *
+     * @param fkModel shared pointer to forward kinematics solver
+     * @param g0 gravity vector in base frame
+     * @throws std::invalid_argument if fkModel is nullptr
+     */
     RegressorRobotModel(
-        std::vector<kinematics::DHParam> dh_parameters,
+        const std::shared_ptr<kinematics::ForwardKinematics>& fkModel,
         const Eigen::Vector3d& g0 = Eigen::Vector3d(0, 0, -9.81));
+
+    /**
+     * @brief Calculate the inverse dynamics.
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @param ddq robot joint accelerations.
+     * @param he end-effector wrench.
+     * @returns the computed torques for the joint actuators \f$ \tau \f$
+     */
+    virtual Eigen::VectorXd inverse_dynamics(
+        const Eigen::VectorXd& q,
+        const Eigen::VectorXd& dq,
+        const Eigen::VectorXd& ddq,
+        const Eigen::VectorXd& he) override;
+
+    /**
+     * @brief Calculate the forward dynamics.
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @param tau joint torques of the robot
+     * @returns the acceleration \f$ \ddot{q} \f$
+     */
+    virtual Eigen::VectorXd forward_dynamics(const Eigen::VectorXd& q, const Eigen::VectorXd& dq, const Eigen::VectorXd& tau)
+        override;
 
     /**
      * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
@@ -51,69 +93,123 @@ namespace sdu_controllers::models
     virtual Eigen::MatrixXd get_jacobian_dot(const Eigen::VectorXd& q, const Eigen::VectorXd& dq) override;
 
     /**
+     * @brief Get the degrees of freedom of the robot.
+     * @returns the number of degrees of freedom
+     */
+    virtual uint16_t get_dof() const override;
+
+    /**
+     * @brief Get the masses of the robot links.
+     * @note Assumes that the masses are part of the dynamic parameters used in the regressor.
+     * it will therefore just throw an error if called.
+     * @throws std::runtime_error if called.
+     * @returns vector containing the mass of each link
+     */
+    virtual std::vector<double> get_m() override;
+
+    /**
+     * @brief Get the gravity vector in base frame.
+     * @returns the 3D gravity vector
+     */
+    virtual Eigen::Vector3d get_g0() override;
+
+    /**
+     * @brief Get the center of mass positions for each link.
+     * @note Assumes that the CoM positions are part of the dynamic parameters used in the regressor.
+     * it will therefore just throw an error if called.
+     * @throws std::runtime_error if called.
+     * @returns matrix where each row contains the 3D center of mass position for a link
+     */
+    virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() override;
+
+    /**
+     * @brief Get the inertia tensors for each link.
+     * @note Assumes that the inertia tensors are part of the dynamic parameters used in the regressor.
+     * it will therefore just throw an error if called.
+     * @throws std::runtime_error if called.
+     * @returns vector of 3x3 inertia matrices for each link
+     */
+    virtual std::vector<Eigen::Matrix3d> get_link_inertia() override;
+
+    /**
+     * @brief Get the friction regressor matrix \f$ \mathbf{Y_f(dq)} \f$
+     * This function is alternative version taking std::vector<double> as input.
+     * @see get_friction_regressor(const Eigen::VectorXd& qd)
+     * @param qd [in] Joint velocities
+     * @return The friction regressor matrix
+     */
+    virtual Eigen::MatrixXd get_friction_regressor(const std::vector<double>& qd) const;
+
+    /**
+     * @brief Get the forward kinematics solver instance.
+     * @returns reference to the forward kinematics solver
+     */
+    virtual const kinematics::ForwardKinematics& get_fk_solver() const override;
+
+    // ################################################
+    // # Functions to be overridden by child classes  #
+    // ################################################
+
+    /**
      * @brief Get joint position bounds.
      * @returns the joint position bounds
      */
     virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() override = 0;
 
     /**
-     * @brief Get joint velocity bounds.
-     * @returns the joint velocity bounds
+     * @brief Get maximum joint velocity.
+     * @returns the maximum joint velocity
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_vel() override = 0;
 
     /**
-     * @brief Get joint acceleration bounds.
-     * @returns the joint acceleration bounds
+     * @brief Get maximum joint acceleration.
+     * @returns the maximum joint acceleration
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_acc() override = 0;
 
     /**
-     * @brief Get joint torque bounds.
-     * @returns the joint torque bounds
+     * @brief Get maximum joint torque.
+     * @returns the maximum joint torque
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() override = 0;
+    virtual Eigen::VectorXd get_joint_max_torque() override = 0;
 
-    virtual uint16_t get_dof() const override;
 
-    virtual std::vector<double> get_a() override;
-
-    virtual std::vector<double> get_d() override;
-
-    virtual std::vector<double> get_alpha() override;
-
-    virtual std::vector<double> get_theta() override;
-
-    virtual std::vector<double> get_m() override;
-
-    virtual std::vector<bool> get_is_joint_revolute() override;
-
-    virtual Eigen::Vector3d get_g0() override;
-
-    virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() override;
-
-    virtual std::vector<Eigen::Matrix3d> get_link_inertia() override;
-
+    /**
+     * @brief Get the regressor matrix \f$ \mathbf{Y(q, \dot{q}, \ddot{q})} \f$
+     * Use this function to compute the regressor matrix for given joint positions, velocities and accelerations.
+     * Can be used in conjunction with the parameter vector to compute the inverse dynamics torques.
+     * @param q [in] Joint positions
+     * @param qd [in] Joint velocities
+     * @param qdd [in] Joint accelerations
+     * @return The regressor matrix
+     */
     virtual Eigen::MatrixXd get_regressor(const Eigen::VectorXd& q, const Eigen::VectorXd& qd, const Eigen::VectorXd& qdd)
         const = 0;
 
+    /**
+     * @brief Get the friction regressor matrix \f$ \mathbf{Y_f(dq)} \f$
+     * Use this function to compute the friction regressor matrix for given joint velocities.
+     * Can be used in conjunction with the friction parameter vector to compute the friction torques.
+     * @param qd [in] Joint velocities
+     * @return The friction regressor matrix
+     */
     virtual Eigen::MatrixXd get_friction_regressor(const Eigen::VectorXd& qd) const = 0;
 
-    virtual Eigen::MatrixXd get_friction_regressor(const std::vector<double>& qd) const;
-
+    /**
+     * @brief Get the dynamic parameters vector.
+     * @returns the dynamic parameters vector
+     */
     virtual Eigen::VectorXd get_parameters() const = 0;
 
+    /**
+     * @brief Get the friction parameters vector.
+     * @returns the friction parameters vector
+     */
     virtual Eigen::VectorXd get_friction_parameters() const = 0;
 
-    virtual Eigen::VectorXd get_tau(const Eigen::VectorXd& q, const Eigen::VectorXd& qd, const Eigen::VectorXd& qdd);
-
-    std::vector<kinematics::DHParam> get_dh_parameters() const
-    {
-      return dh_parameters_;
-    }
-
    protected:
-    std::vector<kinematics::DHParam> dh_parameters_;
+    std::shared_ptr<kinematics::ForwardKinematics> fk_model_;
     Eigen::Vector3d gravity_;
   };
 }  // namespace sdu_controllers::models

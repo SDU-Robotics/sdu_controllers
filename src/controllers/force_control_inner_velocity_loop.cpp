@@ -37,7 +37,7 @@ namespace sdu_controllers::controllers
     const Eigen::VectorXd &dq)
   {
     // Get current cartesian position
-    Matrix4d T = kinematics::forward_kinematics(q, robot_model_);
+    Matrix4d T = robot_model_->get_fk_solver().forward_kinematics(q);
     VectorXd pos = T.block<3, 1>(0,3);
     // Matrix3d rot_mat = T.topLeftCorner(3, 3);
 

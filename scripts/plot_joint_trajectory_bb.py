@@ -58,7 +58,7 @@ time = []
 trajectory_in = []
 trajectory_out = []
 
-with open('../examples/data/joint_trajectory_safe_bb.csv') as csv_file:
+with open('../data/joint_trajectory_safe_bb.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:

@@ -85,20 +85,20 @@ namespace sdu_controllers::safety
 
   bool SafetyVerifier::check_joint_vel_limits(const VectorXd& dq) const
   {
-    const std::pair<VectorXd, VectorXd> dq_bounds = robot_model_->get_joint_vel_bounds();
-    return check_limits(dq, dq_bounds.first, dq_bounds.second);
+    VectorXd dq_max = robot_model_->get_joint_max_vel();
+    return check_limits(dq, -dq_max, dq_max);
   }
 
   bool SafetyVerifier::check_joint_acc_limits(const VectorXd& ddq) const
   {
-    const std::pair<VectorXd, VectorXd> ddq_bounds = robot_model_->get_joint_acc_bounds();
-    return check_limits(ddq, ddq_bounds.first, ddq_bounds.second);
+    VectorXd ddq_max = robot_model_->get_joint_max_acc();
+    return check_limits(ddq, -ddq_max, ddq_max);
   }
 
   bool SafetyVerifier::check_joint_torque_limits(const VectorXd& tau) const
   {
-    const std::pair<VectorXd, VectorXd> torque_bounds = robot_model_->get_joint_torque_bounds();
-    return check_limits(tau, torque_bounds.first, torque_bounds.second);
+    VectorXd torque_max = robot_model_->get_joint_max_torque();
+    return check_limits(tau, -torque_max, torque_max);
   }
 
 }  // namespace sdu_controllers::safety

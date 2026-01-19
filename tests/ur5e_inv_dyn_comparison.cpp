@@ -5,7 +5,6 @@
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/models/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -24,7 +23,7 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobot::RobotType::UR5e);
+  auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
   double Kp_value = 100.0;
@@ -47,7 +46,7 @@ int main()
   math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
   math::ForwardDynamics fwd_dyn(robot_model);
 
-  math::RecursiveNewtonEuler rnea(robot_model);
+  math::RecursiveNewtonEuler rnea(*robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);
@@ -58,7 +57,7 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  MatrixXd T = kinematics::forward_kinematics(q, robot_model);
+  MatrixXd T = robot_model->get_fk_solver().forward_kinematics(q);
 
   // Read input trajectory from file
   std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe.csv");
@@ -103,7 +102,7 @@ int main()
       VectorXd ddq = fwd_dyn.forward_dynamics(q, dq, tau);
       std::cout << "ddq1: " << ddq << std::endl;
 
-      ddq = rnea.forward_dynamics(q, dq, tau, y*0);
+      ddq = rnea.forward_dynamics(q, dq, tau);
       std::cout << "ddq2: " << ddq << std::endl;
 
       // integrate to get velocity

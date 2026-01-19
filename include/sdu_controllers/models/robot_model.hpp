@@ -3,6 +3,10 @@
 #define SDU_CONTROLLERS_ROBOT_MODEL_HPP
 
 #include <Eigen/Dense>
+namespace sdu_controllers::kinematics
+{
+  class ForwardKinematics;
+}
 
 namespace sdu_controllers::models
 {
@@ -13,10 +17,29 @@ namespace sdu_controllers::models
   class RobotModel
   {
    public:
-
     explicit RobotModel() = default;
-
     virtual ~RobotModel() = default;
+
+    /**
+     * @brief Calculate the inverse dynamics.
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @param ddq robot joint accelerations.
+     * @param he end-effector wrench.
+     * @returns the computed torques for the joint actuators \f$ \tau \f$
+     */
+    virtual Eigen::VectorXd inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
+      const Eigen::VectorXd &ddq, const Eigen::VectorXd &he) = 0;
+
+
+    /**
+     * @brief Calculate the forward dynamics.
+     * @param q robot joint positions.
+     * @param dq robot joint velocities.
+     * @param tau joint torques of the robot
+     * @returns the acceleration \f$ \ddot{q} \f$
+     */
+    virtual Eigen::VectorXd forward_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &tau) = 0;
 
     /**
      * @brief Get inertia matrix \f$ \mathbf{B}(q) \f$
@@ -58,43 +81,58 @@ namespace sdu_controllers::models
     virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_pos_bounds() = 0;
 
     /**
-     * @brief Get joint velocity bounds.
-     * @returns the joint velocity bounds
+     * @brief Get maximum joint velocity.
+     * @returns the maximum joint velocity
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_vel_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_vel() = 0;
 
     /**
-     * @brief Get joint acceleration bounds.
-     * @returns the joint acceleration bounds
+     * @brief Get maximum joint acceleration.
+     * @returns the maximum joint acceleration
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_acc_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_acc() = 0;
 
     /**
-     * @brief Get joint torque bounds.
-     * @returns the joint torque bounds
+     * @brief Get maximum joint torque.
+     * @returns the maximum joint torque
      */
-    virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> get_joint_torque_bounds() = 0;
+    virtual Eigen::VectorXd get_joint_max_torque() = 0;
 
-
+    /**
+     * @brief Get the degrees of freedom of the robot.
+     * @returns the number of degrees of freedom
+     */
     virtual uint16_t get_dof() const = 0;
 
-    virtual std::vector<double> get_a() = 0;
-
-    virtual std::vector<double> get_d() = 0;
-
-    virtual std::vector<double> get_alpha() = 0;
-
-    virtual std::vector<double> get_theta() = 0;
-
+    /**
+     * @brief Get the masses of the robot links.
+     * @returns vector containing the mass of each link
+     */
     virtual std::vector<double> get_m() = 0;
-
-    virtual std::vector<bool> get_is_joint_revolute() = 0;
-
+    
+    /**
+     * @brief Get the gravity vector in base frame.
+     * @returns the 3D gravity vector
+     */
     virtual Eigen::Vector3d get_g0() = 0;
 
+    /**
+     * @brief Get the center of mass positions for each link.
+     * @returns matrix where each row contains the 3D center of mass position for a link
+     */
     virtual Eigen::Matrix<double, Eigen::Dynamic, 3> get_CoM() = 0;
 
+    /**
+     * @brief Get the inertia tensors for each link.
+     * @returns vector of 3x3 inertia matrices for each link
+     */
     virtual std::vector<Eigen::Matrix3d> get_link_inertia() = 0;
+
+    /**
+     * @brief Get the forward kinematics solver instance.
+     * @returns reference to the forward kinematics solver
+     */
+    virtual const kinematics::ForwardKinematics &get_fk_solver() const = 0;
   };
 
 }  // namespace sdu_controllers::models
