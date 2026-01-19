@@ -24,7 +24,7 @@ namespace sdu_controllers::models
   }
 
   BreedingBlanketHandlingRobotModel::BreedingBlanketHandlingRobotModel(const std::filesystem::path &yaml_filepath)
-      : ParameterRobotModel(yaml_filepath)
+      : ParameterRobotModel(yaml_filepath.string())
   {
     // Initialize default mass, com and link inertia
     mass_default_ = this->get_m();
