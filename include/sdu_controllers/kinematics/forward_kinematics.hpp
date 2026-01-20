@@ -26,11 +26,25 @@ namespace sdu_controllers::kinematics
     virtual Eigen::Matrix4d forward_kinematics(const Eigen::VectorXd& q) const = 0;
 
     /**
+     * @brief Get the transformation matrix from base to end-effector (overload for std::vector<double>)
+     * @param q [in] Joint configuration as std::vector<double>
+     * @return Homogeneous transformation matrix to end-effector
+     */
+    Eigen::Matrix4d forward_kinematics(const std::vector<double>& q) const;
+
+    /**
      * @brief Get the transformation matrices from base to each joint frame
      * @param q [in] Joint configuration
      * @return Vector of homogeneous transformation matrices to each joint frame
      */
     virtual std::vector<Eigen::Matrix4d> forward_kinematics_all(const Eigen::VectorXd& q) const = 0;
+
+    /**
+     * @brief Get the transformation matrices from base to each joint frame (overload for std::vector<double>)
+     * @param q [in] Joint configuration as std::vector<double>
+     * @return Vector of homogeneous transformation matrices to each joint frame
+     */
+    std::vector<Eigen::Matrix4d> forward_kinematics_all(const std::vector<double>& q) const;
 
     /**
      * @brief Get the type of each joint in the kinematic chain

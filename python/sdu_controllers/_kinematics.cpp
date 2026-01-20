@@ -38,20 +38,38 @@ namespace sdu_controllers
     nb::class_<kinematics::ForwardKinematics>(m, "ForwardKinematics", "Base class for forward kinematics implementations")
         .def(
             "forward_kinematics",
-            &kinematics::ForwardKinematics::forward_kinematics,
+            nb::overload_cast<const Eigen::VectorXd &>(&kinematics::ForwardKinematics::forward_kinematics, nb::const_),
             nb::arg("q"),
             "Get the transformation matrix from base to end-effector\n\n"
             "Args:\n"
-            "    q: Joint configuration\n\n"
+            "    q: Joint configuration (Eigen::VectorXd or array-like)\n\n"
+            "Returns:\n"
+            "    4x4 homogeneous transformation matrix to end-effector")
+        .def(
+            "forward_kinematics",
+            nb::overload_cast<const std::vector<double> &>(&kinematics::ForwardKinematics::forward_kinematics, nb::const_),
+            nb::arg("q"),
+            "Get the transformation matrix from base to end-effector\n\n"
+            "Args:\n"
+            "    q: Joint configuration (list or vector)\n\n"
             "Returns:\n"
             "    4x4 homogeneous transformation matrix to end-effector")
         .def(
             "forward_kinematics_all",
-            &kinematics::ForwardKinematics::forward_kinematics_all,
+            nb::overload_cast<const Eigen::VectorXd &>(&kinematics::ForwardKinematics::forward_kinematics_all, nb::const_),
             nb::arg("q"),
             "Get the transformation matrices from base to each joint frame\n\n"
             "Args:\n"
-            "    q: Joint configuration\n\n"
+            "    q: Joint configuration (Eigen::VectorXd or array-like)\n\n"
+            "Returns:\n"
+            "    List of 4x4 homogeneous transformation matrices to each joint frame")
+        .def(
+            "forward_kinematics_all",
+            nb::overload_cast<const std::vector<double> &>(&kinematics::ForwardKinematics::forward_kinematics_all, nb::const_),
+            nb::arg("q"),
+            "Get the transformation matrices from base to each joint frame\n\n"
+            "Args:\n"
+            "    q: Joint configuration (list or vector)\n\n"
             "Returns:\n"
             "    List of 4x4 homogeneous transformation matrices to each joint frame")
         .def(
