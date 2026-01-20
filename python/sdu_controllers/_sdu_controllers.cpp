@@ -1,7 +1,11 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+
+#include <filesystem>
+#include <sdu_controllers/utils/utility.hpp>
 
 // controllers
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
@@ -20,6 +24,7 @@ namespace sdu_controllers
 {
   nb::module_ create_robot_models_module(nb::module_ &main_module);
   nb::module_ create_math_module(nb::module_ &main_module);
+  nb::module_ create_kinematics_module(nb::module_ &main_module);
 
   NB_MODULE(_sdu_controllers, m)
   {
@@ -28,7 +33,36 @@ namespace sdu_controllers
     nb::module_ m_models = create_robot_models_module(m);
     nb::module_ m_controllers = m.def_submodule("controllers", "Submodule containing robot control methods.");
     nb::module_ m_math = create_math_module(m);
-    nb::module_ m_kinematics = m.def_submodule("kinematics", "Submodule containing functions for calculating kinematics.");
+    nb::module_ m_kinematics = create_kinematics_module(m);
+    nb::module_ m_utils = m.def_submodule("utils", "Submodule containing utility functions.");
+
+    // utils
+    nb::class_<utils::ConfigFolder>(m_utils, "ConfigFolder")
+        .def(
+            nb::init<std::string>(),
+            nb::arg("path"),
+            "Add a configuration folder to the search paths. If the folder does not exist, it is not added.")
+        .def_static(
+            "get_default_config_path",
+            []() { return utils::ConfigFolder::get_default_config_path().string(); },
+            "Get the first valid configuration folder from the search paths.")
+        .def_static(
+            "find_config_file",
+            [](const std::string &filename) { return utils::ConfigFolder::find_config_file(filename).string(); },
+            nb::arg("filename"),
+            "Find a configuration file by searching through the configuration folders and their subdirectories.")
+        .def_static(
+            "get_config_dirs",
+            []()
+            {
+              std::vector<std::string> dirs;
+              for (const auto &dir : utils::ConfigFolder::get_config_dirs())
+              {
+                dirs.push_back(dir.string());
+              }
+              return dirs;
+            },
+            "Get all configuration folders in the search paths.");
 
     // controllers
     nb::class_<controllers::PIDController>(m_controllers, "PIDController")
@@ -93,64 +127,6 @@ namespace sdu_controllers
         .def("step", &controllers::ForceControlInnerVelocityLoop::step)
         .def("get_output", &controllers::ForceControlInnerVelocityLoop::get_output)
         .def("reset", &controllers::ForceControlInnerVelocityLoop::reset);
-
-    nb::enum_<kinematics::ForwardKinematics::JointType>(m_kinematics, "JointType")
-        .value("REVOLUTE", kinematics::ForwardKinematics::JointType::REVOLUTE)
-        .value("PRISMATIC", kinematics::ForwardKinematics::JointType::PRISMATIC)
-        .export_values();
-
-    nb::class_<sdu_controllers::kinematics::ForwardKinematics>(m_kinematics, "ForwardKinematics")
-        .def(
-            "forward_kinematics",
-            &sdu_controllers::kinematics::ForwardKinematics::forward_kinematics,
-            "Get the transformation matrix from base to end-effector",
-            nb::arg("q"))
-        .def(
-            "forward_kinematics_all",
-            &sdu_controllers::kinematics::ForwardKinematics::forward_kinematics_all,
-            "Get the transformation matrices from base to each joint frame",
-            nb::arg("q"))
-        .def(
-            "get_joint_types",
-            &sdu_controllers::kinematics::ForwardKinematics::get_joint_types,
-            "Get the type of each joint in the kinematic chain")
-        .def(
-            "geometric_jacobian",
-            nb::overload_cast<const Eigen::VectorXd &>(
-                &sdu_controllers::kinematics::ForwardKinematics::geometric_jacobian, nb::const_),
-            "Compute the geometric Jacobian at the given joint configuration",
-            nb::arg("q"))
-        .def(
-            "geometric_jacobian",
-            nb::overload_cast<const Eigen::VectorXd &, const std::vector<Eigen::Matrix4d> &>(
-                &sdu_controllers::kinematics::ForwardKinematics::geometric_jacobian, nb::const_),
-            "Compute the geometric Jacobian at the given joint configuration using precomputed forward kinematics matrices",
-            nb::arg("q"),
-            nb::arg("fk_matrices"))
-        .def(
-            "get_dof",
-            &sdu_controllers::kinematics::ForwardKinematics::get_dof,
-            "Get the degrees of freedom of the kinematic chain");
-
-    nb::class_<sdu_controllers::kinematics::DHKinematics, sdu_controllers::kinematics::ForwardKinematics>(
-        m_kinematics, "DHKinematics")
-        .def(nb::init<>())
-        .def(
-            nb::init<
-                const std::vector<double> &,
-                const std::vector<double> &,
-                const std::vector<double> &,
-                const std::vector<double> &,
-                const std::vector<bool> &>(),
-            nb::arg("a"),
-            nb::arg("alpha"),
-            nb::arg("d"),
-            nb::arg("theta"),
-            nb::arg("is_joint_revolute"))
-        .def("get_a", &sdu_controllers::kinematics::DHKinematics::get_a)
-        .def("get_alpha", &sdu_controllers::kinematics::DHKinematics::get_alpha)
-        .def("get_d", &sdu_controllers::kinematics::DHKinematics::get_d)
-        .def("get_theta", &sdu_controllers::kinematics::DHKinematics::get_theta);
   }
 
 }  // namespace sdu_controllers

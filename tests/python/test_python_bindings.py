@@ -1,10 +1,34 @@
 import sdu_controllers
 import numpy as np
 import pytest
+import os
+import pathlib
 
 
 def test_sdu_controllers():
   pass
+
+def test_config_folder_finds_site_packages():
+    """Test that ConfigFolder can access config directory from installed package location
+    
+    This test verifies that when the sdu_controllers module is loaded,
+    it automatically registers its config directory (if it exists) so that
+    ConfigFolder.find_config_file() can locate files there.
+    """
+    # Get the module's installation path
+    module_path = pathlib.Path(sdu_controllers.__file__).parent
+    module_config_path = module_path / "config"
+
+    config_dirs = sdu_controllers.utils.ConfigFolder.get_config_dirs()
+    print("Registered config directories:", config_dirs)
+
+
+    default_path = sdu_controllers.utils.ConfigFolder.get_default_config_path()
+    assert default_path is not None, "get_default_config_path should return a valid path"
+    assert os.path.exists(default_path), f"Default config path should exist: {default_path}"
+
+    assert "site-packages" in str(default_path), "Default config path should be in site-packages"
+    
 
 def test_ur_model_loads():
     robot_model = sdu_controllers.models.URRobotModel(sdu_controllers.models.ur5e)

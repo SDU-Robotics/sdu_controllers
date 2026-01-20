@@ -3,6 +3,7 @@
 #define SDU_CONTROLLERS_BLEEDING_BLANKET_ROBOT_MODEL_HPP
 
 #include <Eigen/Dense>
+#include <filesystem>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/math/rnea.hpp>
 #include <sdu_controllers/models/robot_parameters.hpp>
@@ -22,6 +23,7 @@ namespace sdu_controllers::models
    public:
     BreedingBlanketHandlingRobotModel();
     explicit BreedingBlanketHandlingRobotModel(const std::string &yaml_filepath);
+    explicit BreedingBlanketHandlingRobotModel(const std::filesystem::path &yaml_filepath);
     explicit BreedingBlanketHandlingRobotModel(const RobotParameters &params);
     virtual ~BreedingBlanketHandlingRobotModel() = default;
 

@@ -35,7 +35,14 @@ option(BUILD_FRANKA_EXAMPLES
        "Enable building of examples to be run on Franka robots" OFF)
 
 # Add config library as a path such that we can find parameter files used for the robot models.
-file(REAL_PATH "config" CONFIG_FILE_PATH)
+
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20")
+  file(REAL_PATH "config" CONFIG_FILE_PATH)
+else()
+  set(CONFIG_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config")
+endif()
+
 file(TO_CMAKE_PATH "${CONFIG_FILE_PATH}" CONFIG_FILE_PATH_NORMALIZED)
 add_definitions(-DCONFIG_FILE_PATH="${CONFIG_FILE_PATH_NORMALIZED}")
 

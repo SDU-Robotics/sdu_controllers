@@ -28,6 +28,7 @@ namespace sdu_controllers
     // Pose utilities
     nb::class_<math::Pose>(m, "Pose")
         .def(nb::init<>(), "Default pose (zero position, identity rotation).")
+        .def(nb::init<const math::Pose&>(), nb::arg("other"), "Copy constructor.")
         .def(
             nb::init<const Eigen::Vector3d &, const Eigen::Quaterniond &>(),
             nb::arg("position"),
@@ -42,6 +43,7 @@ namespace sdu_controllers
         .def(nb::init<const Eigen::VectorXd &>(), nb::arg("pose_vector"), "Construct from Eigen vector (6/7 elements).")
         .def(nb::init<const std::array<double, 7> &>(), nb::arg("pose_array"), "Construct from array [x,y,z,qw,qx,qy,qz].")
         .def(nb::init<const Eigen::Affine3d &>(), nb::arg("transform"), "Construct from homogeneous transform.")
+        .def(nb::init<const Eigen::Matrix4d &>(), nb::arg("transform"), "Construct from 4x4 transformation matrix.")
         .def("get_position", &math::Pose::get_position, "Get position as Vector3d.")
         .def("set_position", &math::Pose::set_position, nb::arg("position"), "Set position.")
         .def("get_orientation", &math::Pose::get_orientation, "Get orientation as quaternion (w, x, y, z).")
@@ -57,7 +59,9 @@ namespace sdu_controllers
             "Return orientation as angle-axis vector (axis * angle).")
         .def("to_vector7d", &math::Pose::to_vector7d, "Return [x, y, z, qw, qx, qy, qz].")
         .def("to_std_vector", &math::Pose::to_std_vector, "Return pose as std::vector of length 7.")
-        .def("to_transform", &math::Pose::to_transform, "Return pose as homogeneous transform Affine3d.");
+        .def("to_transform", &math::Pose::to_transform, "Return pose as homogeneous transform Affine3d.")
+        .def("to_pose6d_std", &math::Pose::to_pose6d_std, "Return pose as 6D std::vector [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.")
+        .def("to_pose6d_eigen", &math::Pose::to_pose6d_eigen, "Return pose as 6D Eigen::VectorXd [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.");
 
     // Core dynamics helpers
     nb::class_<math::InverseDynamics>(m, "InverseDynamics")

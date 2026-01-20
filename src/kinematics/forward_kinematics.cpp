@@ -24,11 +24,10 @@ Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(c
 {
   std::vector<Eigen::Matrix4d> T_chain = forward_kinematics_all(q);
 
-  return geometric_jacobian(q, T_chain);
+  return geometric_jacobian(T_chain);
 }
 
 Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(
-    const Eigen::VectorXd& q,
     const std::vector<Eigen::Matrix4d>& fk_matrices) const
 {
   Eigen::Vector3d z_im1, o_im1, o_n;
@@ -78,6 +77,18 @@ Eigen::Matrix<double, 6, Eigen::Dynamic> ForwardKinematics::geometric_jacobian(
   }
 
   return J;
+}
+
+Eigen::Matrix4d ForwardKinematics::forward_kinematics(const std::vector<double>& q) const
+{
+  Eigen::VectorXd q_eigen = Eigen::Map<const Eigen::VectorXd>(q.data(), q.size());
+  return forward_kinematics(q_eigen);
+}
+
+std::vector<Eigen::Matrix4d> ForwardKinematics::forward_kinematics_all(const std::vector<double>& q) const
+{
+  Eigen::VectorXd q_eigen = Eigen::Map<const Eigen::VectorXd>(q.data(), q.size());
+  return forward_kinematics_all(q_eigen);
 }
 
 size_t ForwardKinematics::get_dof() const

@@ -2,13 +2,15 @@
 #ifndef SDU_CONTROLLERS_UTILITY_HPP
 #define SDU_CONTROLLERS_UTILITY_HPP
 
+#include <yaml-cpp/yaml.h>
+
 #include <Eigen/Dense>
+#include <filesystem>
+#include <optional>
 #include <random>
 #include <sdu_controllers/math/pose.hpp>
 #include <sdu_controllers/utils/csv.hpp>
 #include <vector>
-#include <optional>
-#include <yaml-cpp/yaml.h>
 
 namespace sdu_controllers::utils
 {
@@ -263,21 +265,68 @@ namespace sdu_controllers::utils
 
   static std::string data_path(const std::string &rel)
   {
-  #ifdef PROJECT_SOURCE_DIR
+#ifdef PROJECT_SOURCE_DIR
     return std::string(PROJECT_SOURCE_DIR) + "/data/" + rel;
-  #else
+#else
     return "data/" + rel;
-  #endif
+#endif
   }
 
   static std::string project_path(const std::string &rel)
   {
-  #ifdef PROJECT_SOURCE_DIR
+#ifdef PROJECT_SOURCE_DIR
     return std::string(PROJECT_SOURCE_DIR) + "/" + rel;
-  #else
+#else
     return rel;
-  #endif
+#endif
   }
+
+  class ConfigFolder
+  {
+   public:
+    /**
+     * @brief Add a configuration folder to the search paths.
+     * if the folder does not exist, it is not added.
+     * @param path [in] The path to the configuration folder.
+     */
+    ConfigFolder(std::filesystem::path path);
+
+    /**
+     * @brief Add a configuration folder to the search paths.
+     * if the folder does not exist, it is not added.
+     * @param path [in] The path to the configuration folder.
+     */
+    ConfigFolder(const std::string &path) : ConfigFolder(std::filesystem::path(path))
+    {
+    }
+
+    /**
+     * @brief Get the first valid configuration folder from the search paths.
+     * @throws std::runtime_error if no valid configuration folder is found.
+     * @return the path to the first valid configuration folder.
+     */
+    static std::filesystem::path get_default_config_path();
+
+    /**
+     * @brief Find a configuration file by searching through the configuration folders.
+     *
+     * @param filename The name of the configuration file to find.
+     * @return The path to the found configuration file, or an empty path if not found.
+     */
+    static std::filesystem::path find_config_file(const std::string &filename);
+
+    /**
+     * @brief Get the list of configuration directories.
+     * @return A vector of paths to the configuration directories.
+     */
+    static std::vector<std::filesystem::path> get_config_dirs()
+    {
+      return config_dirs_;
+    }
+
+   private:
+    static std::vector<std::filesystem::path> config_dirs_;
+  };
 
 }  // namespace sdu_controllers::utils
 

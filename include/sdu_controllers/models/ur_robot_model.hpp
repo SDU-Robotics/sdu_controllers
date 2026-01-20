@@ -12,6 +12,7 @@
 
 
 #include <vector>
+#include <filesystem>
 
 namespace sdu_controllers::models
 {
@@ -31,6 +32,7 @@ namespace sdu_controllers::models
 
     explicit URRobotModel(RobotType robot_type);
     explicit URRobotModel(const std::string &yaml_filepath);
+    explicit URRobotModel(const std::filesystem::path &yaml_filepath);
     explicit URRobotModel(const RobotParameters &params);
     virtual ~URRobotModel() = default;
   };

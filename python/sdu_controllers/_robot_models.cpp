@@ -88,6 +88,7 @@ namespace sdu_controllers
         m_models, "BreedingBlanketHandlingRobotModel")
         .def(nb::init<>())
         .def(nb::init<const std::string &>())
+        .def(nb::init<const std::filesystem::path &>())
         .def(nb::init<const models::RobotParameters &>());
     return m_models;
   }

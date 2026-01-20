@@ -16,6 +16,14 @@ from ._sdu_controllers.controllers import PIDController as _original_PIDControll
 
 from ._sdu_controllers import kinematics
 from ._sdu_controllers import math
+from ._sdu_controllers import utils
+
+# Add the module's config directory to ConfigFolder search paths
+import pathlib as _pathlib
+_module_config_path = _pathlib.Path(__file__).parent / "config"
+if _module_config_path.exists():
+    utils.ConfigFolder(str(_module_config_path))
+del _pathlib, _module_config_path
 
 # Export the version given in project metadata
 from importlib import metadata
