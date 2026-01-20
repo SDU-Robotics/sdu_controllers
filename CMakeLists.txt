@@ -26,7 +26,8 @@ option(BUILD_PYTHON_STUBS "Enable building of python Stubs" ${BUILD_PYTHON})
 option(BUILD_DOCS "Enable building of documentation" ON)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
-option(BUILD_FOR_PIP_INSTALL "Enable Install commands suitable for pip installations" OFF)
+option(BUILD_FOR_PIP_INSTALL
+       "Enable Install commands suitable for pip installations" OFF)
 
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
@@ -34,8 +35,8 @@ option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
 option(BUILD_FRANKA_EXAMPLES
        "Enable building of examples to be run on Franka robots" OFF)
 
-# Add config library as a path such that we can find parameter files used for the robot models.
-
+# Add config library as a path such that we can find parameter files used for
+# the robot models.
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20")
   file(REAL_PATH "config" CONFIG_FILE_PATH)
@@ -102,10 +103,9 @@ if(BUILD_PYTHON)
     COMPONENTS Interpreter ${DEV_MODULE}
     REQUIRED)
 
-  # Add Python bindings
-  add_subdirectory(ext/nanobind)
+  include(cmake/LoadNanoBind.cmake)
 
- add_subdirectory(python)
+  add_subdirectory(python)
 endif()
 
 # Add an alias target for use if this project is included as a subproject in
