@@ -1,7 +1,7 @@
 # Try to locate nanobind through Python
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-  OUTPUT_VARIABLE NB_DIR
+  OUTPUT_VARIABLE NB_DIR_FISK
   OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 
 # If not found, check in virtual environment
