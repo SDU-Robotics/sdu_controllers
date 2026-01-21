@@ -1,8 +1,8 @@
 # Try to locate nanobind through Python
-#execute_process(
-#  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-#  OUTPUT_VARIABLE NB_DIR
-#  OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  OUTPUT_VARIABLE NB_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 
 # If not found, check in virtual environment
 #if(NOT NB_DIR AND DEFINED ENV{VIRTUAL_ENV})
@@ -23,8 +23,22 @@ set(NB_FOUND_VIA_PYTHON TRUE)
 
 #  find_package(nanobind REQUIRED)
 #else()
+
+
   message(
     STATUS "Nanobind python module not found. Installing with git submodule")
+
+
+
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind/CMakeLists.txt)
+      message(
+        FATAL_ERROR
+          "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
+      )
+    endif()
+    
+    add_subdirectory(ext/nanobind)
+  
 
   set(NB_FOUND_VIA_PYTHON FALSE)
   # Add Python bindings
