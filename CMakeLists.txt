@@ -85,13 +85,6 @@ if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 if(BUILD_PYTHON)
-
-  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind/CMakeLists.txt)
-    message(
-      FATAL_ERROR
-        "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
-    )
-  endif()
   if(CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
   else()
@@ -104,6 +97,17 @@ if(BUILD_PYTHON)
     REQUIRED)
 
   include(cmake/LoadNanoBind.cmake)
+  if(NOT NB_FOUND_VIA_PYTHON)
+
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind/CMakeLists.txt)
+      message(
+        FATAL_ERROR
+          "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
+      )
+    endif()
+    
+    add_subdirectory(ext/nanobind)
+  endif()
 
   add_subdirectory(python)
 endif()

@@ -3,6 +3,7 @@ nanobind_add_module(
   _sdu_controllers sdu_controllers/_sdu_controllers.cpp
   sdu_controllers/_robot_models.cpp sdu_controllers/_math.cpp
   sdu_controllers/_kinematics.cpp)
+  
 target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 
 # install python bindings if building for pip install

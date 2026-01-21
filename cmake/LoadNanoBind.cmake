@@ -28,5 +28,5 @@ else()
 
   set(NB_FOUND_VIA_PYTHON FALSE)
   # Add Python bindings
-  add_subdirectory(${CMAKE_SOURCE_DIR}/ext/nanobind)
+  message(STATUS "Loading from: ${CMAKE_SOURCE_DIR}/ext/nanobind")
 endif()
