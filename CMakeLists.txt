@@ -103,7 +103,9 @@ if(BUILD_PYTHON)
     COMPONENTS Interpreter ${DEV_MODULE}
     REQUIRED)
 
-  include(cmake/LoadNanoBind.cmake)
+
+  add_subdirectory(${CMAKE_SOURCE_DIR}/ext/nanobind)
+  #include(cmake/LoadNanoBind.cmake)
 
   add_subdirectory(python)
 endif()
