@@ -6,5 +6,5 @@ find_package(yaml-cpp CONFIG REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(sdu_controllers DEFAULT_MSG SDU_CONTROLLERS_LIBRARIES)
-
+find_package_handle_standard_args(sdu_controllers DEFAULT_MSG
+                                  SDU_CONTROLLERS_LIBRARIES)

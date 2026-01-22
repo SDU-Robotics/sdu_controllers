@@ -1,14 +1,15 @@
 # Compile the nanobind module
-nanobind_add_module(_sdu_controllers sdu_controllers/_sdu_controllers.cpp
-                    sdu_controllers/_robot_models.cpp sdu_controllers/_math.cpp
-                    sdu_controllers/_kinematics.cpp)
+nanobind_add_module(
+  _sdu_controllers sdu_controllers/_sdu_controllers.cpp
+  sdu_controllers/_robot_models.cpp sdu_controllers/_math.cpp
+  sdu_controllers/_kinematics.cpp)
+  
 target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 
+# install python bindings if building for pip install
 if(BUILD_FOR_PIP_INSTALL)
-
   # Install the Python module shared library
   install(TARGETS _sdu_controllers DESTINATION .)
-
 endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/config DESTINATION .)
