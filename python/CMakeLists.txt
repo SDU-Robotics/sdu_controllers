@@ -14,6 +14,10 @@ endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/config DESTINATION .)
 
+#check if typing extensions are installed
+
+
+ 
 # Check if nanobind is available as a Python import
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -c "import nanobind"
@@ -21,6 +25,17 @@ execute_process(
   OUTPUT_QUIET ERROR_QUIET)
 
 if(BUILD_PYTHON_STUBS AND NOT nanobind_NOT_FOUND)
+
+  execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "import typing_extensions"
+    RESULT_VARIABLE typing_extensions_NOT_FOUND
+    OUTPUT_QUIET ERROR_QUIET)
+
+  if(typing_extensions_NOT_FOUND)
+    message(
+      FATAL_ERROR
+        "typing_extensions package not found, This will cause stub generation to fail. Please install it with 'pip install typing_extensions'.")
+  endif()
 
   # Automatic stub generation
   add_custom_command(

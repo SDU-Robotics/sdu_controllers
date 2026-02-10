@@ -96,6 +96,16 @@ if(BUILD_PYTHON)
     COMPONENTS Interpreter ${DEV_MODULE}
     REQUIRED)
 
+  # make sure python executable is set (for older CMake versions that does not set Python3_EXECUTABLE automatically)
+  if(NOT EXISTS ${Python3_EXECUTABLE})
+    if(EXISTS ${Python_EXECUTABLE})
+      set(Python3_EXECUTABLE ${Python_EXECUTABLE})
+    else()
+      message(FATAL_ERROR "Python 3.8 or higher is required to build the Python bindings.")
+    endif()
+  endif()
+
+
   include(cmake/LoadNanoBind.cmake)
   
   add_subdirectory(python)
