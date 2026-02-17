@@ -8,5 +8,9 @@ target_link_libraries(rnea_test PUBLIC sdu_controllers Catch2::Catch2)
 add_executable(ur5e_inv_dyn_comparison ur5e_inv_dyn_comparison.cpp)
 target_link_libraries(ur5e_inv_dyn_comparison PUBLIC sdu_controllers Catch2::Catch2)
 
+add_executable(pose_test pose_test.cpp)
+target_link_libraries(pose_test PUBLIC sdu_controllers Catch2::Catch2)
+
 # allow user to run tests with `make test` or `ctest`
 catch_discover_tests(tests)
+catch_discover_tests(pose_test)
