@@ -69,7 +69,7 @@ namespace sdu_controllers
             "Return orientation as angle-axis vector (axis * angle).")
         .def("to_vector7d", &math::Pose::to_vector7d, "Return [x, y, z, qw, qx, qy, qz].")
         .def("to_std_vector", &math::Pose::to_std_vector, "Return pose as std::vector of length 7.")
-        .def("to_transform", &math::Pose::to_transform, "Return pose as homogeneous transform Affine3d.")
+        .def("to_transform", [](const math::Pose& p) { return p.to_transform().matrix(); }, "Return pose as homogeneous transform 4x4 matrix.")
         .def("to_pose6d_std", &math::Pose::to_pose6d_std, "Return pose as 6D std::vector [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.")
         .def("to_pose6d_eigen", &math::Pose::to_pose6d_eigen, "Return pose as 6D Eigen::VectorXd [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.")
         .def(
