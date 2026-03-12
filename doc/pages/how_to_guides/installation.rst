@@ -45,6 +45,9 @@ Building sdu_controllers requires the following software installed:
 Optional dependencies
 ---------------------
 
+.. role:: bash(code)
+   :language: bash
+
 These dependencies are only required for specific features or examples:
 
 * Doxygen: Build the documentation (skipped automatically if missing).
@@ -56,6 +59,11 @@ These dependencies are only required for specific features or examples:
 * typing_extensions (Python package): Required for stub generation when
    `BUILD_PYTHON_STUBS=ON`.
 * ur_rtde: Required for UR hardware examples (`BUILD_UR_EXAMPLES=ON`).
+   * Ubuntu install with:
+      *  :bash:`sudo add-apt-repository ppa:sdurobotics/ur-rtde`
+      *  :bash:`sudo apt update`
+      *  :bash:`sudo apt install librtde librtde-dev`.
+   *  Other platforms read documentation at https://sdurobotics.gitlab.io/ur_rtde/installation/installation.html
 * Python example requirements: Required for running Python hardware examples
    * install with `pip install -r hardware_examples/python/ur/requirements.txt`.
 
