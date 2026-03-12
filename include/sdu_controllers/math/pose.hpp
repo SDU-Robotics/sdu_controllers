@@ -247,6 +247,14 @@ namespace sdu_controllers::math
       orientation_.normalize();
     }
 
+
+    Pose inverse() const
+    {
+      Eigen::Quaterniond inv_orientation = orientation_.conjugate();
+      Eigen::Vector3d inv_position = inv_orientation * (-position_);
+      return Pose(inv_position, inv_orientation);
+    }
+
     /**
      * @brief Convert the orientation to Euler angles in the specified order.
      *
@@ -410,6 +418,121 @@ namespace sdu_controllers::math
       orientation_ = new_pose.orientation_;
       g_pose_io_format_ = new_pose.g_pose_io_format_;
       return *this;
+    }
+
+    /**
+     * @brief Compose this pose with another pose (transformation composition).
+     *
+     * Performs the transformation composition T_result = T_this * T_other.
+     * This is equivalent to applying this pose's transformation first, then the other pose's.
+     *
+     * @param other The pose to compose with
+     * @return The resulting composed pose
+     */
+    Pose operator*(const Pose& other) const
+    {
+      // Compose directly using quaternions for efficiency
+      Eigen::Vector3d new_position = orientation_ * other.position_ + position_;
+      Eigen::Quaterniond new_orientation = orientation_ * other.orientation_;
+      return Pose(new_position, new_orientation);
+    }
+
+    /**
+     * @brief Compose this pose with a transformation matrix.
+     *
+     * Performs the transformation composition T_result = T_this * T_transform.
+     *
+     * @param transform The Affine3d transformation to compose with
+     * @return The resulting composed pose
+     */
+    Pose operator*(const Eigen::Affine3d& transform) const
+    {
+      Eigen::Affine3d this_transform = to_transform();
+      Eigen::Affine3d result_transform = this_transform * transform;
+      return Pose(result_transform);
+    }
+
+    /**
+     * @brief Compose this pose with a 4x4 transformation matrix.
+     *
+     * Performs the transformation composition T_result = T_this * T_matrix.
+     *
+     * @param matrix The 4x4 transformation matrix to compose with
+     * @return The resulting composed pose
+     */
+    Pose operator*(const Eigen::Matrix4d& matrix) const
+    {
+      Eigen::Affine3d this_transform = to_transform();
+      Eigen::Affine3d other_transform(matrix);
+      Eigen::Affine3d result_transform = this_transform * other_transform;
+      return Pose(result_transform);
+    }
+
+    /**
+     * @brief Transform a 3D point using this pose.
+     *
+     * Applies the rotation and translation of this pose to transform a point
+     * from the local frame to the global frame.
+     *
+     * @param point The 3D point to transform
+     * @return The transformed point
+     */
+    Eigen::Vector3d operator*(const Eigen::Vector3d& point) const
+    {
+      return orientation_ * point + position_;
+    }
+
+    /**
+     * @brief Apply a rotation matrix to this pose (left multiplication).
+     *
+     * Creates a new pose by rotating this pose's orientation and position by the given rotation matrix.
+     * This performs R * T where R is the rotation and T is this pose.
+     *
+     * @param rotation The 3x3 rotation matrix
+     * @param pose The pose to rotate
+     * @return The resulting rotated pose
+     */
+    friend Pose operator*(const Eigen::Matrix3d& rotation, const Pose& pose)
+    {
+      Eigen::Vector3d new_position = rotation * pose.position_;
+      Eigen::Quaterniond rotation_quat(rotation);
+      Eigen::Quaterniond new_orientation = rotation_quat * pose.orientation_;
+      return Pose(new_position, new_orientation);
+    }
+
+    /**
+     * @brief Apply a transformation matrix to a pose (left multiplication).
+     *
+     * Creates a new pose by composing the transformation with this pose.
+     * This performs T1 * T2 where T1 is the transform and T2 is this pose.
+     *
+     * @param transform The Affine3d transformation
+     * @param pose The pose to transform
+     * @return The resulting transformed pose
+     */
+    friend Pose operator*(const Eigen::Affine3d& transform, const Pose& pose)
+    {
+      Eigen::Affine3d pose_transform = pose.to_transform();
+      Eigen::Affine3d result_transform = transform * pose_transform;
+      return Pose(result_transform);
+    }
+
+    /**
+     * @brief Apply a 4x4 transformation matrix to a pose (left multiplication).
+     *
+     * Creates a new pose by composing the transformation with this pose.
+     * This performs T1 * T2 where T1 is the matrix and T2 is this pose.
+     *
+     * @param matrix The 4x4 transformation matrix
+     * @param pose The pose to transform
+     * @return The resulting transformed pose
+     */
+    friend Pose operator*(const Eigen::Matrix4d& matrix, const Pose& pose)
+    {
+      Eigen::Affine3d transform(matrix);
+      Eigen::Affine3d pose_transform = pose.to_transform();
+      Eigen::Affine3d result_transform = transform * pose_transform;
+      return Pose(result_transform);
     }
 
     /**

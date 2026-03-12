@@ -25,6 +25,15 @@ namespace sdu_controllers
     nb::module_ m = main_module.def_submodule("math", "Submodule containing math utilities.");
     m.doc() = "Python bindings for sdu_controllers math utilities.";
 
+    // PoseFormat enum
+    nb::enum_<math::PoseFormat>(m, "PoseFormat")
+        .value("Default", math::PoseFormat::Default, "Basic format: Position [x, y, z], Orientation [w, x, y, z]")
+        .value("Compact", math::PoseFormat::Compact, "Compact format: [x, y, z, qw, qx, qy, qz]")
+        .value("Verbose", math::PoseFormat::Verbose, "Verbose format with labels and separate lines")
+        .value("Euler", math::PoseFormat::Euler, "Position and Euler angles (default ZYZ)")
+        .value("AngleAxis", math::PoseFormat::AngleAxis, "Position and angle-axis representation")
+        .value("Matrix", math::PoseFormat::Matrix, "Full 4x4 transformation matrix");
+
     // Pose utilities
     nb::class_<math::Pose>(m, "Pose")
         .def(nb::init<>(), "Default pose (zero position, identity rotation).")
@@ -48,6 +57,7 @@ namespace sdu_controllers
         .def("set_position", &math::Pose::set_position, nb::arg("position"), "Set position.")
         .def("get_orientation", &math::Pose::get_orientation, "Get orientation as quaternion (w, x, y, z).")
         .def("set_orientation", &math::Pose::set_orientation, nb::arg("orientation"), "Set orientation quaternion.")
+        .def("inverse", &math::Pose::inverse, "Compute the inverse of this pose.")
         .def(
             "to_euler_angles",
             &math::Pose::to_euler_angles,
@@ -59,9 +69,37 @@ namespace sdu_controllers
             "Return orientation as angle-axis vector (axis * angle).")
         .def("to_vector7d", &math::Pose::to_vector7d, "Return [x, y, z, qw, qx, qy, qz].")
         .def("to_std_vector", &math::Pose::to_std_vector, "Return pose as std::vector of length 7.")
-        .def("to_transform", &math::Pose::to_transform, "Return pose as homogeneous transform Affine3d.")
+        .def("to_transform", [](const math::Pose& p) { return p.to_transform().matrix(); }, "Return pose as homogeneous transform 4x4 matrix.")
         .def("to_pose6d_std", &math::Pose::to_pose6d_std, "Return pose as 6D std::vector [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.")
-        .def("to_pose6d_eigen", &math::Pose::to_pose6d_eigen, "Return pose as 6D Eigen::VectorXd [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.");
+        .def("to_pose6d_eigen", &math::Pose::to_pose6d_eigen, "Return pose as 6D Eigen::VectorXd [X, Y, Z, Rx, Ry, Rz] with angle-axis orientation.")
+        .def(
+            "to_string",
+            &math::Pose::to_string,
+            nb::arg("format") = math::PoseFormat::Default,
+            nb::arg("precision") = 6,
+            "Format the pose as a string.")
+        .def("__repr__", [](const math::Pose& p) { return p.to_string(math::PoseFormat::Compact); })
+        .def("__str__", [](const math::Pose& p) { return p.to_string(math::PoseFormat::Default); })
+        .def(
+            "__mul__",
+            [](const math::Pose& self, const math::Pose& other) { return self * other; },
+            nb::arg("other"),
+            "Compose this pose with another pose.")
+        .def(
+            "__mul__",
+            [](const math::Pose& self, const Eigen::Affine3d& transform) { return self * transform; },
+            nb::arg("transform"),
+            "Compose this pose with an Affine3d transformation.")
+        .def(
+            "__mul__",
+            [](const math::Pose& self, const Eigen::Matrix4d& matrix) { return self * matrix; },
+            nb::arg("matrix"),
+            "Compose this pose with a 4x4 transformation matrix.")
+        .def(
+            "__mul__",
+            [](const math::Pose& self, const Eigen::Vector3d& point) { return self * point; },
+            nb::arg("point"),
+            "Transform a 3D point using this pose.");
 
     // Core dynamics helpers
     nb::class_<math::InverseDynamics>(m, "InverseDynamics")
