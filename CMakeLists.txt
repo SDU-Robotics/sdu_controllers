@@ -8,7 +8,7 @@ endif()
 # Set a name and a version number for your project:
 project(
   sdu_controllers
-  VERSION 0.0.2
+  VERSION 0.0.1
   LANGUAGES CXX)
 
 # Initialize some default paths

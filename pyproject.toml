@@ -17,7 +17,7 @@ build-backend = "setuptools.build_meta"
 # single source of truth for sdu_controllers's version
 [project]
 name = "sdu_controllers"
-version = "0.0.2"
+version = "0.0.1"
 description = "A C++ library containing robot controllers and algorithms developed at University of Southern Denmark (SDU)."
 readme = "README.md"
 maintainers = [
