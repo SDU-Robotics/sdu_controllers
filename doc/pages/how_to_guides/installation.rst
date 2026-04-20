@@ -42,6 +42,27 @@ Building sdu_controllers requires the following software installed:
 * Doxygen (optional, documentation building is skipped if missing)
 * Python `>= 3.8` for building Python bindings
 
+Optional dependencies
+---------------------
+
+These dependencies are only required for specific features or examples:
+
+* Doxygen: Build the documentation (skipped automatically if missing).
+* Catch2 submodule: Required for building the test suite when `BUILD_TESTING=ON`.
+   * Initialize with `git submodule update --init --recursive`.
+* nanobind (Python package): Required to build Python bindings `BUILD_PYTHON=ON` 
+   * Initialize with `git submodule update --init --recursive`, or install from PyPI with `pip install nanobind`.
+   * pip installed version is required for generating Python stubs when `BUILD_PYTHON_STUBS=ON`.
+* typing_extensions (Python package): Required for stub generation when
+   `BUILD_PYTHON_STUBS=ON`.
+* ur_rtde: Required for UR hardware examples (`BUILD_UR_EXAMPLES=ON`).
+* Python example requirements: Required for running Python hardware examples
+   * install with `pip install -r hardware_examples/python/ur/requirements.txt`.
+
+
+Debian/Ubuntu install
+--------------------
+
 On debian-based linux distributions like Ubuntu, you can install the
 dependencies with:
 
