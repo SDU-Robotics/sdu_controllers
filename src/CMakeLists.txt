@@ -17,19 +17,21 @@ set(sdu_controllers_SOURCES
       utils/utility.cpp
 )
 
-# Try to find ur_rtde in order to build UR Robot HAL
-find_package(ur_rtde QUIET)
+if (BUILD_HAL)
+    # Try to find ur_rtde in order to build UR Robot HAL
+    find_package(ur_rtde QUIET)
 
-if(ur_rtde_FOUND)
-    list(APPEND sdu_controllers_SOURCES hal/ur_robot.cpp)
-endif(ur_rtde_FOUND)
+    if(ur_rtde_FOUND)
+        list(APPEND sdu_controllers_SOURCES hal/ur_robot.cpp)
+    endif(ur_rtde_FOUND)
 
-# Try to find libfranka in order to build Franka Robot HAL
-find_package(Franka 0.9.1 QUIET)
+    # Try to find libfranka in order to build Franka Robot HAL
+    find_package(Franka 0.9.1 QUIET)
 
-if(Franka_FOUND)
-    list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
-endif(Franka_FOUND)
+    if(Franka_FOUND)
+        list(APPEND sdu_controllers_SOURCES hal/franka_robot.cpp)
+    endif(Franka_FOUND)
+endif(BUILD_HAL)
 
 if(NOT TARGET yaml-cpp::yaml-cpp)
   add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
@@ -40,7 +42,15 @@ target_link_libraries(sdu_controllers PUBLIC
     Eigen3::Eigen
     yaml-cpp::yaml-cpp
 )
-target_compile_definitions(sdu_controllers PUBLIC PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_compile_definitions(sdu_controllers PUBLIC
+    PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
+# --- Apply Eigen specific definitions ---
+target_compile_definitions(sdu_controllers 
+    PRIVATE 
+        EIGEN_FAST_MATH=0
+)
 target_include_directories(
   sdu_controllers PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+
                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
