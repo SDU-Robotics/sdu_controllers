@@ -28,24 +28,6 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: install dependencies
-      uses: SDU-Robotics/github-actions/install-dependencies@master
-      with:
-        compiler: ${{ matrix.compiler }}
-        build-type: ${{ matrix.build-type }}
-        ubuntu: |
-          apt: libeigen3-dev libyaml-cpp-dev
-        macos: |
-          brew: eigen yaml-cpp
-        windows: |
-          github:
-            - path: jbeder/yaml-cpp
-              ref: 0.8.0
-          gitlab:
-            - path: libeigen/eigen
-              ref: 3.4.0
-
-
     - name: Build wheels
       uses: pypa/cibuildwheel@v3.4.1
 
