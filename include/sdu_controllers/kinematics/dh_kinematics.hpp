@@ -15,12 +15,20 @@ namespace sdu_controllers::kinematics
     bool is_joint_revolute;  // true if the joint is revolute, false if prismatic
   };
 
+
+  /**
+   * @class DHKinematics
+   * @brief Forward kinematics computation using classical Denavit-Hartenberg (DH) parameters
+   *
+   * This class implements forward kinematics using the classical (standard) Denavit-Hartenberg 
+   * parameter convention, as presented in standard robotics textbooks (Spong, Murray, Sastry).
+   */
   class DHKinematics : public ForwardKinematics
   {
    public:
 
     /**
-     * @brief Construct a empty DHKinematics
+     * @brief Construct an empty DHKinematics
      */
     DHKinematics();
 
