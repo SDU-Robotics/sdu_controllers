@@ -8,7 +8,7 @@ endif()
 # Set a name and a version number for your project:
 project(
   sdu_controllers
-  VERSION 0.0.2
+  VERSION 0.0.1
   LANGUAGES CXX)
 
 # Initialize some default paths
@@ -24,10 +24,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_PYTHON "Enable building of Python bindings" ON)
 option(BUILD_PYTHON_STUBS "Enable building of python Stubs" ${BUILD_PYTHON})
 option(BUILD_DOCS "Enable building of documentation" ON)
+option(BUILD_HAL "Enable building of Hardware Abstraction Layer" OFF)
 option(BUILD_EXAMPLES "Enable building of examples" ON)
 option(BUILD_TESTING "Enable building of the tests" ON)
-option(BUILD_FOR_PIP_INSTALL
-       "Enable Install commands suitable for pip installations" OFF)
+option(BUILD_FOR_PIP_INSTALL "Enable Install commands suitable for pip installations" OFF)
 
 # Optional hardware examples
 option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
@@ -48,14 +48,47 @@ file(TO_CMAKE_PATH "${CONFIG_FILE_PATH}" CONFIG_FILE_PATH_NORMALIZED)
 add_definitions(-DCONFIG_FILE_PATH="${CONFIG_FILE_PATH_NORMALIZED}")
 
 include(CMakePrintHelpers)
-cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
+#cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
-# find dependencies
-find_package(Eigen3 REQUIRED NO_MODULE)
-# Eigen: Disable fast math be default.
-add_definitions(-DEIGEN_FAST_MATH=0)
+# Find dependencies
+include(FetchContent)
+# --- Fetch Eigen3 ---
+set(EIGEN_BUILD_TESTING OFF CACHE BOOL " " FORCE)
+set(EIGEN_BUILD_DOC OFF CACHE BOOL " " FORCE)
+set(EIGEN_LEAVE_TEST_IN_ALL_TARGET OFF CACHE BOOL " " FORCE)
+set(EIGEN_GIT_TAG 3.4.0 CACHE STRING " " FORCE)
 
-find_package(yaml-cpp CONFIG REQUIRED)
+FetchContent_Declare(
+    eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG        ${EIGEN_GIT_TAG}
+)
+FetchContent_GetProperties(eigen)
+if(NOT eigen_POPULATED)
+    FetchContent_Populate(eigen)
+endif()
+
+# Manually create the header-only target exactly as Eigen would
+add_library(Eigen3::Eigen INTERFACE IMPORTED)
+target_include_directories(Eigen3::Eigen INTERFACE "${eigen_SOURCE_DIR}")
+message(STATUS "Found Eigen3: ${eigen_SOURCE_DIR} (found version \"${EIGEN_GIT_TAG}\")")
+
+# --- Fetch yaml-cpp ---
+SET(YAML_CPP_INSTALL ON CACHE INTERNAL "")
+# Force static linking so the wheel is self-contained
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
+# Disable yaml-cpp tests and tools to speed up build
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL " " FORCE)
+set(YAML_CPP_GIT_TAG yaml-cpp-0.9.0 CACHE STRING " " FORCE)
+
+FetchContent_Declare(
+    yaml-cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG        ${YAML_CPP_GIT_TAG}
+)
+FetchContent_MakeAvailable(yaml-cpp)
+message(STATUS "Found yaml-cpp: ${yaml-cpp_SOURCE_DIR} (found version \"${YAML_CPP_GIT_TAG}\")")
 
 # compile the library
 add_subdirectory(src)
@@ -85,6 +118,13 @@ if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 if(BUILD_PYTHON)
+
+  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind/CMakeLists.txt)
+    message(
+      FATAL_ERROR
+        "nanobind submodule not found. Please run 'git submodule update --init --recursive'."
+    )
+  endif()
   if(CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
   else()
@@ -118,6 +158,14 @@ add_library(sdu_controllers::sdu_controllers ALIAS sdu_controllers)
 # Install targets and configuration
 install(
   TARGETS sdu_controllers
+  EXPORT sdu_controllers-config
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install targets and configuration
+install(
+  TARGETS yaml-cpp
   EXPORT sdu_controllers-config
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
