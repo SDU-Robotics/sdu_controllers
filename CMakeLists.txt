@@ -35,7 +35,9 @@ option(BUILD_UR_EXAMPLES "Enable building of examples to be run on UR robots"
 option(BUILD_FRANKA_EXAMPLES
        "Enable building of examples to be run on Franka robots" OFF)
 
-# Add config library as a path such that we can find parameter files used for the robot models.
+# Add config library as a path such that we can find parameter files used for
+# the robot models.
+
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20")
   file(REAL_PATH "config" CONFIG_FILE_PATH)
 else()
@@ -134,10 +136,19 @@ if(BUILD_PYTHON)
     COMPONENTS Interpreter ${DEV_MODULE}
     REQUIRED)
 
-  # Add Python bindings
-  add_subdirectory(ext/nanobind)
+  # make sure python executable is set (for older CMake versions that does not set Python3_EXECUTABLE automatically)
+  if(NOT EXISTS ${Python3_EXECUTABLE})
+    if(EXISTS ${Python_EXECUTABLE})
+      set(Python3_EXECUTABLE ${Python_EXECUTABLE})
+    else()
+      message(FATAL_ERROR "Python 3.8 or higher is required to build the Python bindings.")
+    endif()
+  endif()
 
- add_subdirectory(python)
+
+  include(cmake/LoadNanoBind.cmake)
+  
+  add_subdirectory(python)
 endif()
 
 # Add an alias target for use if this project is included as a subproject in
