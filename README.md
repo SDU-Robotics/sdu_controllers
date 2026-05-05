@@ -32,7 +32,7 @@ Building sdu_controllers requires the following software installed:
 * Eigen3 `>= 3.3` for linear algebra.
 * yaml-cpp for loading robot models.
 * Doxygen (optional, documentation building is skipped if missing)
-* Python `>= 3.8` for building Python bindings
+* Python `>= 3.9` for building Python bindings
 
 ## Building sdu_controllers
 ### Dependencies

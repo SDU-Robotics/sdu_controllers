@@ -135,7 +135,7 @@ if(BUILD_PYTHON)
   endif()
 
   find_package(
-    Python 3.8
+    Python 3.9
     COMPONENTS Interpreter ${DEV_MODULE}
     REQUIRED)
 
@@ -144,7 +144,7 @@ if(BUILD_PYTHON)
     if(EXISTS ${Python_EXECUTABLE})
       set(Python3_EXECUTABLE ${Python_EXECUTABLE})
     else()
-      message(FATAL_ERROR "Python 3.8 or higher is required to build the Python bindings.")
+      message(FATAL_ERROR "Python 3.9 or higher is required to build the Python bindings.")
     endif()
   endif()
 

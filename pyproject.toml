@@ -24,7 +24,7 @@ maintainers = [
     { name = "Anders Prier Lindvig", email = "anpl@mmmi.sdu.dk" },
     { name = "Emil Lykke Diget", email = "eld@mmmi.sdu.dk" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -53,7 +53,7 @@ testpaths = ["tests/python"]
 build-verbosity = 3
 
 # We restrict ourselves to recent Python versions
-skip = "*musllinux*"
+skip = "cp38-* *musllinux*"
 
 # Testing commands for our wheels
 test-command = "pytest {package}/tests/python"
