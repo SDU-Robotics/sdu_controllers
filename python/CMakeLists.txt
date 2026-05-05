@@ -6,6 +6,19 @@ nanobind_add_module(
   
 target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 
+# On Windows only: rename the compiled module to a standard name for import compatibility
+# Windows Python import cannot resolve versioned .pyd files (e.g., _sdu_controllers.cp314-win32.pyd)
+# Linux and macOS handle versioned .so/.dylib files automatically, so this copy is unnecessary there
+if(WIN32)
+  add_custom_command(
+    TARGET _sdu_controllers
+    POST_BUILD
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py
+            ${CMAKE_CURRENT_BINARY_DIR}/sdu_controllers
+    COMMENT "Creating standard-named module copy for Windows import compatibility"
+  )
+endif()
+
 # install python bindings if building for pip install
 if(BUILD_FOR_PIP_INSTALL)
   # Install the Python module shared library
