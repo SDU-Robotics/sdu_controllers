@@ -1,4 +1,38 @@
 from skbuild import setup
+import os
+import sys
+import subprocess
+
+
+def get_nanobind_dir():
+    """Try to get nanobind directory from Python package."""
+    try:
+        import nanobind
+        return os.path.dirname(nanobind.__file__)
+    except ImportError:
+        pass
+    
+    # Try using python -m nanobind --cmake_dir
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "nanobind", "--cmake_dir"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    
+    return None
+
+
+# Set NANOBIND_DIR environment variable if found
+nanobind_dir = get_nanobind_dir()
+if nanobind_dir:
+    os.environ["NANOBIND_DIR"] = nanobind_dir
+    print(f"Setting NANOBIND_DIR to: {nanobind_dir}")
 
 
 setup(

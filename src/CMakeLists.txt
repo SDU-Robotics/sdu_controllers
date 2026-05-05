@@ -39,6 +39,7 @@ endif()
 
 add_library(sdu_controllers ${sdu_controllers_SOURCES})
 target_link_libraries(sdu_controllers PUBLIC
+    Threads::Threads
     Eigen3::Eigen
     yaml-cpp::yaml-cpp
 )

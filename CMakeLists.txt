@@ -51,6 +51,9 @@ include(CMakePrintHelpers)
 #cmake_print_variables(CONFIG_FILE_PATH_NORMALIZED)
 
 # Find dependencies
+# --- require thread support
+find_package(Threads REQUIRED)
+
 include(FetchContent)
 # --- Fetch Eigen3 ---
 set(EIGEN_BUILD_TESTING OFF CACHE BOOL " " FORCE)
