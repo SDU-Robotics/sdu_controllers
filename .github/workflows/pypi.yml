@@ -14,14 +14,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        build-type: [Release]
-        compiler: [gcc, clang]
-        exclude:
-          # Only default compiler on macos-latest and windows-latest
-          - os: macos-latest
-            compiler: clang
-          - os: windows-latest
-            compiler: clang
 
     steps:
     - uses: actions/checkout@v4

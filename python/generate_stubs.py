@@ -1,8 +1,25 @@
 #!/usr/bin/env python3
 """Generate type stubs for sdu_controllers and its submodules using nanobind.stubgen"""
 
+import sys
+import os
+import pathlib
+
+# Add current directory to path to find _sdu_controllers extension module
+# This is important for cibuildwheel builds where the .pyd/.so might not be in standard paths
+sys.path.insert(0, os.getcwd())
+# Also add the directory of this script to the path, just in case
+sys.path.insert(0, pathlib.Path(__file__).parent.resolve())
+
 from nanobind.stubgen import StubGen
-import _sdu_controllers
+try:
+    import _sdu_controllers
+except ImportError as e:
+    print(f"ERROR: Could not import _sdu_controllers: {e}")
+    print(f"Current directory: {os.getcwd()}")
+    print(f"sys.path: {sys.path}")
+    print(f"Files in current directory: {os.listdir('.')}")
+    raise
 
 print("Generating stubs for sdu_controllers...")
 
