@@ -12,13 +12,8 @@ if(BUILD_FOR_PIP_INSTALL)
   install(TARGETS _sdu_controllers DESTINATION .)
   
   # On Windows: also install the standard-named copy for import compatibility
-  # This runs during installation to copy the versioned .pyd to a standard name
   if(WIN32)
-    install(CODE "
-      import subprocess
-      import sys
-      subprocess.run([sys.executable, '${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py', '${CMAKE_INSTALL_PREFIX}'], check=False)
-    ")
+    install(SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/install_copy_module.cmake)
   endif()
 endif()
 
