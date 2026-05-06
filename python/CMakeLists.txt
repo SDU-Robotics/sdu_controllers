@@ -10,6 +10,16 @@ target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 if(BUILD_FOR_PIP_INSTALL)
   # Install the Python module shared library
   install(TARGETS _sdu_controllers DESTINATION .)
+  
+  # On Windows: also install the standard-named copy for import compatibility
+  # This runs during installation to copy the versioned .pyd to a standard name
+  if(WIN32)
+    install(CODE "
+      import subprocess
+      import sys
+      subprocess.run([sys.executable, '${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py', '${CMAKE_INSTALL_PREFIX}'], check=False)
+    ")
+  endif()
 endif()
 
 # On Windows only: rename the compiled module to a standard name for import compatibility
