@@ -40,11 +40,11 @@ classdef pid_controller < matlab.System
             obj.Ki_mat = obj.Ki * eye(obj.num_states);
             obj.Kd_mat = obj.Kd * eye(obj.num_states);
             obj.N_mat = obj.N * eye(obj.num_states);
-            obj.u_min_mat = obj.u_min * eye(obj.num_states);
-            obj.u_max_mat = obj.u_max * eye(obj.num_states);
+            obj.u_min_mat = ones(1,obj.num_states) * obj.u_min;
+            obj.u_max_mat = ones(1,obj.num_states) * obj.u_max;
 
            
-            %
+            
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
             obj.pid_contr = obj.sdu_controllers.controllers.PIDController(obj.Kp_mat, ...
                 obj.Ki_mat, obj.Kd_mat, obj.N_mat, obj.sample_time,obj.u_min_mat,obj.u_max_mat );
@@ -63,7 +63,7 @@ classdef pid_controller < matlab.System
             q = reshape(q, 1, obj.num_states);
             dq = reshape(dq, 1, obj.num_states);
 
-            obj.pid_contr.step(q_d', dq_d', u_ff', q, dq);
+            obj.pid_contr.step(q_d, dq_d, u_ff, q, dq);
 
             y = double(obj.pid_contr.get_output());
             % y = double(obj.pid_contr.output);
