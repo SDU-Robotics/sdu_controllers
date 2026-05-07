@@ -17,6 +17,7 @@ classdef forward_kinematics < matlab.System
     properties (Access = private)
         robot_model
         links
+        fk_solver
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
 
@@ -46,6 +47,8 @@ classdef forward_kinematics < matlab.System
                     obj.links = 6;
             end
 
+            obj.fk_solver = obj.robot_model.get_fk_solver();
+
             % obj.links = double(obj.robot_model.get_dof());
             % disp(obj.links)
         end
@@ -53,7 +56,7 @@ classdef forward_kinematics < matlab.System
         function [T] = stepImpl(obj, q)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
-            T = obj.sdu_controllers.kinematics.forward_kinematics(q, obj.robot_model);
+            T = obj.fk_solver.forward_kinematics(q);
             T = double(T);
         end
 
