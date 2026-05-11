@@ -13,7 +13,7 @@ if(BUILD_FOR_PIP_INSTALL)
   
   # On Windows: also install the standard-named copy for import compatibility
   if(WIN32)
-    install(SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/install_copy_module.cmake)
+    install(SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/install_copy_module.cmake")
   endif()
 endif()
 
@@ -24,8 +24,7 @@ if(WIN32)
   add_custom_command(
     TARGET _sdu_controllers
     POST_BUILD
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py
-            $<TARGET_FILE_DIR:_sdu_controllers>
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py" $<TARGET_FILE_DIR:_sdu_controllers>
     COMMENT "Creating standard-named module copy for Windows import compatibility"
   )
 endif()
