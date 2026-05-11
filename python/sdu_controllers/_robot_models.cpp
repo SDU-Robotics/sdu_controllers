@@ -89,7 +89,8 @@ namespace sdu_controllers
         .def(nb::init<>())
         .def(nb::init<const std::string &>())
         .def(nb::init<const std::filesystem::path &>())
-        .def(nb::init<const models::RobotParameters &>());
+        .def(nb::init<const models::RobotParameters &>())
+        .def("set_tcp_mass", &models::BreedingBlanketHandlingRobotModel::set_tcp_mass);
     return m_models;
   }
 }  // namespace sdu_controllers

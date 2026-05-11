@@ -13,6 +13,10 @@ classdef pid_controller < matlab.System
         
         % num_states Number of States
         num_states = 6
+
+        %
+        u_min = -100
+        u_max = 100
         
         % sample_time Sample Time
         sample_time = 1/500.
@@ -24,6 +28,8 @@ classdef pid_controller < matlab.System
         Ki_mat
         Kd_mat
         N_mat
+        u_min_mat
+        u_max_mat
         pid_contr
         sdu_controllers
     end
@@ -34,11 +40,14 @@ classdef pid_controller < matlab.System
             obj.Ki_mat = obj.Ki * eye(obj.num_states);
             obj.Kd_mat = obj.Kd * eye(obj.num_states);
             obj.N_mat = obj.N * eye(obj.num_states);
+            obj.u_min_mat = ones(1,obj.num_states) * obj.u_min;
+            obj.u_max_mat = ones(1,obj.num_states) * obj.u_max;
+
            
-            %
+            
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
             obj.pid_contr = obj.sdu_controllers.controllers.PIDController(obj.Kp_mat, ...
-                obj.Ki_mat, obj.Kd_mat, obj.N_mat, obj.sample_time);
+                obj.Ki_mat, obj.Kd_mat, obj.N_mat, obj.sample_time,obj.u_min_mat,obj.u_max_mat );
         end
 
         % function sts = getSampleTimeImpl(obj)
