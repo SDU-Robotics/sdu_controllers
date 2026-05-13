@@ -53,7 +53,7 @@ testpaths = ["tests/python"]
 build-verbosity = 3
 
 # We restrict ourselves to recent Python versions
-skip = "cp38-* *musllinux*"
+skip = "cp38-* *musllinux* cp314t-*"
 
 # Testing commands for our wheels
 test-command = "pytest {package}/tests/python"
