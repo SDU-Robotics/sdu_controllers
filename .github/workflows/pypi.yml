@@ -25,6 +25,7 @@ jobs:
 
     - uses: actions/upload-artifact@v7
       with:
+        name: artifact-${{ matrix.os }}
         path: ./wheelhouse/*.whl
 
   upload_testpypi:
@@ -36,7 +37,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.14.0
@@ -52,7 +54,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.14.0
