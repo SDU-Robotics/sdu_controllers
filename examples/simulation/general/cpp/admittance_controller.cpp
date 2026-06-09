@@ -55,7 +55,10 @@ int main()
 
   // Compute admittance trajectory
   VectorXd u;
-  controllers::AdmittanceControllerPosition adm_controller;
+  double freq = 500.;
+  integrator::IntegrationMethod intg_method = integrator::IntegrationMethod::Euler;
+  controllers::AdmittanceControllerPosition adm_controller(freq, intg_method);
+
   adm_controller.set_mass_matrix_position(Vector3d(22.5, 22.5, 22.5).asDiagonal());
   adm_controller.set_stiffness_matrix_position(Vector3d(54, 54, 54).asDiagonal());
   adm_controller.set_damping_matrix_position(Vector3d(160, 160, 160).asDiagonal());
@@ -75,11 +78,15 @@ int main()
     x_desired = get_circle_target(start_position, t * dt);
     if (adm_pos[0] > 0.29 && adm_pos[0] < 0.31 && adm_pos[1] > 0.39 && adm_pos[1] < 0.41)
     {
+      f[0] = 40;
       f[1] = 40;
+      f[2] = 40;
     }
     else
     {
+      f[0] = 0;
       f[1] = 0;
+      f[2] = 0;
     }
 
     // Step controller
