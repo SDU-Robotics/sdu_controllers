@@ -54,6 +54,17 @@ if(BUILD_PYTHON_STUBS AND NOT nanobind_NOT_FOUND)
         "typing_extensions package not found, This will cause stub generation to fail. Please install it with 'pip install typing_extensions'.")
   endif()
 
+  execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "import numpy"
+    RESULT_VARIABLE numpy_NOT_FOUND
+    OUTPUT_QUIET ERROR_QUIET)
+
+  if(numpy_NOT_FOUND)
+    message(
+      FATAL_ERROR
+        "NumPy package not found for ${Python3_EXECUTABLE}. The Python bindings use nanobind ndarray support, so stub generation must be able to import NumPy. Please install it with '${Python3_EXECUTABLE} -m pip install numpy' or configure CMake with a Python interpreter that already has NumPy.")
+  endif()
+
   # Automatic stub generation
   add_custom_command(
     TARGET _sdu_controllers

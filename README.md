@@ -69,6 +69,14 @@ If you plan to build tests and python bindings you must install [Catch2](https:/
 git submodule update --init --recursive
 ```
 
+When building the Python bindings with CMake directly, install the Python
+packages used during stub generation into the same Python interpreter that
+CMake finds:
+
+``` bash
+python -m pip install nanobind typing-extensions numpy
+```
+
 ### Build procedure
 The following sequence of commands builds sdu_controllers.
 It assumes that your current working directory is the top-level directory
