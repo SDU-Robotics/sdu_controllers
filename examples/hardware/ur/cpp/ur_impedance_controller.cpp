@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   const double ramp_time    = 0.3;                     // s
 
   // Controller gains
-  const double Kp_pos    = 8000.0;
+  const double Kp_pos    = 2800.0;
   const double Kp_orient = 15.0;
 
   MatrixXd Kp = MatrixXd::Zero(6, 6);
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
   VectorXd ddx_d(DOF);
 
   VectorXd q_init(DOF);
-  q_init << -pi/2, -pi/2, -pi/2, -pi/2, pi/2, 0.0;
+  q_init << 0.0, -pi/2, -pi/2, -pi/2, pi/2, 0.0;
 
   // Move robot to init position
   robot.move_joints(q_init);
