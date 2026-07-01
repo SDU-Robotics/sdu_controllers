@@ -131,26 +131,26 @@ int main(int argc, char* argv[])
 
   const double freq     = 500.0;
   const double dt       = 1.0 / freq;
-  const double total_t  = 4.0;            // seconds (two full circles)
+  const double total_t  = 8.0;            // seconds (four full circles)
   const size_t steps    = static_cast<size_t>(total_t * freq);
 
   // Circle parameters
   const double radius       = 0.05;                    // 5 cm
-  const double circle_freq  = 0.5;                     // Hz
+  const double circle_freq  = 0.2;                     // Hz
   const double omega        = 2.0 * M_PI * circle_freq;
   const double ramp_time    = 0.3;                     // s
 
   // Controller gains
-  const double Kp_pos    = 2800.0;
-  const double Kp_orient = 15.0;
+  const double Kp_pos    = 8000.0;
+  const double Kp_orient = 200.0;
 
   MatrixXd Kp = MatrixXd::Zero(6, 6);
   Kp.block<3, 3>(0, 0) = MatrixXd::Identity(3, 3) * Kp_pos;
   Kp.block<3, 3>(3, 3) = MatrixXd::Identity(3, 3) * Kp_orient;
 
-  // Desired inertia: 2.5 kg for translational axes, 0.5 kg*m2 for rotational
-  VectorXd Md_pos = VectorXd::Ones(3) * 2.5;
-  VectorXd Md_rot = VectorXd::Ones(3) * 0.5;
+  // Desired inertia for translational and rotational axes.
+  VectorXd Md_pos = VectorXd::Ones(3) * 10.0;
+  VectorXd Md_rot = VectorXd::Ones(3) * 1.0;
   MatrixXd Md = MatrixXd::Zero(6, 6);
   Md.block<3, 3>(0, 0) = Md_pos.asDiagonal();
   Md.block<3, 3>(3, 3) = Md_rot.asDiagonal();

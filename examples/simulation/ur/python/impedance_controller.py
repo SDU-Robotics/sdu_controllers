@@ -88,14 +88,14 @@ def main():
     DOF = robot_model.get_dof()
 
     # Controller gains
-    Kp_pos, Kp_orient = 8000.0, 15.0
+    Kp_pos, Kp_orient = 3200.0, 200.0
 
     Kp = np.zeros((6, 6))
     Kp[0:3, 0:3] = np.eye(3) * Kp_pos
     Kp[3:6, 3:6] = np.eye(3) * Kp_orient
 
-    # Desired inertia: 2.5 kg for translational axes, 0.5 kg·m2 for rotational
-    Md_pos_val, Md_orient_val = 2.5, 0.5
+    # Desired inertia for translational and rotational axes.
+    Md_pos_val, Md_orient_val = 10.0, 1.0
     Md = np.zeros((6, 6))
     Md[0:3, 0:3] = np.eye(3) * Md_pos_val
     Md[3:6, 3:6] = np.eye(3) * Md_orient_val
