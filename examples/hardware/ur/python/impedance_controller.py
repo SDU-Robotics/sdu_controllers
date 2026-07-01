@@ -71,6 +71,18 @@ def clamp_array(value, clamp_value):
     
     return ret
 
+def apply_deadband(wrench, force_threshold, torque_threshold):
+    """Apply a symmetric deadband to a wrench: any component with magnitude below
+    the corresponding threshold is set to zero. Components above the threshold are
+    passed through unchanged (not offset-shifted), so contact forces are preserved.
+
+    The first three components are treated as forces (N) and the last three as
+    torques (Nm), each with its own threshold."""
+    ret = wrench.copy()
+    thresholds = np.array([force_threshold] * 3 + [torque_threshold] * 3)
+    ret[np.abs(wrench) < thresholds] = 0.0
+    return ret
+
 # ---------------------------------------------------------------------------
 # Main simulation
 # ---------------------------------------------------------------------------
@@ -128,9 +140,19 @@ def main():
         Kp, Kd, Md, robot_model,
         sdu_controllers.controllers.OrientationRepresentation.QUATERNION)
 
-    # External wrench on the end-effector (zero - free-space motion)
+    # External wrench on the end-effector (measured, filtered in the control loop)
     he    = np.zeros(6)
     h_d_e = np.zeros(6)   # desired contact wrench (zero - pure motion tracking)
+
+    # --- End-effector wrench filtering ---
+    # First-order low-pass filter to suppress force/torque sensor noise.
+    #   he_filt = a * he_raw + (1 - a) * he_filt_prev,   a = 1 - exp(-2*pi*fc*dt)
+    ft_cutoff_freq = 10.0                    # Hz
+    ft_lpf_alpha   = 1.0 - np.exp(-2.0 * np.pi * ft_cutoff_freq * dt)
+    he_filtered    = np.zeros(6)
+    # Deadband half-widths: ignore forces below ft_force_deadband and torques below ft_torque_deadband.
+    ft_force_deadband  = 1.5                 # N
+    ft_torque_deadband = 1.0                 # Nm
 
     q_init = [-np.pi/2, -np.pi/2, -np.pi/2, -np.pi/2, np.pi/2, 0.0]
 
@@ -170,6 +192,15 @@ def main():
             # Measured state
             q_meas = rtde_receive.getActualQ()
             dq_meas = rtde_receive.getActualQd()
+
+            # Measured external wrench at the end-effector
+            he_raw = np.array(rtde_receive.getActualTCPForce())
+
+            # Low-pass filter to attenuate sensor noise.
+            he_filtered = ft_lpf_alpha * he_raw + (1.0 - ft_lpf_alpha) * he_filtered
+
+            # Deadband to reject small residual forces (N) / torques (Nm).
+            he = apply_deadband(he_filtered, ft_force_deadband, ft_torque_deadband)
 
             # Impedance controller step (QUATERNION mode)
             controller.step(x_d, dx_d, ddx_d, q_meas, dq_meas, h_d_e, quat_d)

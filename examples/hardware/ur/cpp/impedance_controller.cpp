@@ -109,6 +109,33 @@ Eigen::VectorXd clamp_array(const Eigen::VectorXd& value, const Eigen::VectorXd&
   return ret;
 }
 
+/**
+ * Apply a symmetric deadband to a wrench: any component with magnitude below
+ * the corresponding threshold is set to zero. Components above the threshold are
+ * passed through unchanged (not offset-shifted), so contact forces are preserved.
+ *
+ * The first three components are treated as forces (N) and the last three as
+ * torques (Nm), each with its own threshold.
+ *
+ * @param wrench           Input wrench (forces in [0:3], torques in [3:6]).
+ * @param force_threshold  Deadband half-width for the force components (N).
+ * @param torque_threshold Deadband half-width for the torque components (Nm).
+ * @returns the deadbanded wrench.
+ */
+Eigen::VectorXd apply_deadband(const Eigen::VectorXd& wrench, double force_threshold, double torque_threshold)
+{
+  Eigen::VectorXd ret = wrench;
+  for (int j = 0; j < wrench.size(); ++j)
+  {
+    const double threshold = (j < 3) ? force_threshold : torque_threshold;
+    if (std::abs(wrench[j]) < threshold)
+    {
+      ret[j] = 0.0;
+    }
+  }
+  return ret;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -167,9 +194,19 @@ int main(int argc, char* argv[])
   URRobot robot(robot_ip, freq);
 
   // External forces/torques at the end-effector (zero - free-space motion)
-  Vector<double, 6> he  = VectorXd::Zero(6);
+  Vector<double, 6> he = VectorXd::Zero(6);
   // Desired contact wrench (zero - purely motion tracking)
   VectorXd h_d_e = VectorXd::Zero(6);
+
+  // --- End-effector wrench filtering ---
+  // First-order low-pass filter to suppress force/torque sensor noise.
+  //   he_filt = a * he_raw + (1 - a) * he_filt_prev,   a = 1 - exp(-2*pi*fc*dt)
+  const double ft_cutoff_freq = 10.0;  // Hz
+  const double ft_lpf_alpha   = 1.0 - std::exp(-2.0 * M_PI * ft_cutoff_freq * dt);
+  Vector<double, 6> he_filtered = VectorXd::Zero(6);
+  // Deadband half-widths: ignore forces below ft_force_deadband and torques below ft_torque_deadband.
+  const double ft_force_deadband  = 1.5;  // N
+  const double ft_torque_deadband = 1.0;  // Nm
 
   VectorXd u_max(DOF);
   // UR5e max and min torque see https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/
@@ -199,6 +236,11 @@ int main(int argc, char* argv[])
   Vector4d quat_d_vec(quat_d.w(), quat_d.x(), quat_d.y(), quat_d.z());
 
   signal(SIGINT, raise_flag);
+
+  // Zero the force-torque sensor before starting the control loop
+  std::this_thread::sleep_for(200ms);
+  robot.zero_ft_sensor();
+  std::this_thread::sleep_for(200ms);
 
   robot.set_control_mode(URRobot::ControlMode::TORQUE);
   robot.start_control();
@@ -233,6 +275,15 @@ int main(int argc, char* argv[])
     // Measured state
     VectorXd q_meas  = robot.get_joint_positions();
     VectorXd dq_meas = robot.get_joint_velocities();
+
+    // Measured external wrench at the end-effector
+    Vector<double, 6> he_raw = utils::std_vector_to_eigen(robot.get_tcp_forces());
+
+    // Low-pass filter to attenuate sensor noise.
+    he_filtered = ft_lpf_alpha * he_raw + (1.0 - ft_lpf_alpha) * he_filtered;
+
+    // Deadband to reject small residual forces (N) / torques (Nm).
+    he = apply_deadband(he_filtered, ft_force_deadband, ft_torque_deadband);
 
     // Impedance controller step (QUATERNION mode)
     impedance_controller.step(x_d, dx_d, ddx_d, q_meas, dq_meas, h_d_e, quat_d_vec);
