@@ -15,7 +15,8 @@ namespace sdu_controllers::kinematics
     enum JointType
     {
       REVOLUTE,
-      PRISMATIC
+      PRISMATIC,
+      FIXED
     };
 
     /**
@@ -68,17 +69,51 @@ namespace sdu_controllers::kinematics
         const std::vector<Eigen::Matrix4d>& fk_matrices) const;
 
     /**
-     * @brief Get the degrees of freedom of the kinematic chain
-     * @return Number of degrees of freedom
+     * @brief Get the degrees of freedom of the kinematic chain (number of actuated joints, excludes FIXED)
+     * @return Number of actuated degrees of freedom
      */
     size_t get_dof() const;
 
+    /**
+     * @brief Get the total number of links in the kinematic chain (including FIXED joints)
+     * @return Total number of links
+     */
+    size_t get_num_links() const;
+
+    /**
+     * @brief Set the Tool Center Point (TCP) transform relative to the last link frame.
+     *        Defaults to identity (TCP coincides with last link frame).
+     * @param tcp_transform [in] 4x4 homogeneous transform from last link frame to TCP
+     */
+    void set_tcp(const Eigen::Matrix4d& tcp_transform);
+
+    /**
+     * @brief Get the current TCP transform
+     * @return 4x4 homogeneous transform from last link frame to TCP
+     */
+    const Eigen::Matrix4d& get_tcp() const;
+
+    /**
+     * @brief Get the TCP pose in the base frame at the given joint configuration.
+     *        Equivalent to forward_kinematics(q) * tcp_transform.
+     * @param q [in] Joint configuration
+     * @return 4x4 homogeneous transformation matrix to TCP
+     */
+    Eigen::Matrix4d get_tcp_pose(const Eigen::VectorXd& q) const;
+
+    /**
+     * @brief Get the TCP pose in the base frame (overload for std::vector<double>)
+     * @param q [in] Joint configuration as std::vector<double>
+     * @return 4x4 homogeneous transformation matrix to TCP
+     */
+    Eigen::Matrix4d get_tcp_pose(const std::vector<double>& q) const;
+
    protected:
     ForwardKinematics(const std::vector<ForwardKinematics::JointType>& joint_type);
-    ForwardKinematics(const std::vector<bool>& is_joint_revolute);
     virtual ~ForwardKinematics() = default;
 
     std::vector<ForwardKinematics::JointType> joint_type_;
+    Eigen::Matrix4d tcp_transform_ = Eigen::Matrix4d::Identity();
   };
 }  // namespace sdu_controllers::kinematics
 

@@ -6,6 +6,7 @@
 #include <string>
 
 using namespace sdu_controllers::models;
+using namespace sdu_controllers::kinematics;
 
 static std::string source_path(const std::string &rel) {
 #ifdef PROJECT_SOURCE_DIR
@@ -71,8 +72,8 @@ TEST_CASE("load_parameters_from_yaml: breeding_blanket_handling_robot loads corr
   REQUIRE(p.com.rows() == static_cast<int>(p.dof));
   REQUIRE(p.com.cols() == 3);
   // joint_1 is prismatic
-  REQUIRE(p.is_joint_revolute.size() == p.dof);
-  REQUIRE(p.is_joint_revolute[0] == false);  // prismatic
+  REQUIRE(p.joint_types.size() == p.dof);
+  REQUIRE(p.joint_types[0] == ForwardKinematics::PRISMATIC);
 }
 
 TEST_CASE("load_parameters_from_yaml: non-existent file returns nullopt", "[yaml][error]")

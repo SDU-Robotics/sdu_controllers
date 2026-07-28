@@ -12,7 +12,7 @@ namespace sdu_controllers::kinematics
     double alpha;            // link twist
     double d;                // link offset
     double theta;            // joint angle
-    bool is_joint_revolute;  // true if the joint is revolute, false if prismatic
+    ForwardKinematics::JointType joint_type = ForwardKinematics::REVOLUTE;  // joint type (REVOLUTE, PRISMATIC, or FIXED)
   };
 
 
@@ -45,7 +45,7 @@ namespace sdu_controllers::kinematics
      * @param alpha [in] Vector of link twists
      * @param d [in] Vector of link offsets
      * @param theta [in] Vector of joint angles
-     * @param is_joint_revolute [in] Vector indicating if each joint is revolute (true) or prismatic (false)
+     * @param joint_types [in] Vector of joint types (REVOLUTE, PRISMATIC, or FIXED)
      * @throws std::runtime_error if input vectors are not of the same size or are empty
      */
     DHKinematics(
@@ -53,7 +53,7 @@ namespace sdu_controllers::kinematics
         const std::vector<double>& alpha,
         const std::vector<double>& d,
         const std::vector<double>& theta,
-        const std::vector<bool>& is_joint_revolute);
+        const std::vector<ForwardKinematics::JointType>& joint_types);
 
     /**
      * @brief Construct a DHKinematics object using DH parameters
@@ -61,7 +61,7 @@ namespace sdu_controllers::kinematics
      * @param alpha [in] Vector of link twists
      * @param d [in] Vector of link offsets
      * @param theta [in] Vector of joint angles
-     * @param is_joint_revolute [in] Vector indicating if each joint is revolute (true) or prismatic (false)
+     * @param joint_types [in] Vector of joint types (REVOLUTE, PRISMATIC, or FIXED)
      * @throws std::runtime_error if input vectors are not of the same size or are empty
      */
     DHKinematics(
@@ -69,7 +69,7 @@ namespace sdu_controllers::kinematics
         const Eigen::VectorXd& alpha,
         const Eigen::VectorXd& d,
         const Eigen::VectorXd& theta,
-        const std::vector<bool>& is_joint_revolute);
+        const std::vector<ForwardKinematics::JointType>& joint_types);
 
     /**
      * @brief Get the transformation matrix from base to end-effector

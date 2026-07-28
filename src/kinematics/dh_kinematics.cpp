@@ -24,10 +24,7 @@ DHKinematics::DHKinematics(const std::vector<DHParam>& dh_parameters)
     alpha_.push_back(param.alpha);
     d_.push_back(param.d);
     theta_.push_back(param.theta);
-    if (param.is_joint_revolute)
-      joint_type_.push_back(ForwardKinematics::REVOLUTE);
-    else
-      joint_type_.push_back(ForwardKinematics::PRISMATIC);
+    joint_type_.push_back(param.joint_type);
   }
 }
 
@@ -36,10 +33,10 @@ DHKinematics::DHKinematics(
     const std::vector<double>& alpha,
     const std::vector<double>& d,
     const std::vector<double>& theta,
-    const std::vector<bool>& is_joint_revolute)
-    : ForwardKinematics(is_joint_revolute)
+    const std::vector<ForwardKinematics::JointType>& joint_types)
+    : ForwardKinematics(joint_types)
 {
-  if (a.size() != alpha.size() || a.size() != d.size() || a.size() != theta.size() || a.size() != is_joint_revolute.size())
+  if (a.size() != alpha.size() || a.size() != d.size() || a.size() != theta.size() || a.size() != joint_types.size())
   {
     throw std::runtime_error("DHKinematics: DH parameter vectors must have the same size");
   }
@@ -59,10 +56,11 @@ DHKinematics::DHKinematics(
     const Eigen::VectorXd& alpha,
     const Eigen::VectorXd& d,
     const Eigen::VectorXd& theta,
-    const std::vector<bool>& is_joint_revolute)
-    : ForwardKinematics(is_joint_revolute)
+    const std::vector<ForwardKinematics::JointType>& joint_types)
+    : ForwardKinematics(joint_types)
 {
-  if (a.size() != alpha.size() || a.size() != d.size() || a.size() != theta.size() || a.size() != is_joint_revolute.size())
+  if (a.size() != alpha.size() || a.size() != d.size() || a.size() != theta.size() ||
+      static_cast<Eigen::Index>(joint_types.size()) != a.size())
   {
     throw std::runtime_error("DHKinematics: DH parameter vectors must have the same size");
   }
@@ -79,7 +77,7 @@ DHKinematics::DHKinematics(
 
 Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
 {
-  if (q.size() != a_.size())
+  if (static_cast<size_t>(q.size()) != get_dof())
   {
     throw std::runtime_error("DHKinematics: Input joint vector has incorrect size");
   }
@@ -87,67 +85,46 @@ Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
   Eigen::Matrix4d T;
 
   Eigen::MatrixXd A_i(4, 4);
-  double qi;
+  Eigen::Index q_idx = 0;  // index into actuated joint variable q
 
   // calculate transform matrix for each link
-  for (Eigen::Index i = 0; i < q.size(); i++)
+  for (size_t i = 0; i < a_.size(); i++)
   {
     double cos_alpha = std::cos(alpha_[i]);
     double sin_alpha = std::sin(alpha_[i]);
 
     if (joint_type_[i] == ForwardKinematics::REVOLUTE)
     {  // revolute joint
-      qi = q[i] + theta_[i];
+      double qi = q[q_idx++] + theta_[i];
 
       double cos_qi = std::cos(qi);
       double sin_qi = std::sin(qi);
 
-      A_i(0, 0) = cos_qi;
-      A_i(0, 1) = -sin_qi * cos_alpha;
-      A_i(0, 2) = sin_qi * sin_alpha;
-      A_i(0, 3) = a_[i] * cos_qi;
-
-      A_i(1, 0) = sin_qi;
-      A_i(1, 1) = cos_qi * cos_alpha;
-      A_i(1, 2) = -cos_qi * sin_alpha;
-      A_i(1, 3) = a_[i] * sin_qi;
-
-      A_i(2, 0) = 0;
-      A_i(2, 1) = sin_alpha;
-      A_i(2, 2) = cos_alpha;
-      A_i(2, 3) = d_[i];
-
-      A_i(3, 0) = 0;
-      A_i(3, 1) = 0;
-      A_i(3, 2) = 0;
-      A_i(3, 3) = 1;
+      A_i(0, 0) = cos_qi;  A_i(0, 1) = -sin_qi * cos_alpha;  A_i(0, 2) = sin_qi * sin_alpha;  A_i(0, 3) = a_[i] * cos_qi;
+      A_i(1, 0) = sin_qi;  A_i(1, 1) =  cos_qi * cos_alpha;  A_i(1, 2) = -cos_qi * sin_alpha; A_i(1, 3) = a_[i] * sin_qi;
+      A_i(2, 0) = 0;       A_i(2, 1) = sin_alpha;             A_i(2, 2) = cos_alpha;           A_i(2, 3) = d_[i];
+      A_i(3, 0) = 0;       A_i(3, 1) = 0;                     A_i(3, 2) = 0;                   A_i(3, 3) = 1;
     }
     else if (joint_type_[i] == ForwardKinematics::PRISMATIC)
     {  // prismatic joint
+      double cos_theta = std::cos(theta_[i]);
+      double sin_theta = std::sin(theta_[i]);
+      double qi = q[q_idx++] + d_[i];
 
+      A_i(0, 0) = cos_theta;  A_i(0, 1) = -sin_theta * cos_alpha;  A_i(0, 2) = sin_theta * sin_alpha;  A_i(0, 3) = a_[i] * cos_theta;
+      A_i(1, 0) = sin_theta;  A_i(1, 1) =  cos_theta * cos_alpha;  A_i(1, 2) = -cos_theta * sin_alpha; A_i(1, 3) = a_[i] * sin_theta;
+      A_i(2, 0) = 0;          A_i(2, 1) = sin_alpha;               A_i(2, 2) = cos_alpha;              A_i(2, 3) = qi;
+      A_i(3, 0) = 0;          A_i(3, 1) = 0;                       A_i(3, 2) = 0;                      A_i(3, 3) = 1;
+    }
+    else if (joint_type_[i] == ForwardKinematics::FIXED)
+    {  // fixed joint: constant transform using stored theta_[i] and d_[i]
       double cos_theta = std::cos(theta_[i]);
       double sin_theta = std::sin(theta_[i]);
 
-      qi = q[i] + d_[i];
-      A_i(0, 0) = cos_theta;
-      A_i(0, 1) = -sin_theta * cos_alpha;
-      A_i(0, 2) = sin_theta * sin_alpha;
-      A_i(0, 3) = a_[i] * cos_theta;
-
-      A_i(1, 0) = sin_theta;
-      A_i(1, 1) = cos_theta * cos_alpha;
-      A_i(1, 2) = -cos_theta * sin_alpha;
-      A_i(1, 3) = a_[i] * sin_theta;
-
-      A_i(2, 0) = 0;
-      A_i(2, 1) = sin_alpha;
-      A_i(2, 2) = cos_alpha;
-      A_i(2, 3) = qi;
-
-      A_i(3, 0) = 0;
-      A_i(3, 1) = 0;
-      A_i(3, 2) = 0;
-      A_i(3, 3) = 1;
+      A_i(0, 0) = cos_theta;  A_i(0, 1) = -sin_theta * cos_alpha;  A_i(0, 2) = sin_theta * sin_alpha;  A_i(0, 3) = a_[i] * cos_theta;
+      A_i(1, 0) = sin_theta;  A_i(1, 1) =  cos_theta * cos_alpha;  A_i(1, 2) = -cos_theta * sin_alpha; A_i(1, 3) = a_[i] * sin_theta;
+      A_i(2, 0) = 0;          A_i(2, 1) = sin_alpha;               A_i(2, 2) = cos_alpha;              A_i(2, 3) = d_[i];
+      A_i(3, 0) = 0;          A_i(3, 1) = 0;                       A_i(3, 2) = 0;                      A_i(3, 3) = 1;
     }
     else
     {
@@ -168,7 +145,7 @@ Eigen::Matrix4d DHKinematics::forward_kinematics(const Eigen::VectorXd& q) const
 
 std::vector<Eigen::Matrix4d> DHKinematics::forward_kinematics_all(const Eigen::VectorXd& q) const
 {
-  if (q.size() != a_.size())
+  if (static_cast<size_t>(q.size()) != get_dof())
   {
     throw std::runtime_error("DHKinematics: Input joint vector has incorrect size");
   }
@@ -178,66 +155,46 @@ std::vector<Eigen::Matrix4d> DHKinematics::forward_kinematics_all(const Eigen::V
   Eigen::Matrix4d T;
 
   Eigen::MatrixXd A_i(4, 4);
-  double qi;
+  Eigen::Index q_idx = 0;  // index into actuated joint variable q
 
   // calculate transform matrix for each link
-  for (Eigen::Index i = 0; i < q.size(); i++)
+  for (size_t i = 0; i < a_.size(); i++)
   {
     double cos_alpha = std::cos(alpha_[i]);
     double sin_alpha = std::sin(alpha_[i]);
+
     if (joint_type_[i] == ForwardKinematics::REVOLUTE)
     {  // revolute joint
-      qi = q[i] + theta_[i];
+      double qi = q[q_idx++] + theta_[i];
 
       double cos_qi = std::cos(qi);
       double sin_qi = std::sin(qi);
 
-      A_i(0, 0) = cos_qi;
-      A_i(0, 1) = -sin_qi * cos_alpha;
-      A_i(0, 2) = sin_qi * sin_alpha;
-      A_i(0, 3) = a_[i] * cos_qi;
-
-      A_i(1, 0) = sin_qi;
-      A_i(1, 1) = cos_qi * cos_alpha;
-      A_i(1, 2) = -cos_qi * sin_alpha;
-      A_i(1, 3) = a_[i] * sin_qi;
-
-      A_i(2, 0) = 0;
-      A_i(2, 1) = sin_alpha;
-      A_i(2, 2) = cos_alpha;
-      A_i(2, 3) = d_[i];
-
-      A_i(3, 0) = 0;
-      A_i(3, 1) = 0;
-      A_i(3, 2) = 0;
-      A_i(3, 3) = 1;
+      A_i(0, 0) = cos_qi;  A_i(0, 1) = -sin_qi * cos_alpha;  A_i(0, 2) = sin_qi * sin_alpha;  A_i(0, 3) = a_[i] * cos_qi;
+      A_i(1, 0) = sin_qi;  A_i(1, 1) =  cos_qi * cos_alpha;  A_i(1, 2) = -cos_qi * sin_alpha; A_i(1, 3) = a_[i] * sin_qi;
+      A_i(2, 0) = 0;       A_i(2, 1) = sin_alpha;             A_i(2, 2) = cos_alpha;           A_i(2, 3) = d_[i];
+      A_i(3, 0) = 0;       A_i(3, 1) = 0;                     A_i(3, 2) = 0;                   A_i(3, 3) = 1;
     }
     else if (joint_type_[i] == ForwardKinematics::PRISMATIC)
     {  // prismatic joint
+      double cos_theta = std::cos(theta_[i]);
+      double sin_theta = std::sin(theta_[i]);
+      double qi = q[q_idx++] + d_[i];
 
+      A_i(0, 0) = cos_theta;  A_i(0, 1) = -sin_theta * cos_alpha;  A_i(0, 2) = sin_theta * sin_alpha;  A_i(0, 3) = a_[i] * cos_theta;
+      A_i(1, 0) = sin_theta;  A_i(1, 1) =  cos_theta * cos_alpha;  A_i(1, 2) = -cos_theta * sin_alpha; A_i(1, 3) = a_[i] * sin_theta;
+      A_i(2, 0) = 0;          A_i(2, 1) = sin_alpha;               A_i(2, 2) = cos_alpha;              A_i(2, 3) = qi;
+      A_i(3, 0) = 0;          A_i(3, 1) = 0;                       A_i(3, 2) = 0;                      A_i(3, 3) = 1;
+    }
+    else if (joint_type_[i] == ForwardKinematics::FIXED)
+    {  // fixed joint: constant transform using stored theta_[i] and d_[i]
       double cos_theta = std::cos(theta_[i]);
       double sin_theta = std::sin(theta_[i]);
 
-      qi = q[i] + d_[i];
-      A_i(0, 0) = cos_theta;
-      A_i(0, 1) = -sin_theta * cos_alpha;
-      A_i(0, 2) = sin_theta * sin_alpha;
-      A_i(0, 3) = a_[i] * cos_theta;
-
-      A_i(1, 0) = sin_theta;
-      A_i(1, 1) = cos_theta * cos_alpha;
-      A_i(1, 2) = -cos_theta * sin_alpha;
-      A_i(1, 3) = a_[i] * sin_theta;
-
-      A_i(2, 0) = 0;
-      A_i(2, 1) = sin_alpha;
-      A_i(2, 2) = cos_alpha;
-      A_i(2, 3) = qi;
-
-      A_i(3, 0) = 0;
-      A_i(3, 1) = 0;
-      A_i(3, 2) = 0;
-      A_i(3, 3) = 1;
+      A_i(0, 0) = cos_theta;  A_i(0, 1) = -sin_theta * cos_alpha;  A_i(0, 2) = sin_theta * sin_alpha;  A_i(0, 3) = a_[i] * cos_theta;
+      A_i(1, 0) = sin_theta;  A_i(1, 1) =  cos_theta * cos_alpha;  A_i(1, 2) = -cos_theta * sin_alpha; A_i(1, 3) = a_[i] * sin_theta;
+      A_i(2, 0) = 0;          A_i(2, 1) = sin_alpha;               A_i(2, 2) = cos_alpha;              A_i(2, 3) = d_[i];
+      A_i(3, 0) = 0;          A_i(3, 1) = 0;                       A_i(3, 2) = 0;                      A_i(3, 3) = 1;
     }
     else
     {
