@@ -67,9 +67,7 @@ namespace sdu_controllers::models
       params.mass.resize(n_links);
       params.com.resize(static_cast<int>(n_links), 3);
       params.link_inertia.clear();
-      params.is_joint_revolute.clear();
       params.link_inertia.reserve(n_links);
-      params.is_joint_revolute.reserve(n_links);
 
       // Parse each joint entry and place values according to the joint index found in the key
       // E.g. key "joint_1" -> index 0
@@ -147,17 +145,19 @@ namespace sdu_controllers::models
         params.link_inertia.resize(n_links);  // ensure size
         params.link_inertia[idx] = I;
 
-        // joint type -> revolute/prismatic
-        bool is_revolute = true;
+        // joint type -> revolute/prismatic/fixed
+        kinematics::ForwardKinematics::JointType jt = kinematics::ForwardKinematics::REVOLUTE;
         if (node["type"])
         {
           std::string t = node["type"].as<std::string>();
           if (t == "prismatic")
-            is_revolute = false;
+            jt = kinematics::ForwardKinematics::PRISMATIC;
+          else if (t == "fixed")
+            jt = kinematics::ForwardKinematics::FIXED;
         }
-        if (params.is_joint_revolute.size() != n_links)
-          params.is_joint_revolute.resize(n_links);
-        params.is_joint_revolute[idx] = is_revolute;
+        if (params.joint_types.size() != n_links)
+          params.joint_types.resize(n_links);
+        params.joint_types[idx] = jt;
       }
 
       // Get kinematics type
@@ -195,7 +195,7 @@ namespace sdu_controllers::models
         Eigen::VectorXd theta = *theta_opt;
 
         // initialize forward kinematics with DH-parameters
-        params.fk_model = std::make_shared<kinematics::DHKinematics>(a, alpha, d, theta, params.is_joint_revolute);
+        params.fk_model = std::make_shared<kinematics::DHKinematics>(a, alpha, d, theta, params.joint_types);
       }
       else
       {
@@ -289,7 +289,7 @@ namespace sdu_controllers::models
     mass_ = p.mass;
     com_ = p.com;
     link_inertia_ = p.link_inertia;
-    is_joint_revolute_ = p.is_joint_revolute;
+    joint_types_ = p.joint_types;
     g0_ = p.g0;
 
     // joint limits
