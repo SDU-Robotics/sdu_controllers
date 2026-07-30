@@ -383,7 +383,7 @@ namespace sdu_controllers::models
 
   MatrixXd ParameterRobotModel::get_jacobian_dot(const VectorXd& q, const VectorXd& dq)
   {
-    const double dt = 1e-6;
+    const double dt = 1.0/500.0;
 
     // Calculate the Jacobian at the current configuration q
     MatrixXd J_current = get_jacobian(q);
