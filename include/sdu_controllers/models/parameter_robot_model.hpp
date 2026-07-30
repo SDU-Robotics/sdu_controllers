@@ -167,7 +167,7 @@ namespace sdu_controllers::models
     std::vector<double> mass_;
     Eigen::Matrix<double, Eigen::Dynamic, 3> com_;
     std::vector<Eigen::Matrix3d> link_inertia_;
-    std::vector<bool> is_joint_revolute_;
+    std::vector<kinematics::ForwardKinematics::JointType> joint_types_;
     Eigen::Vector3d g0_;
 
     // classical joint friction (Siciliano et al., Eq. (7.42))

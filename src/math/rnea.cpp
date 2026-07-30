@@ -13,14 +13,15 @@ namespace sdu_controllers::math
 {
   RecursiveNewtonEuler::RecursiveNewtonEuler(models::RobotModel &robot_model) : robot_model_(robot_model)
   {
-    const int N = robot_model_.get_dof();
-    omega_ = Eigen::MatrixXd::Zero(3, N);
-    domega_ = Eigen::MatrixXd::Zero(3, N);
-    ddp_ = Eigen::MatrixXd::Zero(3, N);
-    ddpc_ = Eigen::MatrixXd::Zero(3, N);
-    tau_ = Eigen::VectorXd::Zero(N);
-    f_ = Eigen::MatrixXd::Zero(3, N);
-    mu_ = Eigen::MatrixXd::Zero(3, N);
+    const int N_links = static_cast<int>(robot_model_.get_fk_solver().get_num_links());
+    const int N_dof   = static_cast<int>(robot_model_.get_dof());
+    omega_ = Eigen::MatrixXd::Zero(3, N_links);
+    domega_ = Eigen::MatrixXd::Zero(3, N_links);
+    ddp_ = Eigen::MatrixXd::Zero(3, N_links);
+    ddpc_ = Eigen::MatrixXd::Zero(3, N_links);
+    tau_ = Eigen::VectorXd::Zero(N_dof);
+    f_ = Eigen::MatrixXd::Zero(3, N_links);
+    mu_ = Eigen::MatrixXd::Zero(3, N_links);
     ddp0_ = -robot_model_.get_g0();
     omega0_ = Eigen::MatrixXd::Zero(3, 1);
     domega0_ = Eigen::MatrixXd::Zero(3, 1);
@@ -185,7 +186,8 @@ namespace sdu_controllers::math
 
     std::vector<kinematics::ForwardKinematics::JointType> joint_type = robot_model_.get_fk_solver().get_joint_types();
 
-    for (int i = 0; i < robot_model_.get_dof(); ++i)
+    int q_idx = 0;  // index into actuated joint variables (dq, ddq)
+    for (int i = 0; i < static_cast<int>(robot_model_.get_fk_solver().get_num_links()); ++i)
     {
       if (i > 0)
       {
@@ -198,29 +200,41 @@ namespace sdu_controllers::math
 
       Rci = T[i].block<3, 3>(0, 0) * CoM_(i, Eigen::all).transpose();
 
-      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
-      {  // revolute joint
+      // Assign the appropriate kinematic quantities for each joint type.
+      // These formulas are from Spong.
+      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::FIXED)
+      {  // fixed joint: kinematics pass through, no velocity/acceleration contribution
         if (i == 0)
         {
-          omega_(Eigen::all, i) = omega0_ + dq(i) * z0_;
-          domega_(Eigen::all, i) = domega0_ + ddq(i) * z0_ + dq(i) * omega0_.cross(z0_);
+          omega_(Eigen::all, i) = omega0_;
+          domega_(Eigen::all, i) = domega0_;
           ddp_(Eigen::all, i) = ddp0_ + domega0_.cross(r_) + omega0_.cross(omega0_.cross(r_));
         }
         else
         {
-          // zi = T[i - 1].block<3, 1>(0, 2);
-          zi = T[i - 1](Eigen::seqN(0, 3), 2);
-
-          // omega(:, i) = omega(:, i - 1) + dq(i) * zi;
-          // domega(:, i) = domega(:, i - 1) + ddq(i) * zi + ...
-          //     cross(dq(i) * omega(:, i - 1), zi);
-          // ddp(:, i) = ddp(:, i - 1) + cross(domega(:, i), r_) + ...
-          //     cross(omega(:, i), cross(omega(:, i), r_));
-          omega_(Eigen::all, i) = omega_(Eigen::all, i - 1) + dq(i) * zi;
-          domega_(Eigen::all, i) = domega_(Eigen::all, i - 1) + ddq(i) * zi + dq(i) * omega_(Eigen::all, i - 1).cross(zi);
+          omega_(Eigen::all, i) = omega_(Eigen::all, i - 1);
+          domega_(Eigen::all, i) = domega_(Eigen::all, i - 1);
           ddp_(Eigen::all, i) = ddp_(Eigen::all, i - 1) + domega_(Eigen::all, i).cross(r_) +
                                omega_(Eigen::all, i).cross(omega_(Eigen::all, i).cross(r_));
         }
+      }
+      else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
+      {  // revolute joint
+        if (i == 0)
+        {
+          omega_(Eigen::all, i) = omega0_ + dq(q_idx) * z0_;
+          domega_(Eigen::all, i) = domega0_ + ddq(q_idx) * z0_ + dq(q_idx) * omega0_.cross(z0_);
+          ddp_(Eigen::all, i) = ddp0_ + domega0_.cross(r_) + omega0_.cross(omega0_.cross(r_));
+        }
+        else
+        {
+          zi = T[i - 1](Eigen::seqN(0, 3), 2);
+          omega_(Eigen::all, i) = omega_(Eigen::all, i - 1) + dq(q_idx) * zi;
+          domega_(Eigen::all, i) = domega_(Eigen::all, i - 1) + ddq(q_idx) * zi + dq(q_idx) * omega_(Eigen::all, i - 1).cross(zi);
+          ddp_(Eigen::all, i) = ddp_(Eigen::all, i - 1) + domega_(Eigen::all, i).cross(r_) +
+                               omega_(Eigen::all, i).cross(omega_(Eigen::all, i).cross(r_));
+        }
+        ++q_idx;
       }
       else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::PRISMATIC)
       {  // prismatic joint
@@ -229,25 +243,20 @@ namespace sdu_controllers::math
           omega_(Eigen::all, i) = omega0_;
           domega_(Eigen::all, i) = domega0_;
           ddp_(Eigen::all, i) =
-              ddp0_ + ddq(i) * z0_ + 2 * dq(i) * omega0_.cross(z0_) + domega0_.cross(r_) + omega0_.cross(omega0_.cross(r_));
+              ddp0_ + ddq(q_idx) * z0_ + 2 * dq(q_idx) * omega0_.cross(z0_) + domega0_.cross(r_) + omega0_.cross(omega0_.cross(r_));
         }
         else
         {
-          // zi = T[i - 1].block<3, 1>(0, 2);
           zi = T[i - 1](Eigen::seqN(0, 3), 2);
-
-          // omega(:, i) = omega(:, i - 1);
-          // domega(:, i) = domega(:, i - 1);
-          // ddp(:, i) = ddp(:, i - 1) + ddq(i) * zi +  ...
-          //     2 * dq(i) * cross(omega(:, i), zi) + ...
-          //     cross(domega(:, i), r_) + ...
-          //     cross(omega(:, i), cross(omega(:, i), r_));
           omega_(Eigen::all, i) = omega_(Eigen::all, i - 1);
           domega_(Eigen::all, i) = domega_(Eigen::all, i - 1);
-          ddp_(Eigen::all, i) = ddp_(Eigen::all, i - 1) + ddq(i) * zi + 2 * dq(i) * omega_(Eigen::all, i).cross(zi) +
+          ddp_(Eigen::all, i) = ddp_(Eigen::all, i - 1) + ddq(q_idx) * zi + 2 * dq(q_idx) * omega_(Eigen::all, i).cross(zi) +
                                domega_(Eigen::all, i).cross(r_) + omega_(Eigen::all, i).cross(omega_(Eigen::all, i).cross(r_));
         }
-      }else {
+        ++q_idx;
+      }
+      else
+      {
         throw std::runtime_error("Unknown joint type");
       }
 
@@ -264,8 +273,12 @@ namespace sdu_controllers::math
     std::vector<double> m = robot_model_.get_m();
 
     std::vector<kinematics::ForwardKinematics::JointType> joint_type = robot_model_.get_fk_solver().get_joint_types();
+    const int N_links = static_cast<int>(robot_model_.get_fk_solver().get_num_links());
 
-    for (int i = robot_model_.get_dof() - 1; i >= 0; --i)
+    // Count actuated (non-fixed) joints descending so we can index tau_ correctly
+    int q_idx = static_cast<int>(robot_model_.get_dof()) - 1;
+
+    for (int i = N_links - 1; i >= 0; --i)
     {
       if (i > 0)
       {
@@ -280,7 +293,7 @@ namespace sdu_controllers::math
       Rci = R * CoM_(i, Eigen::all).transpose();
 
       Ibase << R * link_inertia_[i] * R.transpose();
-      if (i == (robot_model_.get_dof() - 1))
+      if (i == (N_links - 1))
       {
         Eigen::Vector3d f_e = he(Eigen::seqN(0, 3));
         Eigen::Vector3d mu_e = he(Eigen::seqN(3, 3));
@@ -296,33 +309,36 @@ namespace sdu_controllers::math
                             Ibase * domega_(Eigen::all, i) + omega_(Eigen::all, i).cross(Ibase * omega_(Eigen::all, i));
       }
 
-      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
+      if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::FIXED)
+      {
+        // Fixed joints carry no torque output, skip tau assignment
+        continue;
+      }
+      else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
       {  // Revolute
         if (i == 0)
         {
-          tau_(i) = mu_(Eigen::all, i).transpose() * z0_;
-          // std::cout << "tau(" << i << ") " << tau(i) << std::endl;
-          // std::cout << "z0 " << z0 << std::endl;
+          tau_(q_idx) = mu_(Eigen::all, i).transpose() * z0_;
         }
         else
         {
-          // zi = T[i - 1].block<3, 1>(0, 2);
           zi = T[i - 1](Eigen::seqN(0, 3), 2);
-          tau_(i) = mu_(Eigen::all, i).transpose() * zi;
+          tau_(q_idx) = mu_(Eigen::all, i).transpose() * zi;
         }
+        --q_idx;
       }
       else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::PRISMATIC)
       {  // Prismatic
         if (i == 0)
         {
-          tau_(i) = f_(Eigen::all, i).transpose() * z0_;
+          tau_(q_idx) = f_(Eigen::all, i).transpose() * z0_;
         }
         else
         {
-          // zi = T[i - 1].block<3, 1>(0, 2);
           zi = T[i - 1](Eigen::seqN(0, 3), 2);
-          tau_(i) = f_(Eigen::all, i).transpose() * zi;
+          tau_(q_idx) = f_(Eigen::all, i).transpose() * zi;
         }
+        --q_idx;
       }
       else
       {
