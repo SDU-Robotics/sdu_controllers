@@ -78,9 +78,14 @@ namespace sdu_controllers::controllers
       double   eta_d = q_d_quat.w();
       Vector3d eps_d = q_d_quat.vec();
 
-      // Quaternion orientation error
+      // Orientation error
+      double eta_tilde = eta_d * eta_e + eps_d.dot(eps_e);
       Vector3d eps_tilde = eta_e * eps_d - eta_d * eps_e
                            - math::skew(eps_d) * eps_e;
+
+      // Ensure shortest-arc
+      if (eta_tilde < 0.0)
+        eps_tilde = -eps_tilde;
 
       // Position error
       Vector3d p_tilde = x_d.head<3>() - pos;

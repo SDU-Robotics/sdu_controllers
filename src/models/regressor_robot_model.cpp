@@ -140,7 +140,7 @@ Eigen::MatrixXd RegressorRobotModel::get_jacobian(const Eigen::VectorXd& q)
 
 Eigen::MatrixXd RegressorRobotModel::get_jacobian_dot(const Eigen::VectorXd& q, const Eigen::VectorXd& dq)
 {
-  const double dt = 1e-6;
+  const double dt = 1.0/500.0;
 
   // Calculate the Jacobian at the current configuration q
   Eigen::MatrixXd J_current = get_jacobian(q);

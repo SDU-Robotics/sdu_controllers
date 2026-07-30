@@ -143,7 +143,8 @@ int main(int argc, char* argv[])
   std::ofstream output_filestream;
   output_filestream.open("output.csv");
   auto csv_writer = make_csv_writer(output_filestream);
-  std::vector<std::string> header = {"t", "tau0", "tau1", "tau2", "tau3", "tau4", "tau5", "x", "y", "z", "rot_x", "rot_y", "rot_z", "x_d", "y_d", "z_d"};
+  // row << t, tau+tau_g, q, dq, currents, he, pos, rotvec, pos_d, y, tau_clamped
+  std::vector<std::string> header = {"t", "tau0", "tau1", "tau2", "tau3", "tau4", "tau5", "q0", "q1", "q2", "q3", "q4", "q5", "dq0", "dq1", "dq2", "dq3", "dq4", "dq5", "current0", "current1", "current2", "current3", "current4", "current5", "he0", "he1", "he2", "he3", "he4", "he5", "x", "y", "z", "rot_x", "rot_y", "rot_z", "x_d", "y_d", "z_d", "y0", "y1", "y2", "y3", "y4", "y5", "tau_cmd0", "tau_cmd1", "tau_cmd2", "tau_cmd3", "tau_cmd4", "tau_cmd5"};
   csv_writer << header;
 
   std::string robot_ip = "127.0.0.1";
@@ -163,13 +164,13 @@ int main(int argc, char* argv[])
 
   // Circle parameters
   const double radius       = 0.05;                    // 5 cm
-  const double circle_freq  = 0.2;                     // Hz
+  const double circle_freq  = 0.5;                     // Hz
   const double omega        = 2.0 * M_PI * circle_freq;
   const double ramp_time    = 0.3;                     // s
 
   // Controller gains
-  const double Kp_pos    = 8000.0;
-  const double Kp_orient = 200.0;
+  const double Kp_pos    = 1000.0; // 1000.0;
+  const double Kp_orient = 10.0; // 10.0;
 
   MatrixXd Kp = MatrixXd::Zero(6, 6);
   Kp.block<3, 3>(0, 0) = MatrixXd::Identity(3, 3) * Kp_pos;
@@ -177,7 +178,7 @@ int main(int argc, char* argv[])
 
   // Desired inertia for translational and rotational axes.
   VectorXd Md_pos = VectorXd::Ones(3) * 10.0;
-  VectorXd Md_rot = VectorXd::Ones(3) * 1.0;
+  VectorXd Md_rot = VectorXd::Ones(3) * 0.2;
   MatrixXd Md = MatrixXd::Zero(6, 6);
   Md.block<3, 3>(0, 0) = Md_pos.asDiagonal();
   Md.block<3, 3>(3, 3) = Md_rot.asDiagonal();
@@ -230,8 +231,10 @@ int main(int argc, char* argv[])
   Vector3d center = actual_robot_pose.get_position();
   center[0] -= radius;   // shift so trajectory starts at robot's initial position
 
-  // Desired orientation
-  Quaterniond quat_d = actual_robot_pose.get_orientation();
+  // Desired orientation from the same model frame used by the controller.
+  Matrix4d T_init = robot_model->get_fk_solver().forward_kinematics(robot.get_joint_positions());
+  Quaterniond quat_d(T_init.topLeftCorner<3, 3>());
+  quat_d.normalize();
   // Pack as Vector4d [w, x, y, z]
   Vector4d quat_d_vec(quat_d.w(), quat_d.x(), quat_d.y(), quat_d.z());
 
@@ -290,22 +293,26 @@ int main(int argc, char* argv[])
     VectorXd y = impedance_controller.get_output();   // joint accelerations
 
     // Convert joint accelerations to joint torques via inverse dynamics
+    // get gravity is substracted to avoid double-counting gravity in the direct_torque command.
     VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
+    VectorXd tau_g = robot_model->get_gravity(q_meas);
+    tau -= tau_g;
 
     // Clamp the torques if they exceed max
     VectorXd tau_clamped = clamp_array(tau, u_max);
-    std::cout << "tau_clamped: " << tau_clamped << std::endl;
 
     // Collect actual end-effector position for logging
     Pose actual_robot_pose = robot.get_cartesian_tcp_pose();
     Vector3d pos_actual = actual_robot_pose.get_position();
     Vector3d rotvec_actual = actual_robot_pose.to_angle_axis_vector();
 
-    // Write: time | tau (6) | x_actual (3) | rotvec_actual (3) | x_d (3)
-    VectorXd row(1 + DOF + 3 + 3 + 3);
-    row << t, tau, pos_actual, rotvec_actual, pos_d;
+    // Write: time | tau (6) | q (6) | dq (6) | currents (6) | he (6) | pos (3) | rotvec (3) | pos_d (3) | y/ddq (6) | tau_clamped (6)
+    VectorXd row(1 + DOF + DOF + DOF + DOF + DOF + 3 + 3 + 3 + DOF + DOF);
+    row << t, tau + tau_g, q_meas, dq_meas, robot.get_actual_joint_currents(), he, pos_actual, rotvec_actual, pos_d, y, tau_clamped;
     csv_writer << eigen_to_std_vector(row);
 
+    //VectorXd tau_zero(6);
+    //tau_zero << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
     // Set joint torque reference
     robot.set_joint_torque_ref(tau_clamped);
 
