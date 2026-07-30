@@ -63,6 +63,47 @@ namespace sdu_controllers::models
     virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
 
     /**
+     * @brief Get the viscous friction coefficients \f$ \mathbf{F}_{v} \f$.
+     *
+     * Diagonal terms of the viscous friction matrix in the classical friction
+     * model. Defaults to zero (frictionless).
+     *
+     * @returns the viscous friction coefficients.
+     */
+    virtual Eigen::VectorXd get_friction_viscous() const
+    {
+      return Eigen::VectorXd::Zero(get_dof());
+    }
+
+    /**
+     * @brief Get the Coulomb friction torques \f$ \mathbf{F}_{s} \f$.
+     *
+     * Diagonal terms of the Coulomb (static) friction matrix in the classical
+     * friction model. Defaults to zero (frictionless).
+     *
+     * @returns the Coulomb friction torques.
+     */
+    virtual Eigen::VectorXd get_friction_coulomb() const
+    {
+      return Eigen::VectorXd::Zero(get_dof());
+    }
+
+    /**
+     * @brief Get the classical joint friction torque \f$ \tau_{f} \f$.
+     *
+     * Computes \f$ \tau_{f} = \mathbf{F}_{v}\dot{q} + \mathbf{F}_{s}\,
+     * \mathrm{sgn}(\dot{q}) \f$.
+     *
+     * @param dq robot joint velocities.
+     * @returns the friction torque vector.
+     */
+    Eigen::VectorXd get_friction(const Eigen::VectorXd &dq) const
+    {
+      return get_friction_viscous().cwiseProduct(dq) +
+             get_friction_coulomb().cwiseProduct(dq.array().sign().matrix());
+    }
+
+    /**
      * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
      * @returns the jacobian
      */

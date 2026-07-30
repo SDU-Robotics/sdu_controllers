@@ -24,6 +24,10 @@ struct RobotParameters
   std::vector<bool> is_joint_revolute;
   Eigen::Vector3d g0{0, 0, -9.81};
 
+  // Classical joint friction tau_f = F_v * dq + F_s * sgn(dq).
+  Eigen::VectorXd friction_viscous;  // F_v (viscous friction coefficients)
+  Eigen::VectorXd friction_coulomb;  // F_s (Coulomb/static friction torques)
+
   // joint limits
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_position_bounds;
   Eigen::VectorXd joint_max_velocity;

@@ -83,10 +83,23 @@ namespace sdu_controllers::models
     Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) override;
 
     /**
+     * @brief Get the viscous friction coefficients \f$ \mathbf{F}_{v} \f$.
+     * @returns the viscous friction coefficients.
+     */
+    Eigen::VectorXd get_friction_viscous() const override;
+
+    /**
+     * @brief Get the Coulomb friction torques \f$ \mathbf{F}_{s} \f$.
+     * @returns the Coulomb friction torques.
+     */
+    Eigen::VectorXd get_friction_coulomb() const override;
+
+    /**
      * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
      * @returns the jacobian
      */
     Eigen::MatrixXd get_jacobian(const Eigen::VectorXd &q) override;
+
 
     /**
      * @brief Get jacobian dot \f$ \mathbf{\dot{J(q, dq)}} \f$
@@ -136,6 +149,10 @@ namespace sdu_controllers::models
 
     void set_mass(const std::vector<double> &mass);
 
+    void set_friction_viscous(const Eigen::VectorXd &friction_viscous);
+
+    void set_friction_coulomb(const Eigen::VectorXd &friction_coulomb);
+
   protected:
     // degrees of freedom
     uint16_t dof_;
@@ -152,6 +169,10 @@ namespace sdu_controllers::models
     std::vector<Eigen::Matrix3d> link_inertia_;
     std::vector<bool> is_joint_revolute_;
     Eigen::Vector3d g0_;
+
+    // classical joint friction (Siciliano et al., Eq. (7.42))
+    Eigen::VectorXd friction_viscous_;  // F_v
+    Eigen::VectorXd friction_coulomb_;  // F_s
 
     // joint limits
     std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_pos_bounds_;

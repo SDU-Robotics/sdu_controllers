@@ -64,7 +64,7 @@ namespace sdu_controllers::math
     {
       ddq_bar.setZero();
       ddq_bar(i) = 1.0;
-      tau_tmp = inverse_dynamics(q, zero_vec, ddq_bar, he0);
+      tau_tmp = rigid_body_inverse_dynamics(q, zero_vec, ddq_bar, he0);
       B(Eigen::all, i) = tau_tmp;
     }
 
@@ -98,7 +98,7 @@ namespace sdu_controllers::math
       QD = Eigen::VectorXd::Zero(q.rows());
       QD(i) = 1.;
 
-      tau = inverse_dynamics(q, QD, ddq0, he0);
+      tau = rigid_body_inverse_dynamics(q, QD, ddq0, he0);
 
       Csq(Eigen::all, i) = tau;
     }
@@ -112,7 +112,7 @@ namespace sdu_controllers::math
         QD(i) = 1.;
         QD(j) = 1.;
 
-        tau = inverse_dynamics(q, QD, ddq0, he0);
+        tau = rigid_body_inverse_dynamics(q, QD, ddq0, he0);
 
         C(Eigen::all, j) = C(Eigen::all, j) + (tau - Csq(Eigen::all, j) - Csq(Eigen::all, i)) * dq(i) / 2.;
         C(Eigen::all, i) = C(Eigen::all, i) + (tau - Csq(Eigen::all, j) - Csq(Eigen::all, i)) * dq(j) / 2.;
@@ -135,7 +135,7 @@ namespace sdu_controllers::math
     Eigen::Vector3d ddp0_original = this->ddp0_;
     this->ddp0_ *= 0;
 
-    Cdq = inverse_dynamics(q, dq, zero_vec, zero_vec);
+    Cdq = rigid_body_inverse_dynamics(q, dq, zero_vec, zero_vec);
 
     this->ddp0_ = ddp0_original;
 
@@ -147,11 +147,26 @@ namespace sdu_controllers::math
     Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(q.rows()), he0 = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd grav = Eigen::VectorXd::Zero(q.rows());
 
-    grav = inverse_dynamics(q, zero_vec, zero_vec, he0);
+    grav = rigid_body_inverse_dynamics(q, zero_vec, zero_vec, he0);
     return grav;
   }
 
   Eigen::VectorXd RecursiveNewtonEuler::inverse_dynamics(
+      const Eigen::VectorXd &q,
+      const Eigen::VectorXd &dq,
+      const Eigen::VectorXd &ddq,
+      const Eigen::VectorXd &he)
+  {
+    // Rigid-body dynamics plus joint friction
+    return rigid_body_inverse_dynamics(q, dq, ddq, he) + friction(dq);
+  }
+
+  Eigen::VectorXd RecursiveNewtonEuler::friction(const Eigen::VectorXd &dq)
+  {
+    return robot_model_.get_friction(dq);
+  }
+
+  Eigen::VectorXd RecursiveNewtonEuler::rigid_body_inverse_dynamics(
       const Eigen::VectorXd &q,
       const Eigen::VectorXd &dq,
       const Eigen::VectorXd &ddq,

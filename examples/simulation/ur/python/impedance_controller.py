@@ -1,5 +1,5 @@
 """
-Impedance controller simulation example — UR5e following a Cartesian circle.
+Impedance controller simulation example - UR5e following a Cartesian circle.
 
 The robot tracks a circular reference trajectory in the XY plane while the
 impedance controller enforces a desired mechanical impedance between the
@@ -100,14 +100,14 @@ def main():
     Kp[0:3, 0:3] = np.eye(3) * Kp_pos
     Kp[3:6, 3:6] = np.eye(3) * Kp_orient
 
-    # Desired inertia: 2.5 kg for translational axes, 0.5 kg·m2 for rotational
+    # Desired inertia for translational rotational axes
     Md_pos_val, Md_orient_val = 2.5, 0.5
     Md = np.zeros((6, 6))
     Md[0:3, 0:3] = np.eye(3) * Md_pos_val
     Md[3:6, 3:6] = np.eye(3) * Md_orient_val
 
     # Critical damping: D = 2 * sqrt(M * K)
-    Kd_pos    = 2.0 * np.sqrt(Md_pos_val    * Kp_pos)
+    Kd_pos    = 2.0 * np.sqrt(Md_pos_val * Kp_pos)
     Kd_orient = 2.0 * np.sqrt(Md_orient_val * Kp_orient)
 
     Kd = np.zeros((6, 6))
@@ -128,15 +128,15 @@ def main():
 
     # Circle centre from initial FK position.
     # Shift by -radius in x so the robot starts exactly on the circle at t=0.
-    T0     = robot_model.get_fk_solver().forward_kinematics(q)
+    T0 = robot_model.get_fk_solver().forward_kinematics(q)
     center = T0[:3, 3].copy()
     center[0] -= radius
 
     # Desired orientation: constant at the initial FK orientation (as quaternion).
     # Convention [w, x, y, z] — matches AdmittanceControllerPosition and step().
     R0 = T0[:3, :3].copy()
-    quat_d = R.from_matrix(R0).as_quat()  # returns [x, y, z, w]
-    quat_d = np.array([quat_d[3], quat_d[0], quat_d[1], quat_d[2]])  # reorder to [w, x, y, z]
+    quat_d = R.from_matrix(R0).as_quat() # returns [x, y, z, w]
+    quat_d = np.array([quat_d[3], quat_d[0], quat_d[1], quat_d[2]]) # reorder to [w, x, y, z]
 
     # For R_d = R0 * Rz(yaw), desired angular velocity/acceleration in base frame
     # are along the initial tool z-axis expressed in base coordinates.
@@ -181,15 +181,15 @@ def main():
         controller.step(x_d, dx_d, ddx_d, q, dq, h_d_e, quat_d)
         y = controller.get_output()          # joint accelerations
 
-        # Inverse dynamics → joint torques
+        # Inverse dynamics -> joint torques
         tau = robot_model.inverse_dynamics(q, dq, y, he)
 
-        # Forward dynamics → joint accelerations
+        # Forward dynamics -> joint accelerations
         ddq = robot_model.forward_dynamics(q, dq, tau)
 
         # Euler integration
         dq += ddq * dt
-        q  += dq  * dt
+        q  += dq * dt
 
         # Log actual end-effector position
         T_actual   = robot_model.get_fk_solver().forward_kinematics(q)
@@ -235,7 +235,7 @@ def main():
 
     fig, axes = plt.subplots(2, 3, figsize=(18, 10))
     fig.canvas.manager.set_window_title('Impedance Controller Circle Example') 
-    # XY plane — circle tracking
+    # XY plane - circle tracking
     ax = axes[0, 0]
     ax.plot(desired_traj[:, 0], desired_traj[:, 1], 'r--', label='Desired', linewidth=1.5)
     ax.plot(actual_traj[:, 0],  actual_traj[:, 1],  'b-',  label='Actual',  linewidth=1.5)

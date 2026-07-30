@@ -24,8 +24,11 @@ namespace sdu_controllers::math
     //std::cout << "q:" << q << std::endl;
     //std::cout << "dq:" << dq << std::endl;
 
-    // Eq. (6.27) from page 141, Springer Handbook of Robotics 2008.
-    VectorXd tau = B * y + C * dq + tau_g;
+    // Classical joint friction tau_f = F_v * dq + F_s * sgn(dq),
+    VectorXd tau_f = robot_model->get_friction(dq);
+
+    // Eq. (6.27) from page 141, Springer Handbook of Robotics 2008
+    VectorXd tau = B * y + C * dq + tau_g + tau_f;
 
     return tau;
   }

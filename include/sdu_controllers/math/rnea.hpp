@@ -30,7 +30,24 @@ namespace sdu_controllers::math
       Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd gravity(const Eigen::VectorXd &q);
 
+      /**
+       * @brief Classical joint friction torque \f$ \tau_{f} \f$.
+       *
+       * Computes \f$ \tau_{f} = \mathbf{F}_{v}\dot{q} + \mathbf{F}_{s}\,
+       * \mathrm{sgn}(\dot{q}) \f$
+       *
+       * @param dq robot joint velocities.
+       * @returns the friction torque vector.
+       */
+      Eigen::VectorXd friction(const Eigen::VectorXd &dq);
+
     private:
+      /**
+       * @brief Rigid-body inverse dynamics (without joint friction).
+       */
+      Eigen::VectorXd rigid_body_inverse_dynamics(const Eigen::VectorXd &q, const Eigen::VectorXd &dq,
+        const Eigen::VectorXd &ddq, const Eigen::VectorXd &he);
+
       void forward(const Eigen::VectorXd &dq, const Eigen::VectorXd &ddq, const std::vector<Eigen::Matrix4d> T);
 
       void backward(const Eigen::VectorXd &he, const std::vector<Eigen::Matrix4d> T);

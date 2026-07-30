@@ -209,6 +209,8 @@ namespace sdu_controllers::models
       params.joint_max_velocity = Eigen::VectorXd::Zero(static_cast<int>(n_links));
       params.joint_max_acceleration = Eigen::VectorXd::Zero(static_cast<int>(n_links));
       params.joint_max_torque = Eigen::VectorXd::Zero(static_cast<int>(n_links));
+      params.friction_viscous = Eigen::VectorXd::Zero(static_cast<int>(n_links));
+      params.friction_coulomb = Eigen::VectorXd::Zero(static_cast<int>(n_links));
 
       if (root["joint_limits"])
       {
@@ -241,6 +243,36 @@ namespace sdu_controllers::models
             params.joint_max_acceleration(idx) = node["max_acceleration"].as<double>();
           if (node["max_torque"])
             params.joint_max_torque(idx) = node["max_torque"].as<double>();
+        }
+      }
+
+      // Optional friction section: joint_1, joint_2, ... each with 'viscous' and
+      // 'coulomb' fields. Missing entries stay zero.
+      if (root["friction"])
+      {
+        YAML::Node friction = root["friction"];
+        for (YAML::const_iterator it = friction.begin(); it != friction.end(); ++it)
+        {
+          const std::string joint_name = it->first.as<std::string>();
+          YAML::Node node = it->second;
+
+          auto pos = joint_name.find_last_of('_');
+          if (pos == std::string::npos)
+          {
+            std::cerr << "YAML parse error: unexpected friction key '" << joint_name << "' in " << filepath << std::endl;
+            return std::nullopt;
+          }
+          int idx = std::stoi(joint_name.substr(pos + 1)) - 1;
+          if (idx < 0 || static_cast<std::size_t>(idx) >= n_links)
+          {
+            std::cerr << "YAML parse error: invalid joint index for '" << joint_name << "' in " << filepath << std::endl;
+            return std::nullopt;
+          }
+
+          if (node["viscous"])
+            params.friction_viscous(idx) = node["viscous"].as<double>();
+          if (node["coulomb"])
+            params.friction_coulomb(idx) = node["coulomb"].as<double>();
         }
       }
 
@@ -292,6 +324,10 @@ namespace sdu_controllers::models
     is_joint_revolute_ = p.is_joint_revolute;
     g0_ = p.g0;
 
+    // classical joint friction
+    friction_viscous_ = p.friction_viscous;
+    friction_coulomb_ = p.friction_coulomb;
+
     // joint limits
     joint_pos_bounds_ = p.joint_position_bounds;
     joint_max_velocity_ = p.joint_max_velocity;
@@ -324,6 +360,20 @@ namespace sdu_controllers::models
   MatrixXd ParameterRobotModel::get_gravity(const VectorXd& q)
   {
     return rnea_->gravity(q);
+  }
+
+  VectorXd ParameterRobotModel::get_friction_viscous() const
+  {
+    if (friction_viscous_.size() == 0)
+      return Eigen::VectorXd::Zero(dof_);
+    return friction_viscous_;
+  }
+
+  VectorXd ParameterRobotModel::get_friction_coulomb() const
+  {
+    if (friction_coulomb_.size() == 0)
+      return Eigen::VectorXd::Zero(dof_);
+    return friction_coulomb_;
   }
 
   MatrixXd ParameterRobotModel::get_jacobian(const VectorXd& q)
@@ -459,5 +509,15 @@ namespace sdu_controllers::models
   void ParameterRobotModel::set_mass(const std::vector<double> &mass)
   {
     mass_ = mass;
+  }
+
+  void ParameterRobotModel::set_friction_viscous(const Eigen::VectorXd &friction_viscous)
+  {
+    friction_viscous_ = friction_viscous;
+  }
+
+  void ParameterRobotModel::set_friction_coulomb(const Eigen::VectorXd &friction_coulomb)
+  {
+    friction_coulomb_ = friction_coulomb;
   }
 }  // namespace sdu_controllers::models
