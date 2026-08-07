@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
   const double freq     = 500.0;
   const double dt       = 1.0 / freq;
-  const double total_t  = 8.0;            // seconds (four full circles)
+  const double total_t  = 100.0;            // seconds
   const size_t steps    = static_cast<size_t>(total_t * freq);
 
   // Circle parameters
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 
   // Controller gains
   const double Kp_pos    = 1000.0; // 1000.0;
-  const double Kp_orient = 10.0; // 10.0;
+  const double Kp_orient = 50.0; // 10.0;
 
   MatrixXd Kp = MatrixXd::Zero(6, 6);
   Kp.block<3, 3>(0, 0) = MatrixXd::Identity(3, 3) * Kp_pos;
@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
   const double ft_torque_deadband = 1.0;  // Nm
 
   VectorXd u_max(DOF);
-  // UR5e max and min torque see https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/
+  // UR5e max and min torque
   u_max << 150.0, 150.0, 150.0, 28.0, 28.0, 28.0;
   VectorXd u_min = -u_max;
 

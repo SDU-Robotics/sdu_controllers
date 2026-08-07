@@ -93,7 +93,7 @@ def main():
     # Simulation parameters
     freq      = 500.0
     dt        = 1.0 / freq
-    total_t   = 4.0                          # seconds (two full circles)
+    total_t   = 100.0                          # seconds
     steps     = int(total_t * freq)
 
     # Circle parameters
@@ -102,28 +102,25 @@ def main():
     omega        = 2.0 * np.pi * circle_freq
     ramp_time    = 0.3                       # s
 
-    rtde_receive = RTDEReceive(robot_ip)
-    rtde_control = RTDEControl(robot_ip)
-    time.sleep(0.2)
-    rtde_control.zeroFtSensor()
-    time.sleep(0.2)
+    rtde_r = RTDEReceive(robot_ip)
+    rtde_c = RTDEControl(robot_ip)
 
     # Robot model (UR5e)
     robot_model = sdu_controllers.models.URRobotModel(sdu_controllers.models.RobotType.ur5e)
     DOF = robot_model.get_dof()
 
-    # UR5e max and min torque see https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/
+    # UR5e max and min torque
     u_max = np.array([150.0, 150.0, 150.0, 28.0, 28.0, 28.0])
 
     # Controller gains
-    Kp_pos, Kp_orient = 1000.0, 15.0
+    Kp_pos, Kp_orient = 1000.0, 50.0
 
     Kp = np.zeros((6, 6))
     Kp[0:3, 0:3] = np.eye(3) * Kp_pos
     Kp[3:6, 3:6] = np.eye(3) * Kp_orient
 
-    # Desired inertia: 2.5 kg for translational axes, 0.5 kg·m2 for rotational
-    Md_pos_val, Md_orient_val = 2.5, 0.5
+    # Desired inertia for translational and rotational axes.
+    Md_pos_val, Md_orient_val = 10.0, 0.2
     Md = np.zeros((6, 6))
     Md[0:3, 0:3] = np.eye(3) * Md_pos_val
     Md[3:6, 3:6] = np.eye(3) * Md_orient_val
@@ -154,32 +151,35 @@ def main():
     ft_force_deadband  = 1.5                 # N
     ft_torque_deadband = 1.0                 # Nm
 
-    q_init = [-np.pi/2, -np.pi/2, -np.pi/2, -np.pi/2, np.pi/2, 0.0]
+    q_init = [0.0, -np.pi/2, -np.pi/2, -np.pi/2, np.pi/2, 0.0]
 
     # Move robot to init position
-    rtde_control.moveJ(q_init, 0.5, 0.5)
+    rtde_c.moveJ(q_init, 0.5, 0.5)
 
     # Circle centre from initial FK position.
     # Shift by -radius in x so the robot starts exactly on the circle at t=0.
-    actual_tcp_pose = rtde_receive.getActualTCPPose()
+    actual_tcp_pose = rtde_r.getActualTCPPose()
     center = actual_tcp_pose[0:3]
     center[0] -= radius
 
     # Desired orientation: constant at the initial FK orientation (as quaternion).
-    # Convention [w, x, y, z] — matches AdmittanceControllerPosition and step().
+    # Convention [w, x, y, z] - matches AdmittanceControllerPosition and step().
     quat_d = R.from_rotvec(actual_tcp_pose[3:6]).as_quat(scalar_first=True)
 
-    actual_traj  = []
-    desired_traj = []
-    time_log     = []
-    tau_log      = []
+    # Zero the force-torque sensor before starting the control loop
+    time.sleep(0.2)
+    rtde_c.zeroFtSensor()
+    time.sleep(0.2)
+
+    # Start logging of robot data
+    rtde_r.startFileRecording('robot_data.csv')
 
     # -----------------------------------------------------------------------
     # Control loop
     # -----------------------------------------------------------------------
     try:
         for step in range(steps):
-            start_time = rtde_control.initPeriod()
+            start_time = rtde_c.initPeriod()
             t = step * dt
 
             # Desired pose, velocity and acceleration
@@ -190,11 +190,11 @@ def main():
             ddx_d = np.concatenate([ddpos_d, np.zeros(3)])
 
             # Measured state
-            q_meas = rtde_receive.getActualQ()
-            dq_meas = rtde_receive.getActualQd()
+            q_meas = rtde_r.getActualQ()
+            dq_meas = rtde_r.getActualQd()
 
             # Measured external wrench at the end-effector
-            he_raw = np.array(rtde_receive.getActualTCPForce())
+            he_raw = np.array(rtde_r.getActualTCPForce())
 
             # Low-pass filter to attenuate sensor noise.
             he_filtered = ft_lpf_alpha * he_raw + (1.0 - ft_lpf_alpha) * he_filtered
@@ -206,79 +206,28 @@ def main():
             controller.step(x_d, dx_d, ddx_d, q_meas, dq_meas, h_d_e, quat_d)
             y = controller.get_output()          # joint accelerations
 
-            # Inverse dynamics --> joint torques
+            # Inverse dynamics --> joint torques.
+            # Gravity is subtracted to avoid double-counting it in the directTorque command.
             tau = robot_model.inverse_dynamics(q_meas, dq_meas, y, he)
+            tau_g = np.asarray(robot_model.get_gravity(q_meas)).reshape(-1)
+            tau -= tau_g
 
             # Clamp torques
             tau_clamped = clamp_array(tau, u_max)
 
-            rtde_control.directTorque(tau_clamped.tolist())
-
-            # Log data
-            pos_actual = np.array(rtde_receive.getActualTCPPose()[0:3])
-            actual_traj.append(pos_actual.copy())
-            desired_traj.append(pos_d.copy())
-            tau_log.append(tau.copy())
-            time_log.append(t)
+            rtde_c.directTorque(tau_clamped.tolist())
 
             # wait control cycle
-            rtde_control.waitPeriod(start_time)
+            rtde_c.waitPeriod(start_time)
 
     except KeyboardInterrupt:
-            rtde_control.directTorque([0.0] * DOF)
-            # Perform a move to the current joint position to exit torque mode.
-            rtde_control.stopJ(10)
-            rtde_control.moveJ(rtde_receive.getActualQ)
+            print("Interrupted. Stopping...")
     finally:
-            rtde_control.directTorque([0.0] * DOF)
+            rtde_r.stopFileRecording()
+            rtde_c.directTorque([0.0] * DOF)
             # Perform a move to the current joint position to exit torque mode.
-            rtde_control.stopJ(10)
-            rtde_control.moveJ(rtde_receive.getActualQ)
-
-
-    # -----------------------------------------------------------------------
-    # Plot results
-    # -----------------------------------------------------------------------
-    actual_traj  = np.array(actual_traj)
-    desired_traj = np.array(desired_traj)
-    time_log     = np.array(time_log)
-    tau_log      = np.array(tau_log)
-
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    fig.canvas.manager.set_window_title('Impedance Controller Circle Example') 
-    # XY plane — circle tracking
-    ax = axes[0]
-    ax.plot(desired_traj[:, 0], desired_traj[:, 1], 'r--', label='Desired', linewidth=1.5)
-    ax.plot(actual_traj[:, 0],  actual_traj[:, 1],  'b-',  label='Actual',  linewidth=1.5)
-    ax.set_xlabel('x [m]')
-    ax.set_ylabel('y [m]')
-    ax.set_title('Cartesian trajectory (XY plane)')
-    ax.legend()
-    ax.set_aspect('equal')
-    ax.grid(True)
-
-    # Position error over time
-    ax = axes[1]
-    error = np.linalg.norm(actual_traj - desired_traj, axis=1) * 1e3   # mm
-    ax.plot(time_log, error, 'k-', linewidth=1.2)
-    ax.set_xlabel('Time [s]')
-    ax.set_ylabel('Position error [mm]')
-    ax.set_title('Cartesian position tracking error')
-    ax.grid(True)
-
-    # Joint Torques over time
-    ax = axes[2]
-    for i in range(DOF):
-        ax.plot(time_log, tau_log[:, i], label=f'Joint {i+1}')
-    ax.set_xlabel('Time [s]')
-    ax.set_ylabel('Torque [Nm]')
-    ax.set_title('Joint Torques (tau)')
-    ax.legend()
-    ax.grid(True)
-
-    plt.tight_layout()
-    plt.savefig('impedance_controller_circle.png', dpi=150)
-    plt.show()
+            rtde_c.stopJ(10)
+            rtde_c.moveJ(rtde_r.getActualQ)
 
 
 if __name__ == '__main__':
