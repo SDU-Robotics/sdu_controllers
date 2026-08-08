@@ -16,6 +16,8 @@ using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
 
+constexpr double pi = 3.14159265358979323846;
+
 /**
  * Generate the desired Cartesian position on a circle in the XY plane.
  *
@@ -107,7 +109,7 @@ int main()
   // Circle parameters
   const double radius       = 0.05;                    // 5 cm
   const double circle_freq  = 0.5;                     // Hz
-  const double omega        = 2.0 * M_PI * circle_freq;
+  const double omega        = 2.0 * pi * circle_freq;
   const double ramp_time    = 0.3;                     // s
 
   // -------------------------------------------------------------------------
