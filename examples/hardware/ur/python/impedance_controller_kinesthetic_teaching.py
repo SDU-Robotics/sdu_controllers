@@ -129,7 +129,7 @@ def main():
     time.sleep(0.2)
 
     # Start logging of robot data
-    rtde_r.startFileRecording('robot_data.csv')
+    rtde_r.startFileRecording('output_imp_kine.csv')
 
     # -----------------------------------------------------------------------
     # Control loop
@@ -139,8 +139,8 @@ def main():
             start_time = rtde_c.initPeriod()
 
             # Measured state
-            q_meas = rtde_r.getActualQ()
-            dq_meas = rtde_r.getActualQd()
+            q_meas = np.asarray(rtde_r.getActualQ(), dtype=np.float64)
+            dq_meas = np.asarray(rtde_r.getActualQd(), dtype=np.float64)
 
             # Measured external wrench at the end-effector
             he_raw = np.array(rtde_r.getActualTCPForce())
@@ -164,7 +164,7 @@ def main():
             # Clamp torques
             tau_clamped = clamp_array(tau, u_max)
 
-            rtde_c.directTorque(tau_clamped.tolist())
+            rtde_c.directTorque(tau_clamped.tolist(), [0.0] * DOF, [0.0] * DOF)
 
             # wait control cycle
             rtde_c.waitPeriod(start_time)
@@ -176,7 +176,7 @@ def main():
             rtde_c.directTorque([0.0] * DOF)
             # Perform a move to the current joint position to exit torque mode.
             rtde_c.stopJ(10)
-            rtde_c.moveJ(rtde_r.getActualQ)
+            rtde_c.moveJ(rtde_r.getActualQ())
 
 
 if __name__ == '__main__':
