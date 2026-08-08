@@ -89,18 +89,22 @@ namespace sdu_controllers::models
     }
 
     /**
-     * @brief Get the classical joint friction torque \f$ \tau_{f} \f$.
+     * @brief Get the joint friction torque \f$ \tau_{f} \f$.
      *
      * Computes \f$ \tau_{f} = \mathbf{F}_{v}\dot{q} + \mathbf{F}_{s}\,
-     * \mathrm{sgn}(\dot{q}) \f$.
+     * \tanh(k\,\dot{q}) \f$, where \f$ k \f$ is a steepness parameter that
+     * provides a smooth, differentiable approximation of
+     * \f$ \mathrm{sgn}(\dot{q}) \f$. Larger values of \f$ k \f$ yield a
+     * sharper transition.
      *
      * @param dq robot joint velocities.
+     * @param k steepness of the hyperbolic tangent approximation (default: 100).
      * @returns the friction torque vector.
      */
-    Eigen::VectorXd get_friction(const Eigen::VectorXd &dq) const
+    Eigen::VectorXd get_friction(const Eigen::VectorXd &dq, double k = 100.0) const
     {
       return get_friction_viscous().cwiseProduct(dq) +
-             get_friction_coulomb().cwiseProduct(dq.array().sign().matrix());
+             get_friction_coulomb().cwiseProduct((k * dq).array().tanh().matrix());
     }
 
     /**

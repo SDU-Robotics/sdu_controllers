@@ -24,7 +24,7 @@ struct RobotParameters
   std::vector<kinematics::ForwardKinematics::JointType> joint_types;
   Eigen::Vector3d g0{0, 0, -9.81};
 
-  // Classical joint friction tau_f = F_v * dq + F_s * sgn(dq).
+  // Joint friction tau_f = F_v * dq + F_s * tanh(k * dq).
   Eigen::VectorXd friction_viscous;  // F_v (viscous friction coefficients)
   Eigen::VectorXd friction_coulomb;  // F_s (Coulomb/static friction torques)
 
