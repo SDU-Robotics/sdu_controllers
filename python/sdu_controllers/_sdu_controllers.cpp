@@ -19,6 +19,10 @@
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/sdu_controllers.hpp>
 
+// integrator
+#include <sdu_controllers/integrator/integrator.hpp>
+
+
 namespace nb = nanobind;
 
 namespace sdu_controllers
@@ -26,6 +30,7 @@ namespace sdu_controllers
   nb::module_ create_robot_models_module(nb::module_ &main_module);
   nb::module_ create_math_module(nb::module_ &main_module);
   nb::module_ create_kinematics_module(nb::module_ &main_module);
+  nb::module_ create_integrator_module(nb::module_ &main_module);
 
   NB_MODULE(_sdu_controllers, m)
   {
@@ -36,6 +41,7 @@ namespace sdu_controllers
     nb::module_ m_math = create_math_module(m);
     nb::module_ m_kinematics = create_kinematics_module(m);
     nb::module_ m_utils = m.def_submodule("utils", "Submodule containing utility functions.");
+    nb::module_ m_integrator = create_integrator_module(m);
 
     // utils
     nb::class_<utils::ConfigFolder>(m_utils, "ConfigFolder")
@@ -89,6 +95,7 @@ namespace sdu_controllers
 
     nb::class_<controllers::AdmittanceControllerPosition>(m_controllers, "AdmittanceControllerPosition")
         .def(nb::init<const double>(), nb::arg("frequency"))
+        .def(nb::init<const double, integrator::IntegrationMethod>(), nb::arg("frequency"), nb::arg("integration_method"))
         .def("step", &controllers::AdmittanceControllerPosition::step)
         .def("get_output", &controllers::AdmittanceControllerPosition::get_output)
         .def("reset", &controllers::AdmittanceControllerPosition::reset)

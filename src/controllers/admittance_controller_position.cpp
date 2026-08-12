@@ -1,10 +1,11 @@
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/math/math.hpp>
 
-
 namespace sdu_controllers::controllers
 {
-  AdmittanceControllerPosition::AdmittanceControllerPosition(const double frequency)
+  AdmittanceControllerPosition::AdmittanceControllerPosition(const double frequency, 
+    const integrator::IntegrationMethod intg_method)
+    : intg_method(intg_method)
   {
     // Specification of impedance-parameters
     const Eigen::Vector3d M_vec{ 22.5, 22.5, 22.5 };  // Positional mass
@@ -31,12 +32,43 @@ namespace sdu_controllers::controllers
   {
     // -- Compute positional error --
 
+    /* Old code
     // Acceleration error
     Eigen::Vector3d ddx_e_ = M_.inverse() * (input_force - K_ * x_e_ - D_ * dx_e_);
 
     // Integrate velocity and position error
     dx_e_ += ddx_e_ * dt_;
     x_e_ += dx_e_ * dt_;
+    */
+
+    // Integrate using integrator.hpp
+    // Define get_dydt function
+    auto get_dydt = [=](Eigen::Vector<double, 6> x_e_dx_e_)
+    {
+      Eigen::Vector3d _x_e = x_e_dx_e_(Eigen::seqN(0, 3));
+      Eigen::Vector3d _dx_e = x_e_dx_e_(Eigen::seqN(3, 3));
+
+      Eigen::Vector3d _ddx_e = M_.inverse() * (input_force - K_ * _x_e - D_ * _dx_e);
+
+      Eigen::Vector<double, 6> return_value;
+      return_value << _dx_e, _ddx_e;
+
+      return return_value;
+    };
+
+    Eigen::Vector<double, 6> current_state;
+    current_state << x_e_, dx_e_;
+
+    Eigen::Vector<double, 6> new_state = integrator::Integrator<double, 6, 1>::integrate(
+      current_state,
+      get_dydt,
+      dt_,
+      intg_method
+    );
+
+    x_e_ = new_state(Eigen::seqN(0, 3));
+    dx_e_ = new_state(Eigen::seqN(3, 3));
+    // End of integration
 
     // -- Compute rotational error --
     Eigen::Matrix3d E = (quat_e_.w() * rot_identity_) - math::skew(quat_e_.vec());
