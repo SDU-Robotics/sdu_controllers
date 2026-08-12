@@ -10,7 +10,7 @@ pyenv(ExecutionMode="InProcess")
 addpath("../library/")
 
 % Create robot model
-sdu_controllers_lib = py.importlib.import_module('sdu_controllers')
+sdu_controllers_lib = py.importlib.import_module('sdu_controllers');
 bbrobot = sdu_controllers_lib.models.BreedingBlanketHandlingRobotModel();
 
 ur3e = sdu_controllers_lib.models.URRobotModel( ...

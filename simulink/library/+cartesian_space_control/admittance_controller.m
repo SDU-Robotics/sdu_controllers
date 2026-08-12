@@ -40,10 +40,11 @@ classdef admittance_controller < matlab.System
 
         function [x_c, quat_c] = stepImpl(obj, input_force, input_torque, ...
                 x_desired, quat_desired)
-            % const Eigen::Vector3d &input_force, 
-            % const Eigen::Vector3d &input_torque, 
-            % const Eigen::Vector3d &x_desired, 
-            % const Eigen::Vector4d &quat_desired
+
+            input_force = reshape(input_force, 1, 3);
+            input_torque = reshape(input_torque, 1, 3);
+            x_desired = reshape(x_desired, 1, 3);
+            quat_desired = reshape(quat_desired, 1, 4);
 
             obj.adm_contr.step(input_force, input_torque, ...
                 x_desired, quat_desired);

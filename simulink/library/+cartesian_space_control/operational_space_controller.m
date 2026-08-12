@@ -53,6 +53,12 @@ classdef operational_space_controller < matlab.System
         end
 
         function [y] = stepImpl(obj, x_d, dx_d, ddx_d, q, dq)
+            x_d = reshape(x_d, 1, 6);
+            dx_d = reshape(dx_d, 1, 6);
+            ddx_d = reshape(ddx_d, 1, 6);
+            q = reshape(q, 1, obj.links);
+            dq = reshape(dq, 1, obj.links);
+
             obj.os_contr.step(x_d, dx_d, ddx_d, q, dq);
 
             y = double(obj.os_contr.get_output());

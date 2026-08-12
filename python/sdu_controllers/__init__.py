@@ -50,27 +50,27 @@ del metadata
 #
 #     return PIDController_(Kp, Ki, Kd, N, dt)
 
-class _PIDController(_original_PIDController):
-    def __init__(self, Kp, Ki, Kd, N, dt):
-        args = [Kp, Ki, Kd, N]
+# class _PIDController(_original_PIDController):
+#     def __init__(self, Kp, Ki, Kd, N, dt):
+#         args = [Kp, Ki, Kd, N]
 
-        for i, arg in enumerate(args):
-            if isinstance(arg, float):
-                args[i] = _np.array([[arg]])
+#         for i, arg in enumerate(args):
+#             if isinstance(arg, float):
+#                 args[i] = _np.array([[arg]])
 
-        super(_PIDController, self).__init__(*args, dt)
+#         super(_PIDController, self).__init__(*args, dt)
 
-        self.output = _np.zeros((args[0].shape[0],))
+#         self.output = _np.zeros((args[0].shape[0],))
 
-    def step(self, q_d, dq_d, u_ff, q, dq):
-        args = [q_d, dq_d, u_ff, q, dq]
+#     def step(self, q_d, dq_d, u_ff, q, dq):
+#         args = [q_d, dq_d, u_ff, q, dq]
 
-        for i, arg in enumerate(args):
-            if isinstance(arg, float):
-                args[i] = _np.array([arg])
+#         for i, arg in enumerate(args):
+#             if isinstance(arg, float):
+#                 args[i] = _np.array([arg])
 
-        super().step(*args)
+#         super().step(*args)
 
-        self.output = super().get_output()
+#         self.output = super().get_output()
 
-controllers.PIDController = _PIDController
+# controllers.PIDController = _PIDController
