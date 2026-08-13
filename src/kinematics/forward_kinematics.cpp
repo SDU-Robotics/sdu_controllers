@@ -87,7 +87,7 @@ size_t ForwardKinematics::get_dof() const
   size_t count = 0;
   for (const auto& jt : joint_type_)
     if (jt != ForwardKinematics::FIXED)
-    ++count;
+      ++count;
   return count;
 }
 

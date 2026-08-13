@@ -314,7 +314,6 @@ namespace sdu_controllers::math
         // Fixed joints carry no torque output, skip tau assignment
         continue;
       }
-      
       else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
       {  // Revolute
         if (i == 0)
