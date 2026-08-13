@@ -314,7 +314,6 @@ namespace sdu_controllers::math
       {
         // Fixed joints carry no torque output, skip tau assignment
         tau_(q_idx) = 0;
-
         --q_idx;
       }
       
