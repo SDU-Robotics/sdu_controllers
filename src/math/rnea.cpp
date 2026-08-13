@@ -217,7 +217,6 @@ namespace sdu_controllers::math
           ddp_(Eigen::all, i) = ddp_(Eigen::all, i - 1) + domega_(Eigen::all, i).cross(r_) +
                                omega_(Eigen::all, i).cross(omega_(Eigen::all, i).cross(r_));
         }
-        ++q_idx;
       }
       else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)
       {  // revolute joint
@@ -313,8 +312,7 @@ namespace sdu_controllers::math
       if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::FIXED)
       {
         // Fixed joints carry no torque output, skip tau assignment
-        tau_(q_idx) = 0;
-        --q_idx;
+        continue;
       }
       
       else if (joint_type.at(i) == kinematics::ForwardKinematics::JointType::REVOLUTE)

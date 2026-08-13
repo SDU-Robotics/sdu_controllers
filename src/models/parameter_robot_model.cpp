@@ -289,13 +289,6 @@ namespace sdu_controllers::models
         params.g0 = Eigen::Vector3d(0.0, 0.0, -9.81);
       }
 
-      // Basic validation: sizes must match dof if provided
-      if (params.dof != 0 && params.dof != static_cast<uint16_t>(n_links))
-      {
-        std::cerr << "YAML validation error: declared dof (" << params.dof << ") "
-                  << "does not match number of inertial entries (" << n_links << ") in " << filepath << std::endl;
-        return std::nullopt;
-      }
       // set dof if not set
       if (params.dof == 0)
         params.dof = static_cast<uint16_t>(n_links);
