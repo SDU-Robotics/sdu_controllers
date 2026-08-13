@@ -29,6 +29,10 @@ namespace sdu_controllers::math
       Eigen::MatrixXd coriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd velocity_product(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
       Eigen::VectorXd gravity(const Eigen::VectorXd &q);
+      
+      // Get complete joint dynamics of every frame component
+      const Eigen::Matrix3Xd& get_joint_forces() const { return f_; }
+      const Eigen::Matrix3Xd& get_joint_moments() const { return mu_; }
 
       /**
        * @brief Classical joint friction torque \f$ \tau_{f} \f$.

@@ -171,7 +171,17 @@ namespace sdu_controllers
             "set_z0",
             &math::RecursiveNewtonEuler::set_z0,
             "Set the z-axis of the base frame",
-            nb::arg("z0"));
+            nb::arg("z0"))
+        .def(
+            "get_joint_forces",
+            &math::RecursiveNewtonEuler::get_joint_forces,
+            "Get reaction forces from the most recent inverse dynamics call"
+        )
+        .def(
+            "get_joint_moments",
+            &math::RecursiveNewtonEuler::get_joint_moments,
+            "Get reaction moments from the most recent inverse dynamics call"
+        );
 
     // Linear algebra utilities
     m.def(
