@@ -4,6 +4,7 @@ set(sdu_controllers_SOURCES
       controllers/pid_controller.cpp
       controllers/operational_space_controller.cpp
       controllers/force_control_inner_velocity_loop.cpp
+      controllers/impedance_controller.cpp
       kinematics/forward_kinematics.cpp
       kinematics/dh_kinematics.cpp
       math/inverse_dynamics_joint_space.cpp
@@ -39,6 +40,7 @@ endif()
 
 add_library(sdu_controllers ${sdu_controllers_SOURCES})
 target_link_libraries(sdu_controllers PUBLIC
+    Threads::Threads
     Eigen3::Eigen
     yaml-cpp::yaml-cpp
 )

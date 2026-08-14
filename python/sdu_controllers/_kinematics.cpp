@@ -22,6 +22,7 @@ namespace sdu_controllers
     nb::enum_<kinematics::ForwardKinematics::JointType>(m, "JointType")
         .value("REVOLUTE", kinematics::ForwardKinematics::JointType::REVOLUTE, "Revolute joint")
         .value("PRISMATIC", kinematics::ForwardKinematics::JointType::PRISMATIC, "Prismatic joint")
+        .value("FIXED", kinematics::ForwardKinematics::JointType::FIXED, "Fixed joint (no DOF contribution)")
         .export_values();
 
     // Bind DHParam structure
@@ -32,7 +33,8 @@ namespace sdu_controllers
         .def_rw("d", &kinematics::DHParam::d, "Link offset")
         .def_rw("theta", &kinematics::DHParam::theta, "Joint angle")
         .def_rw(
-            "is_joint_revolute", &kinematics::DHParam::is_joint_revolute, "True if joint is revolute, false if prismatic");
+            "joint_type", &kinematics::DHParam::joint_type,
+            "Joint type: REVOLUTE, PRISMATIC, or FIXED");
 
     // Bind ForwardKinematics base class
     nb::class_<kinematics::ForwardKinematics>(m, "ForwardKinematics", "Base class for forward kinematics implementations")
@@ -101,9 +103,47 @@ namespace sdu_controllers
         .def(
             "get_dof",
             &kinematics::ForwardKinematics::get_dof,
-            "Get the degrees of freedom of the kinematic chain\n\n"
+            "Get the number of actuated degrees of freedom (excludes FIXED joints)\n\n"
             "Returns:\n"
-            "    Number of degrees of freedom");
+            "    Number of actuated DOF")
+        .def(
+            "get_num_links",
+            &kinematics::ForwardKinematics::get_num_links,
+            "Get the total number of links including FIXED joints\n\n"
+            "Returns:\n"
+            "    Total number of links")
+        .def(
+            "set_tcp",
+            &kinematics::ForwardKinematics::set_tcp,
+            nb::arg("tcp_transform"),
+            "Set the TCP transform relative to the last link frame\n\n"
+            "Args:\n"
+            "    tcp_transform: 4x4 homogeneous transform from last link to TCP")
+        .def(
+            "get_tcp",
+            &kinematics::ForwardKinematics::get_tcp,
+            nb::rv_policy::reference_internal,
+            "Get the current TCP transform\n\n"
+            "Returns:\n"
+            "    4x4 homogeneous transform from last link to TCP")
+        .def(
+            "get_tcp_pose",
+            nb::overload_cast<const Eigen::VectorXd &>(&kinematics::ForwardKinematics::get_tcp_pose, nb::const_),
+            nb::arg("q"),
+            "Get the TCP pose in the base frame\n\n"
+            "Args:\n"
+            "    q: Joint configuration\n\n"
+            "Returns:\n"
+            "    4x4 homogeneous transform to TCP")
+        .def(
+            "get_tcp_pose",
+            nb::overload_cast<const std::vector<double> &>(&kinematics::ForwardKinematics::get_tcp_pose, nb::const_),
+            nb::arg("q"),
+            "Get the TCP pose in the base frame\n\n"
+            "Args:\n"
+            "    q: Joint configuration (list or vector)\n\n"
+            "Returns:\n"
+            "    4x4 homogeneous transform to TCP");
 
     // Bind DHKinematics class
     nb::class_<kinematics::DHKinematics, kinematics::ForwardKinematics>(
@@ -121,38 +161,38 @@ namespace sdu_controllers
                 const std::vector<double> &,
                 const std::vector<double> &,
                 const std::vector<double> &,
-                const std::vector<bool> &>(),
+                const std::vector<kinematics::ForwardKinematics::JointType> &>(),
             nb::arg("a"),
             nb::arg("alpha"),
             nb::arg("d"),
             nb::arg("theta"),
-            nb::arg("is_joint_revolute"),
-            "Construct a DHKinematics object using separate parameter vectors\n\n"
+            nb::arg("joint_types"),
+            "Construct a DHKinematics object using separate parameter vectors with joint types\n\n"
             "Args:\n"
             "    a: Vector of link lengths\n"
             "    alpha: Vector of link twists\n"
             "    d: Vector of link offsets\n"
             "    theta: Vector of joint angles\n"
-            "    is_joint_revolute: Vector indicating if each joint is revolute (True) or prismatic (False)")
+            "    joint_types: Vector of JointType (REVOLUTE, PRISMATIC, or FIXED)")
         .def(
             nb::init<
                 const Eigen::VectorXd &,
                 const Eigen::VectorXd &,
                 const Eigen::VectorXd &,
                 const Eigen::VectorXd &,
-                const std::vector<bool> &>(),
+                const std::vector<kinematics::ForwardKinematics::JointType> &>(),
             nb::arg("a"),
             nb::arg("alpha"),
             nb::arg("d"),
             nb::arg("theta"),
-            nb::arg("is_joint_revolute"),
-            "Construct a DHKinematics object using Eigen vectors\n\n"
+            nb::arg("joint_types"),
+            "Construct a DHKinematics object using Eigen vectors with joint types\n\n"
             "Args:\n"
             "    a: Eigen vector of link lengths\n"
             "    alpha: Eigen vector of link twists\n"
             "    d: Eigen vector of link offsets\n"
             "    theta: Eigen vector of joint angles\n"
-            "    is_joint_revolute: Vector indicating if each joint is revolute (True) or prismatic (False)")
+            "    joint_types: Vector of JointType (REVOLUTE, PRISMATIC, or FIXED)")
         .def(
             "get_a",
             &kinematics::DHKinematics::get_a,

@@ -1,5 +1,29 @@
 find_package(Doxygen REQUIRED)
-set(DOXYGEN_EXCLUDE_PATTERNS "${CMAKE_SOURCE_DIR}/ext/*")
+set(DOXYGEN_EXCLUDE_PATTERNS 
+  "${CMAKE_SOURCE_DIR}/ext/*"
+  "${CMAKE_SOURCE_DIR}/_skbuild/*"
+  "${CMAKE_SOURCE_DIR}/build/*"
+  "${CMAKE_SOURCE_DIR}/cmake-build-debug/*"
+  "${CMAKE_SOURCE_DIR}/*.egg-info/*"
+  "*/eigen/*"
+  "*/eigen-src/*"
+  "*/eigen-build/*"
+  "*/eigen-subbuild/*"
+  "*/yaml-cpp/*"
+  "*/yaml-cpp-src/*"
+  "*/yaml-cpp-build/*"
+  "*/yaml-cpp-subbuild/*"
+  "*/.git/*"
+  "*/.svn/*"
+  "*/.hg/*"
+  "*/CMakeFiles/*"
+  "*/_CPack_Packages/*"
+  "*/__pycache__/*"
+  "*.pyc"
+  "DartConfiguration.tcl"
+  "CMakeLists.txt"
+  "CMakeCache.txt"
+)
 set(DOXYGEN_SHORT_NAMES YES)
 set(DOXYGEN_GENERATE_XML YES)
 doxygen_add_docs(

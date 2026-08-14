@@ -21,8 +21,12 @@ struct RobotParameters
   std::vector<double> mass;
   Eigen::Matrix<double, Eigen::Dynamic, 3> com;
   std::vector<Eigen::Matrix3d> link_inertia;
-  std::vector<bool> is_joint_revolute;
+  std::vector<kinematics::ForwardKinematics::JointType> joint_types;
   Eigen::Vector3d g0{0, 0, -9.81};
+
+  // Joint friction tau_f = F_v * dq + F_s * tanh(k * dq).
+  Eigen::VectorXd friction_viscous;  // F_v (viscous friction coefficients)
+  Eigen::VectorXd friction_coulomb;  // F_s (Coulomb/static friction torques)
 
   // joint limits
   std::pair<Eigen::VectorXd, Eigen::VectorXd> joint_position_bounds;

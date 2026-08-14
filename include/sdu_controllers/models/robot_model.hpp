@@ -63,6 +63,51 @@ namespace sdu_controllers::models
     virtual Eigen::MatrixXd get_gravity(const Eigen::VectorXd &q) = 0;
 
     /**
+     * @brief Get the viscous friction coefficients \f$ \mathbf{F}_{v} \f$.
+     *
+     * Diagonal terms of the viscous friction matrix in the classical friction
+     * model. Defaults to zero (frictionless).
+     *
+     * @returns the viscous friction coefficients.
+     */
+    virtual Eigen::VectorXd get_friction_viscous() const
+    {
+      return Eigen::VectorXd::Zero(get_dof());
+    }
+
+    /**
+     * @brief Get the Coulomb friction torques \f$ \mathbf{F}_{s} \f$.
+     *
+     * Diagonal terms of the Coulomb (static) friction matrix in the classical
+     * friction model. Defaults to zero (frictionless).
+     *
+     * @returns the Coulomb friction torques.
+     */
+    virtual Eigen::VectorXd get_friction_coulomb() const
+    {
+      return Eigen::VectorXd::Zero(get_dof());
+    }
+
+    /**
+     * @brief Get the joint friction torque \f$ \tau_{f} \f$.
+     *
+     * Computes \f$ \tau_{f} = \mathbf{F}_{v}\dot{q} + \mathbf{F}_{s}\,
+     * \tanh(k\,\dot{q}) \f$, where \f$ k \f$ is a steepness parameter that
+     * provides a smooth, differentiable approximation of
+     * \f$ \mathrm{sgn}(\dot{q}) \f$. Larger values of \f$ k \f$ yield a
+     * sharper transition.
+     *
+     * @param dq robot joint velocities.
+     * @param k steepness of the hyperbolic tangent approximation (default: 100).
+     * @returns the friction torque vector.
+     */
+    Eigen::VectorXd get_friction(const Eigen::VectorXd &dq, double k = 100.0) const
+    {
+      return get_friction_viscous().cwiseProduct(dq) +
+             get_friction_coulomb().cwiseProduct((k * dq).array().tanh().matrix());
+    }
+
+    /**
      * @brief Get the jacobian \f$ \mathbf{J(q)} \f$
      * @returns the jacobian
      */

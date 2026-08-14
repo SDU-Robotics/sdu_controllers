@@ -22,9 +22,12 @@ namespace sdu_controllers::math
      * @brief Calculate the inverse dynamics.
      *
      * The inverse dynamics are calculated according to Eq. (6.27),
-     * from page 141, Springer Handbook of Robotics 2008:
+     * from page 141, Springer Handbook of Robotics 2008, which includes the rigid-body dynamics plus the
+     * classical joint friction term \f$ \tau_{f} = \mathbf{F}_{v}\dot{q} +
+     * \mathbf{F}_{s}\,\mathrm{sgn}(\dot{q}) \f$
      *
-     * \f$ \mathbf{\tau} = \mathbf{B}(q)y + \mathbf{C}(q, \dot{q})\dot{q} + \mathbf{\tau}_{g} \f$
+     * \f$ \mathbf{\tau} = \mathbf{B}(q)y + \mathbf{C}(q, \dot{q})\dot{q} +
+     * \mathbf{\tau}_{g} + \mathbf{\tau}_{f} \f$
      *
      * @param y auxiliary control input.
      * @param q robot joint positions.

@@ -10,6 +10,7 @@
 // controllers
 #include <sdu_controllers/controllers/admittance_controller_position.hpp>
 #include <sdu_controllers/controllers/force_control_inner_velocity_loop.hpp>
+#include <sdu_controllers/controllers/impedance_controller.hpp>
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/controllers/pid_controller.hpp>
 
@@ -127,6 +128,39 @@ namespace sdu_controllers
         .def("step", &controllers::ForceControlInnerVelocityLoop::step)
         .def("get_output", &controllers::ForceControlInnerVelocityLoop::get_output)
         .def("reset", &controllers::ForceControlInnerVelocityLoop::reset);
+
+    // Impedance controller
+    nb::enum_<controllers::ImpedanceController::OrientationRepresentation>(
+        m_controllers, "OrientationRepresentation")
+        .value("ZYZ",        controllers::ImpedanceController::OrientationRepresentation::ZYZ,
+               "ZYZ Euler angles + analytical Jacobian (singular at theta=0, pi)")
+        .value("QUATERNION", controllers::ImpedanceController::OrientationRepresentation::QUATERNION,
+               "Unit quaternion error + geometric Jacobian (singularity-free)")
+        .export_values();
+
+    nb::class_<controllers::ImpedanceController>(m_controllers, "ImpedanceController")
+        .def(
+            nb::init<
+                const Eigen::MatrixXd &,
+                const Eigen::MatrixXd &,
+                const Eigen::MatrixXd &,
+                std::shared_ptr<models::RobotModel>,
+                controllers::ImpedanceController::OrientationRepresentation>(),
+            nb::arg("Kp"),
+            nb::arg("Kd"),
+            nb::arg("Md"),
+            nb::arg("robot_model"),
+            nb::arg("orientation_rep") = controllers::ImpedanceController::OrientationRepresentation::ZYZ)
+        .def("step", &controllers::ImpedanceController::step,
+            nb::arg("x_d"),
+            nb::arg("dx_d"),
+            nb::arg("ddx_d"),
+            nb::arg("q"),
+            nb::arg("dq"),
+            nb::arg("h_d_e"),
+            nb::arg("quat_d") = Eigen::Vector4d(1.0, 0.0, 0.0, 0.0))
+        .def("get_output", &controllers::ImpedanceController::get_output)
+        .def("reset", &controllers::ImpedanceController::reset);
   }
 
 }  // namespace sdu_controllers

@@ -10,6 +10,23 @@ target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 if(BUILD_FOR_PIP_INSTALL)
   # Install the Python module shared library
   install(TARGETS _sdu_controllers DESTINATION .)
+  
+  # On Windows: also install the standard-named copy for import compatibility
+  if(WIN32)
+    install(SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/install_copy_module.cmake")
+  endif()
+endif()
+
+# On Windows only: rename the compiled module to a standard name for import compatibility
+# Windows Python import cannot resolve versioned .pyd files (e.g., _sdu_controllers.cp314-win32.pyd)
+# Linux and macOS handle versioned .so/.dylib files automatically, so this copy is unnecessary there
+if(WIN32)
+  add_custom_command(
+    TARGET _sdu_controllers
+    POST_BUILD
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/copy_module.py" $<TARGET_FILE_DIR:_sdu_controllers>
+    COMMENT "Creating standard-named module copy for Windows import compatibility"
+  )
 endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/config DESTINATION .)
@@ -35,6 +52,17 @@ if(BUILD_PYTHON_STUBS AND NOT nanobind_NOT_FOUND)
     message(
       FATAL_ERROR
         "typing_extensions package not found, This will cause stub generation to fail. Please install it with 'pip install typing_extensions'.")
+  endif()
+
+  execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "import numpy"
+    RESULT_VARIABLE numpy_NOT_FOUND
+    OUTPUT_QUIET ERROR_QUIET)
+
+  if(numpy_NOT_FOUND)
+    message(
+      FATAL_ERROR
+        "NumPy package not found for ${Python3_EXECUTABLE}. The Python bindings use nanobind ndarray support, so stub generation must be able to import NumPy. Please install it with '${Python3_EXECUTABLE} -m pip install numpy' or configure CMake with a Python interpreter that already has NumPy.")
   endif()
 
   # Automatic stub generation

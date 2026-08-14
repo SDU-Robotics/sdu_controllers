@@ -112,7 +112,7 @@ namespace sdu_controllers::hal
         else if (control_mode_ == ControlMode::TORQUE)
         {
           std::vector<double> torques(joint_torque_ref_.begin(), joint_torque_ref_.end());
-          rtde_control_->directTorque(torques);
+          rtde_control_->directTorque(torques, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
         }
         else if (control_mode_ == ControlMode::UNDEFINED)
         {

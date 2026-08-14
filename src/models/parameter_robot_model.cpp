@@ -67,9 +67,7 @@ namespace sdu_controllers::models
       params.mass.resize(n_links);
       params.com.resize(static_cast<int>(n_links), 3);
       params.link_inertia.clear();
-      params.is_joint_revolute.clear();
       params.link_inertia.reserve(n_links);
-      params.is_joint_revolute.reserve(n_links);
 
       // Parse each joint entry and place values according to the joint index found in the key
       // E.g. key "joint_1" -> index 0
@@ -147,17 +145,19 @@ namespace sdu_controllers::models
         params.link_inertia.resize(n_links);  // ensure size
         params.link_inertia[idx] = I;
 
-        // joint type -> revolute/prismatic
-        bool is_revolute = true;
+        // joint type -> revolute/prismatic/fixed
+        kinematics::ForwardKinematics::JointType jt = kinematics::ForwardKinematics::REVOLUTE;
         if (node["type"])
         {
           std::string t = node["type"].as<std::string>();
           if (t == "prismatic")
-            is_revolute = false;
+            jt = kinematics::ForwardKinematics::PRISMATIC;
+          else if (t == "fixed")
+            jt = kinematics::ForwardKinematics::FIXED;
         }
-        if (params.is_joint_revolute.size() != n_links)
-          params.is_joint_revolute.resize(n_links);
-        params.is_joint_revolute[idx] = is_revolute;
+        if (params.joint_types.size() != n_links)
+          params.joint_types.resize(n_links);
+        params.joint_types[idx] = jt;
       }
 
       // Get kinematics type
@@ -195,7 +195,7 @@ namespace sdu_controllers::models
         Eigen::VectorXd theta = *theta_opt;
 
         // initialize forward kinematics with DH-parameters
-        params.fk_model = std::make_shared<kinematics::DHKinematics>(a, alpha, d, theta, params.is_joint_revolute);
+        params.fk_model = std::make_shared<kinematics::DHKinematics>(a, alpha, d, theta, params.joint_types);
       }
       else
       {
@@ -209,6 +209,8 @@ namespace sdu_controllers::models
       params.joint_max_velocity = Eigen::VectorXd::Zero(static_cast<int>(n_links));
       params.joint_max_acceleration = Eigen::VectorXd::Zero(static_cast<int>(n_links));
       params.joint_max_torque = Eigen::VectorXd::Zero(static_cast<int>(n_links));
+      params.friction_viscous = Eigen::VectorXd::Zero(static_cast<int>(n_links));
+      params.friction_coulomb = Eigen::VectorXd::Zero(static_cast<int>(n_links));
 
       if (root["joint_limits"])
       {
@@ -244,6 +246,36 @@ namespace sdu_controllers::models
         }
       }
 
+      // Optional friction section: joint_1, joint_2, ... each with 'viscous' and
+      // 'coulomb' fields. Missing entries stay zero.
+      if (root["friction"])
+      {
+        YAML::Node friction = root["friction"];
+        for (YAML::const_iterator it = friction.begin(); it != friction.end(); ++it)
+        {
+          const std::string joint_name = it->first.as<std::string>();
+          YAML::Node node = it->second;
+
+          auto pos = joint_name.find_last_of('_');
+          if (pos == std::string::npos)
+          {
+            std::cerr << "YAML parse error: unexpected friction key '" << joint_name << "' in " << filepath << std::endl;
+            return std::nullopt;
+          }
+          int idx = std::stoi(joint_name.substr(pos + 1)) - 1;
+          if (idx < 0 || static_cast<std::size_t>(idx) >= n_links)
+          {
+            std::cerr << "YAML parse error: invalid joint index for '" << joint_name << "' in " << filepath << std::endl;
+            return std::nullopt;
+          }
+
+          if (node["viscous"])
+            params.friction_viscous(idx) = node["viscous"].as<double>();
+          if (node["coulomb"])
+            params.friction_coulomb(idx) = node["coulomb"].as<double>();
+        }
+      }
+
       // Optional gravity vector at top-level
       if (root["gravity"])
       {
@@ -257,13 +289,6 @@ namespace sdu_controllers::models
         params.g0 = Eigen::Vector3d(0.0, 0.0, -9.81);
       }
 
-      // Basic validation: sizes must match dof if provided
-      if (params.dof != 0 && params.dof != static_cast<uint16_t>(n_links))
-      {
-        std::cerr << "YAML validation error: declared dof (" << params.dof << ") "
-                  << "does not match number of inertial entries (" << n_links << ") in " << filepath << std::endl;
-        return std::nullopt;
-      }
       // set dof if not set
       if (params.dof == 0)
         params.dof = static_cast<uint16_t>(n_links);
@@ -289,8 +314,12 @@ namespace sdu_controllers::models
     mass_ = p.mass;
     com_ = p.com;
     link_inertia_ = p.link_inertia;
-    is_joint_revolute_ = p.is_joint_revolute;
+    joint_types_ = p.joint_types;
     g0_ = p.g0;
+
+    // classical joint friction
+    friction_viscous_ = p.friction_viscous;
+    friction_coulomb_ = p.friction_coulomb;
 
     // joint limits
     joint_pos_bounds_ = p.joint_position_bounds;
@@ -326,6 +355,20 @@ namespace sdu_controllers::models
     return rnea_->gravity(q);
   }
 
+  VectorXd ParameterRobotModel::get_friction_viscous() const
+  {
+    if (friction_viscous_.size() == 0)
+      return Eigen::VectorXd::Zero(dof_);
+    return friction_viscous_;
+  }
+
+  VectorXd ParameterRobotModel::get_friction_coulomb() const
+  {
+    if (friction_coulomb_.size() == 0)
+      return Eigen::VectorXd::Zero(dof_);
+    return friction_coulomb_;
+  }
+
   MatrixXd ParameterRobotModel::get_jacobian(const VectorXd& q)
   {
     return fk_model_->geometric_jacobian(q);
@@ -333,7 +376,7 @@ namespace sdu_controllers::models
 
   MatrixXd ParameterRobotModel::get_jacobian_dot(const VectorXd& q, const VectorXd& dq)
   {
-    const double dt = 1e-6;
+    const double dt = 1.0/500.0;
 
     // Calculate the Jacobian at the current configuration q
     MatrixXd J_current = get_jacobian(q);
@@ -459,5 +502,15 @@ namespace sdu_controllers::models
   void ParameterRobotModel::set_mass(const std::vector<double> &mass)
   {
     mass_ = mass;
+  }
+
+  void ParameterRobotModel::set_friction_viscous(const Eigen::VectorXd &friction_viscous)
+  {
+    friction_viscous_ = friction_viscous;
+  }
+
+  void ParameterRobotModel::set_friction_coulomb(const Eigen::VectorXd &friction_coulomb)
+  {
+    friction_coulomb_ = friction_coulomb;
   }
 }  // namespace sdu_controllers::models

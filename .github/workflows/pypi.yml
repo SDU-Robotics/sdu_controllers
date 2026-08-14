@@ -14,14 +14,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        build-type: [Release]
-        compiler: [gcc, clang]
-        exclude:
-          # Only default compiler on macos-latest and windows-latest
-          - os: macos-latest
-            compiler: clang
-          - os: windows-latest
-            compiler: clang
 
     steps:
     - uses: actions/checkout@v4
@@ -33,6 +25,7 @@ jobs:
 
     - uses: actions/upload-artifact@v7
       with:
+        name: artifact-${{ matrix.os }}
         path: ./wheelhouse/*.whl
 
   upload_testpypi:
@@ -44,7 +37,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.14.0
@@ -60,7 +54,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.14.0

@@ -32,7 +32,7 @@ Building sdu_controllers requires the following software installed:
 * Eigen3 `>= 3.3` for linear algebra.
 * yaml-cpp for loading robot models.
 * Doxygen (optional, documentation building is skipped if missing)
-* Python `>= 3.8` for building Python bindings
+* Python `>= 3.9` for building Python bindings
 
 ## Building sdu_controllers
 ### Dependencies
@@ -67,6 +67,14 @@ If you plan to build tests and python bindings you must install [Catch2](https:/
 
 ``` bash
 git submodule update --init --recursive
+```
+
+When building the Python bindings with CMake directly, install the Python
+packages used during stub generation into the same Python interpreter that
+CMake finds:
+
+``` bash
+python -m pip install nanobind typing-extensions numpy
 ```
 
 ### Build procedure
