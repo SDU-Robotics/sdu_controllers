@@ -85,7 +85,10 @@ namespace sdu_controllers::controllers
 
       // Ensure shortest-arc
       if (eta_tilde < 0.0)
+      {
         eps_tilde = -eps_tilde;
+        eta_tilde = -eta_tilde;
+      }
 
       // Position error
       Vector3d p_tilde = x_d.head<3>() - pos;
@@ -99,7 +102,13 @@ namespace sdu_controllers::controllers
       dx_tilde << (dx_d.head<3>() - v_e.head<3>()),
                   (dx_d.tail<3>() - v_e.tail<3>());
 
-      VectorXd rhs = Kd_ * dx_tilde + Kp_ * x_tilde
+
+      // Calculate Ko' for the orientation part of the stiffness matrix (see The Role of Euler Parameters In Robot Control Caccavale et al. 1999)
+      Matrix3d E_tilde = eta_tilde * Matrix3d::Identity() - math::skew(eps_tilde);
+      MatrixXd Kp_mark = Kp_;
+      Kp_mark.bottomRightCorner<3, 3>() = 2.0 * E_tilde.transpose() * Kp_.bottomRightCorner<3, 3>();
+
+      VectorXd rhs = Kd_ * dx_tilde + Kp_mark * x_tilde
                      - Md_ * Jdot * dq + Md_ * ddx_d - h_d_e;
       y_ = J.lu().solve(Md_.lu().solve(rhs));
     }
