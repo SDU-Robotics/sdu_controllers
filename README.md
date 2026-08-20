@@ -21,7 +21,7 @@
 sdu_controllers is a C++ library that implements fundamental robot controllers.
 The library is developed and maintained by the [SDU Robotics](https://www.sdu.dk/en/forskning/sdurobotics) group at University of Southern Denmark (SDU).
 Python bindings and a MATLAB Simulink interface is provided making it possible to use it as a Python library or
-in Simulink with very little overhead.
+in Simulink with very little overhead. You can find the documentation here: [sdu-controllers.readthedocs.io](https://sdu-controllers.readthedocs.io/)
 
 ## Quick install
 If you only want to use the python bindings, the easiest way of installing sdu_controllers is:
