@@ -24,6 +24,7 @@ Python bindings and a MATLAB Simulink interface is provided making it possible t
 in Simulink with very little overhead.
 
 ## Quick install
+If you only want to use the python bindings, the easiest way of installing sdu_controllers is:
 ``` bash
 pip install sdu_controllers
 ```
