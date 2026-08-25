@@ -144,6 +144,15 @@ namespace sdu_controllers::math
 
     return q;
   }
+
+  static double saturation(double x, double delta)
+  {
+    double x_delta = x / delta;
+    x_delta = (x_delta < -1) ? -1 : x_delta;  // MATLAB: max(x/delta, -1)
+    x_delta = (x_delta > 1) ? 1 : x_delta;    // MATLAB: min(max(x/delta, -1), 1)
+    return x_delta;
+  }
+/*
 }  // namespace sdu_controllers::math
 
 // namespace sdu_controllers::math
