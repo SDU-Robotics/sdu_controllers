@@ -31,8 +31,8 @@ classdef forward_kinematics < matlab.System
             % Perform one-time calculations, such as computing constants
             switch obj.RobotType
                 case obj.all_robot_types(1)
-                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
-                    obj.links = 7;
+                    obj.robot_model = obj.sdu_controllers.models.ParameterRobotModel("/home/madla/Documents/sdu_controllers/config/models/breeding_blanket_handling_robot.yaml");
+                    obj.links = 6;
 
                 case obj.all_robot_types(2)
                     obj.robot_model = obj.sdu_controllers.models.URRobotModel(...

@@ -23,7 +23,10 @@ classdef set_tcp_mass < matlab.System
         end
 
         function [] = stepImpl(obj, mass, com, inertia)
-            obj.robot_model.set_tcp_mass(mass, com, inertia);
+
+            com = reshape(com, 3, 1);
+
+            obj.robot_model.set_tcp_mass(mass, com', inertia);
         end
 
         function [] = isOutputFixedSizeImpl(~)
