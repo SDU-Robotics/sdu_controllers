@@ -1,4 +1,4 @@
-dof: 7 # Number of degrees of freedom
+dof: 6 # Number of degrees of freedom
 robot_name: breeding_blanket_handling_robot
 
 # Model specific notes:
@@ -62,7 +62,7 @@ inertial:
       iyz: -109.9599999999999937
 
   joint_4:
-    type: "revolute"
+    type: "fixed"
     mass: 2987.8000 # kg
     com: [0.0259800000000000, 0.0000000004822200, 0.0515730000000000] # meters [m]
     inertia:
