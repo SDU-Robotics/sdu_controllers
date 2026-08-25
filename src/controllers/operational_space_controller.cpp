@@ -2,6 +2,7 @@
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <utility>
+#include <Eigen/src/QR/FullPivHouseholderQR.h>
 
 using namespace Eigen;
 
@@ -15,6 +16,7 @@ namespace sdu_controllers::controllers
         Kd_(std::move(Kd)),
         robot_model_(std::move(robot_model))
   {
+    kappa_ = 0;
   }
 
   void OperationalSpaceController::step(
@@ -44,11 +46,15 @@ namespace sdu_controllers::controllers
 
     VectorXd dx_tilde = dx_d - dx_e;
 
-
     // Eq. (8.114) from page 348, Robotics: Modelling, Planning and Control:
-    // TODO: This will only work for a robot with six joints, since you cannot take the inverse
-    //       of a 6x7 sized Jacobian.
-    y_ = J_A.lu().solve(ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq);
+    Eigen::MatrixXd kappaI;
+    kappaI.setIdentity(6, 6);
+    kappaI *= kappa_*kappa_; // todo: should be user configurable
+
+    // The following implements damped least-squares, see eq. (3.59)
+    y_ = J_A.transpose() * (J_A * J_A.transpose() + kappaI).fullPivHouseholderQr().solve(
+      ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq
+    );
   }
 
   void OperationalSpaceController::reset()
@@ -56,11 +62,17 @@ namespace sdu_controllers::controllers
     Kp_.setZero();
     Kd_.setZero();
     y_.setZero();
+    kappa_ = 0;
   }
 
   VectorXd OperationalSpaceController::get_output()
   {
     return y_;
+  }
+
+  void OperationalSpaceController::set_kappa(double kappa)
+  {
+    kappa_ = kappa;
   }
 
 }  // namespace sdu_controllers::controllers

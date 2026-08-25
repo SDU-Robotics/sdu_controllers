@@ -46,9 +46,15 @@ namespace sdu_controllers::controllers
      */
     void reset() override;
 
+    /**
+     * Set kappa used in the damped least squares.
+     */
+    void set_kappa(double kappa);
+
   private:
     Eigen::VectorXd y_;
     Eigen::MatrixXd Kp_, Kd_;
+    double kappa_;
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 
