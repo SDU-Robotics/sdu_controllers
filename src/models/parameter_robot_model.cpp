@@ -288,11 +288,57 @@ namespace sdu_controllers::models
       else {
         params.g0 = Eigen::Vector3d(0.0, 0.0, -9.81);
       }
+      
+      // Count the number of actuated joint; skip FIXED joints.
+      int n_actuated_joints = 0;
+
+      for (size_t i = 0; i < n_links; ++i)
+      {
+        if (params.joint_types[i] != kinematics::ForwardKinematics::FIXED)
+        {
+          n_actuated_joints++;
+        }
+      }
 
       // set dof if not set
       if (params.dof == 0)
-        params.dof = static_cast<uint16_t>(n_links);
+        params.dof = n_actuated_joints;
 
+      // The following vectors should be of size actuated DOF and not n_links
+      Eigen::VectorXd joint_position_bounds_first(n_actuated_joints),
+                      joint_position_bounds_second(n_actuated_joints),
+                      joint_max_velocity(n_actuated_joints),
+                      joint_max_acceleration(n_actuated_joints),
+                      joint_max_torque(n_actuated_joints),
+                      friction_viscous(n_actuated_joints),
+                      friction_coulomb(n_actuated_joints);
+
+      // Copy elements of the prior vectors to the final parameter vectors such that we skip fixed joints.
+      size_t idx = 0;
+      for (size_t i = 0; i < n_links; ++i)
+      {
+        if (params.joint_types[i] != kinematics::ForwardKinematics::FIXED)
+        {
+          joint_position_bounds_first[idx] = params.joint_position_bounds.first[i];
+          joint_position_bounds_second[idx] = params.joint_position_bounds.second[i];
+          joint_max_velocity[idx] = params.joint_max_velocity[i];
+          joint_max_acceleration[idx] = params.joint_max_acceleration[i];
+          joint_max_torque[idx] = params.joint_max_torque[i];
+          friction_viscous[idx] = params.friction_viscous[i];
+          friction_coulomb[idx] = params.friction_coulomb[i];
+          idx++;
+        }
+      }
+      
+      // Overwrite the parameter vectors with the new truncated ones.
+      params.joint_position_bounds.first = joint_position_bounds_first;
+      params.joint_position_bounds.second = joint_position_bounds_second;
+      params.joint_max_velocity = joint_max_velocity;
+      params.joint_max_acceleration = joint_max_acceleration;
+      params.joint_max_torque = joint_max_torque;
+      params.friction_viscous = friction_viscous;
+      params.friction_coulomb = friction_coulomb;
+          
       return params;
     }
     catch (const YAML::Exception &e)

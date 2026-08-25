@@ -76,7 +76,8 @@ html_theme_options = {
     "repository_url": "https://github.com/SDU-Robotics/sdu_controllers",
     "use_repository_button": True,
     "show_toc_level": 2,
-    "use_sidenotes": True
+    "use_sidenotes": True,
+    "navbar_persistent": []
 }
 
 # CSS

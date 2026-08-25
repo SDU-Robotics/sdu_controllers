@@ -48,6 +48,8 @@ namespace sdu_controllers
         .def("get_joint_max_vel", &models::RobotModel::get_joint_max_vel)
         .def("get_joint_max_acc", &models::RobotModel::get_joint_max_acc)
         .def("get_joint_max_torque", &models::RobotModel::get_joint_max_torque)
+        .def("get_friction_viscous", &models::RobotModel::get_friction_viscous)
+        .def("get_friction_coulomb", &models::RobotModel::get_friction_coulomb)
         .def("get_dof", &models::RobotModel::get_dof)
         .def("get_m", &models::RobotModel::get_m)
         .def("get_g0", &models::RobotModel::get_g0)
