@@ -20,7 +20,10 @@ def main():
         x_desired = get_circle_target(start_position, t*dt)
         ref_traj.append(x_desired)
 
-    adm_controller = sdu_controllers.controllers.AdmittanceControllerPosition(frequency)
+    integration_method = sdu_controllers.integrator.IntegrationMethod.RK4
+
+    adm_controller = sdu_controllers.controllers.AdmittanceControllerPosition(frequency, integration_method)
+
     adm_controller.set_mass_matrix_position(np.identity(3) * 22.5)
     adm_controller.set_stiffness_matrix_position(np.identity(3) * 54)
     adm_controller.set_damping_matrix_position(np.identity(3) * 160)
@@ -39,9 +42,13 @@ def main():
     for t in range(int(steps)):
         x_desired = get_circle_target(start_position, t * dt)
         if 0.29 < adm_pos[0] < 0.31 and 0.39 < adm_pos[1] < 0.41:
+            f[0] = 40
             f[1] = 40
+            f[2] = 40
         else:
+            f[0] = 0
             f[1] = 0
+            f[2] = 0
 
         # Step controller
         adm_controller.step(f, mu, x_desired, quat_init)
@@ -54,10 +61,14 @@ def main():
     ref_traj = np.array(ref_traj)
     adm_traj = np.array(adm_traj)
 
-    plt.figure(figsize=(8, 8))
-    plt.plot(ref_traj[:, 0], ref_traj[:, 1], label="desired trajectory", color='red')
-    plt.plot(adm_traj[:, 0], adm_traj[:, 1], label="admittance trajectory", color='blue')
-    plt.legend()
+    ax = plt.figure(figsize=(8, 8)).add_subplot(projection='3d')
+    ax.plot(ref_traj[:, 0], ref_traj[:, 1], ref_traj[:, 2], label="desired trajectory", color='red')
+    ax.plot(adm_traj[:, 0], adm_traj[:, 1], adm_traj[:, 2], label="admittance trajectory", color='blue')
+    ax.legend()
+    ax.set_aspect('equal')
+
+    plt.grid()
+
     plt.show()
 
 if __name__ == "__main__":

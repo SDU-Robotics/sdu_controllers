@@ -1,8 +1,10 @@
 # Compile the nanobind module
 nanobind_add_module(
   _sdu_controllers sdu_controllers/_sdu_controllers.cpp
-  sdu_controllers/_robot_models.cpp sdu_controllers/_math.cpp
-  sdu_controllers/_kinematics.cpp)
+  sdu_controllers/_robot_models.cpp 
+  sdu_controllers/_math.cpp
+  sdu_controllers/_kinematics.cpp
+  sdu_controllers/_integrator.cpp)
   
 target_link_libraries(_sdu_controllers PUBLIC sdu_controllers)
 

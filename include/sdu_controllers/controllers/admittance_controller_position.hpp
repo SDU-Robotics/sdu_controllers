@@ -4,6 +4,7 @@
 
 #include <Eigen/Dense>
 #include <sdu_controllers/controllers/controller.hpp>
+#include <sdu_controllers/integrator/integrator.hpp>
 
 namespace sdu_controllers::controllers
 {
@@ -52,7 +53,8 @@ namespace sdu_controllers::controllers
      * Initialize the admittance controller
      * @param frequency controller frequency, defaults to 500 Hz
      */
-    explicit AdmittanceControllerPosition(double frequency=500.0);
+    explicit AdmittanceControllerPosition(double frequency=500.0, 
+      integrator::IntegrationMethod intg_method = integrator::IntegrationMethod::RK4);
 
     /**
      * @brief
@@ -133,6 +135,8 @@ namespace sdu_controllers::controllers
 
     // Helper variables
     Eigen::Matrix3d rot_identity_;
+
+    integrator::IntegrationMethod intg_method;
   };
 }  // namespace sdu_controllers::controllers
 
