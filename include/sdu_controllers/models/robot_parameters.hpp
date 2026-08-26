@@ -14,6 +14,8 @@ struct RobotParameters
 {
   // degrees of freedom
   uint16_t dof;
+
+  uint16_t number_of_links;
   // forward kinematics model (either based on dh parameters or frames)
   std::shared_ptr<kinematics::ForwardKinematics> fk_model;
 

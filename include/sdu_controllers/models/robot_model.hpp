@@ -150,6 +150,12 @@ namespace sdu_controllers::models
     virtual uint16_t get_dof() const = 0;
 
     /**
+     * @brief Get the number of links on the robot.
+     * @returns the number of links
+     */
+    virtual uint16_t get_number_of_links() const = 0;
+
+    /**
      * @brief Get the masses of the robot links.
      * @returns vector containing the mass of each link
      */

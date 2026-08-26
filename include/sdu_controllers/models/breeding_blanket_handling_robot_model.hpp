@@ -31,7 +31,7 @@ namespace sdu_controllers::models
 
    private:
     std::vector<double> mass_default_;
-    Eigen::Matrix<double, 7, 3> com_default_;
+    Eigen::Matrix<double, Eigen::Dynamic, 3> com_default_;
     std::vector<Eigen::Matrix3d> link_inertia_default_;
   };
 
