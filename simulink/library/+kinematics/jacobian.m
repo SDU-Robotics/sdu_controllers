@@ -1,12 +1,12 @@
-classdef force_control_inner_velocity_loop < matlab.System
-    % Force Control with Inner Velocity Loop
+classdef jacobian < matlab.System
+    % Inertia matrix
+    %
+    % This template includes the minimum set of functions required
+    % to define a System object.
 
     % Public, tunable properties
     properties
-        Kp = eye(6)
-        Kd = eye(6)
-        Md = eye(6)
-        Kf = eye(6)
+
     end
 
     properties(Nontunable)
@@ -14,20 +14,20 @@ classdef force_control_inner_velocity_loop < matlab.System
     end
 
     % Pre-computed constants or internal states
-    properties (Access = private)        
+    properties (Access = private)
         robot_model
         dof
+        fk_solver
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
-        
+
         sdu_controllers
-        f_contr
     end
 
     methods (Access = protected)
-        function setupImpl(obj)          
+        function setupImpl(obj)
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
-
+            
             % Perform one-time calculations, such as computing constants
             switch obj.RobotType
                 case obj.all_robot_types(1)
@@ -45,52 +45,55 @@ classdef force_control_inner_velocity_loop < matlab.System
             end
 
             obj.dof = double(obj.robot_model.get_dof());
-
-            obj.f_contr = obj.sdu_controllers.controllers.ForceControlInnerVelocityLoop(obj.Kp, obj.Kd, obj.Md, obj.Kf, obj.robot_model);
         end
 
-        function [y] = stepImpl(obj, f_d, f_e, q, dq)
-            f_d = reshape(f_d, 1, 6);
-            f_e = reshape(f_e, 1, 6);
-            q = reshape(q, 1, obj.dof);
-            dq = reshape(dq, 1, obj.dof);
-
-            obj.f_contr.step(f_d, f_e, q, dq);
-
-            y = double(obj.f_contr.get_output());
-            y = reshape(y, obj.dof, 1);
+        function [J] = stepImpl(obj, q)
+            % Implement algorithm. Calculate y as a function of input u and
+            % internal states.
+            J = obj.robot_model.get_jacobian(q');
+            
+            J = double(J);
         end
 
-        function [y] = isOutputFixedSizeImpl(~)
-            y = true;
+        function J = isOutputFixedSizeImpl(~)
+            J = true;
         end
 
-        % function resetImpl(obj)
-        %     % Initialize / reset internal properties
-        % end
-
-        function [y] = getOutputSizeImpl(obj)
-            % Example: inherit size from fourth input port
-            y = propagatedInputSize(obj, 4);
+        function resetImpl(obj)
+            % Initialize / reset internal properties
         end
 
-        function [y] = getOutputDataTypeImpl(obj)
+        function J = getOutputSizeImpl(obj)
+            switch obj.RobotType
+                case obj.all_robot_types(1)
+                    obj.links = 6;
+
+                case obj.all_robot_types(2)
+                    obj.links = 6;
+
+                case obj.all_robot_types(3)
+                    obj.links = 6;
+            end
+            J = [6,obj.links];
+        end
+
+        function J = getOutputDataTypeImpl(obj)
             % Return data type for each output port
-            y = "double";
+            J = "double";
 
             % Example: inherit data type from first input port
             % out = propagatedInputDataType(obj,1);
         end
 
-        function [y] = isOutputComplexImpl(obj)
+        function J = isOutputComplexImpl(obj)
             % Return true for each output port with complex data
-            y = false;
+            J = false;
             % Example: inherit complexity from first input port
             % out = propagatedInputComplexity(obj,1);
         end
 
         function icon = getIconImpl(obj)
-            icon = {'Force Controller', 'With', 'Inner Velocity Loop', obj.RobotType};
+            icon = {'Jacobian', obj.RobotType};
         end
     end
 end

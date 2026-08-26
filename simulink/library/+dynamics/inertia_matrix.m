@@ -15,7 +15,7 @@ classdef inertia_matrix < matlab.System
 
     % Pre-computed constants or internal states
     properties (Access = private)
-        links
+        dof
 
         sdu_controllers
     end
@@ -24,15 +24,15 @@ classdef inertia_matrix < matlab.System
         function setupImpl(obj)
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
 
-            obj.links = double(obj.robot_model.get_dof());
+            obj.dof = double(obj.robot_model.get_dof());
         end
 
         function [B] = stepImpl(obj, q)
             % Implement algorithm. Calculate y as a function of input u and
             % internal states.
-            q = reshape(q, 1, obj.links);
+            q = reshape(q, 1, obj.dof);
             B = obj.robot_model.get_inertia_matrix(q);
-            B = reshape(double(B), obj.links, obj.links);
+            B = reshape(double(B), obj.dof, obj.dof);
         end
 
         function B = isOutputFixedSizeImpl(~)
