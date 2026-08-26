@@ -1,10 +1,5 @@
 classdef forward_kinematics < matlab.System
-    % Inertia matrix
-    %
-    % This template includes the minimum set of functions required
-    % to define a System object.
 
-    % Public, tunable properties
     properties
 
     end
@@ -13,10 +8,10 @@ classdef forward_kinematics < matlab.System
         RobotType {mustBeMember(RobotType, ["BB Handler", "UR3e", "UR5e"])} = "UR5e"
     end
 
-    % Pre-computed constants or internal states
+
     properties (Access = private)
         robot_model
-        links
+        dof
         fk_solver
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
@@ -32,30 +27,26 @@ classdef forward_kinematics < matlab.System
             switch obj.RobotType
                 case obj.all_robot_types(1)
                     obj.robot_model = obj.sdu_controllers.models.ParameterRobotModel("/home/madla/Documents/sdu_controllers/config/models/breeding_blanket_handling_robot.yaml");
-                    obj.links = 6;
 
                 case obj.all_robot_types(2)
                     obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
                         obj.sdu_controllers.models.RobotType(0) ...
                     );
-                    obj.links = 6;
+
 
                 case obj.all_robot_types(3)
                     obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
                         obj.sdu_controllers.models.RobotType(1) ...
                     );
-                    obj.links = 6;
-            end
 
+            end
+            obj.dof = double(obj.robot_model.get_dof());
             obj.fk_solver = obj.robot_model.get_fk_solver();
 
-            % obj.links = double(obj.robot_model.get_dof());
-            % disp(obj.links)
         end
 
         function [T] = stepImpl(obj, q)
-            % Implement algorithm. Calculate y as a function of input u and
-            % internal states.
+
             T = obj.fk_solver.forward_kinematics(q);
             T = double(T);
         end
@@ -65,7 +56,7 @@ classdef forward_kinematics < matlab.System
         end
 
         function resetImpl(obj)
-            % Initialize / reset internal properties
+
         end
 
         function T = getOutputSizeImpl(obj)
@@ -73,18 +64,15 @@ classdef forward_kinematics < matlab.System
         end
 
         function T = getOutputDataTypeImpl(obj)
-            % Return data type for each output port
+
             T = "double";
 
-            % Example: inherit data type from first input port
-            % out = propagatedInputDataType(obj,1);
         end
 
         function T = isOutputComplexImpl(obj)
-            % Return true for each output port with complex data
+
             T = false;
-            % Example: inherit complexity from first input port
-            % out = propagatedInputComplexity(obj,1);
+
         end
 
         function icon = getIconImpl(obj)

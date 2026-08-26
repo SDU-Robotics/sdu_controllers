@@ -15,7 +15,7 @@ classdef gravity_torques < matlab.System
 
     % Pre-computed constants or internal states
     properties (Access = private)
-        links
+        dof
 
         sdu_controllers
     end
@@ -24,17 +24,15 @@ classdef gravity_torques < matlab.System
         function setupImpl(obj)
             obj.sdu_controllers = py.importlib.import_module('sdu_controllers');
             
-            obj.links = double(obj.robot_model.get_dof());
-            % disp(obj.links)
+            obj.dof = double(obj.robot_model.get_dof());
         end
 
         function tau = stepImpl(obj, q)
-            % Implement algorithm. Calculate y as a function of input u and
-            % internal states.
-            q = reshape(q, 1, obj.links);
+
+            q = reshape(q, 1, obj.dof);
 
             tau = obj.robot_model.get_gravity(q);
-            tau = reshape(double(tau), obj.links, 1);
+            tau = reshape(double(tau), obj.dof, 1);
         end
 
         function tau = isOutputFixedSizeImpl(~)
@@ -42,7 +40,7 @@ classdef gravity_torques < matlab.System
         end
 
         function resetImpl(obj)
-            % Initialize / reset internal properties
+
         end
 
         function tau = getOutputSizeImpl(obj)
@@ -50,18 +48,15 @@ classdef gravity_torques < matlab.System
         end
 
         function tau = getOutputDataTypeImpl(obj)
-            % Return data type for each output port
+
             tau = "double";
 
-            % Example: inherit data type from first input port
-            % out = propagatedInputDataType(obj,1);
         end
 
         function tau = isOutputComplexImpl(obj)
-            % Return true for each output port with complex data
+
             tau = false;
-            % Example: inherit complexity from first input port
-            % out = propagatedInputComplexity(obj,1);
+
         end
 
         function icon = getIconImpl(obj)

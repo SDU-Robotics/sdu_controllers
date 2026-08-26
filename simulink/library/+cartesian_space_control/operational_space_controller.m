@@ -19,7 +19,7 @@ classdef operational_space_controller < matlab.System
     % Pre-computed constants or internal states
     properties (Access = private)        
         robot_model
-        links
+        dof
 
         all_robot_types = ["BB Handler", "UR3e", "UR5e"];
         
@@ -34,7 +34,7 @@ classdef operational_space_controller < matlab.System
             % Perform one-time calculations, such as computing constants
             switch obj.RobotType
                 case obj.all_robot_types(1)
-                    obj.robot_model = obj.sdu_controllers.models.ParameterRobotModel("/home/madla/Documents/sdu_controllers/config/models/breeding_blanket_handling_robot.yaml");
+                    obj.robot_model = obj.sdu_controllers.models.BreedingBlanketHandlingRobotModel();
 
                 case obj.all_robot_types(2)
                     obj.robot_model = obj.sdu_controllers.models.URRobotModel(...
@@ -47,7 +47,7 @@ classdef operational_space_controller < matlab.System
                     );
             end
 
-            obj.links = double(obj.robot_model.get_dof());
+            obj.dof = double(obj.robot_model.get_dof());
 
             obj.os_contr = obj.sdu_controllers.controllers.OperationalSpaceController(obj.Kp, obj.Kd, obj.robot_model);
         end
@@ -56,13 +56,13 @@ classdef operational_space_controller < matlab.System
             x_d = reshape(x_d, 1, 6);
             dx_d = reshape(dx_d, 1, 6);
             ddx_d = reshape(ddx_d, 1, 6);
-            q = reshape(q, 1, obj.links);
-            dq = reshape(dq, 1, obj.links);
+            q = reshape(q, 1, obj.dof);
+            dq = reshape(dq, 1, obj.dof);
 
             obj.os_contr.step(x_d, dx_d, ddx_d, q, dq);
 
             y = double(obj.os_contr.get_output());
-            y = reshape(y, obj.links, 1);
+            y = reshape(y, obj.dof, 1);
         end
 
         function [y] = isOutputFixedSizeImpl(~)
