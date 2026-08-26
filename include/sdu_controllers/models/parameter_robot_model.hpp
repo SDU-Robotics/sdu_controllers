@@ -133,6 +133,8 @@ namespace sdu_controllers::models
 
     uint16_t get_dof() const override;
 
+    uint16_t get_number_of_links() const override;
+
     std::vector<double> get_m() override;
 
     Eigen::Vector3d get_g0() override;
@@ -156,6 +158,8 @@ namespace sdu_controllers::models
   protected:
     // degrees of freedom
     uint16_t dof_;
+
+    uint16_t number_of_links_;
 
     // forward kinematics model (either based on dh parameters or frames)
     std::shared_ptr<kinematics::ForwardKinematics> fk_model_;

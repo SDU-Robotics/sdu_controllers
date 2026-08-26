@@ -64,6 +64,7 @@ namespace sdu_controllers::models
       YAML::Node inertial = root["inertial"];
       // determine number of joints by counting entries
       const std::size_t n_links = inertial.size();
+      params.number_of_links = n_links;
       params.mass.resize(n_links);
       params.com.resize(static_cast<int>(n_links), 3);
       params.link_inertia.clear();
@@ -356,6 +357,7 @@ namespace sdu_controllers::models
   void ParameterRobotModel::set_robot_parameters(const RobotParameters &p)
   {
     dof_ = p.dof;
+    number_of_links_ = p.number_of_links;
     // inertial
     mass_ = p.mass;
     com_ = p.com;
@@ -508,6 +510,11 @@ namespace sdu_controllers::models
   uint16_t ParameterRobotModel::get_dof() const
   {
     return dof_;
+  }
+
+  uint16_t ParameterRobotModel::get_number_of_links() const
+  {
+    return number_of_links_;
   }
 
   std::vector<double> ParameterRobotModel::get_m()
