@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef INTEGRAGOR_HPP
-#define INTEGRAGOR_HPP
+#ifndef INTEGRATOR_HPP
+#define INTEGRATOR_HPP
 
 #include <Eigen/Core>
 #include <functional>
@@ -104,4 +104,4 @@ namespace sdu_controllers::integrator
     };
 }
 
-#endif  //INTEGRAGOR_HPP
+#endif  //INTEGRATOR_HPP
