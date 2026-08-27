@@ -11,6 +11,7 @@
 #include <optional>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace sdu_controllers::models
 {
@@ -24,6 +25,7 @@ namespace sdu_controllers::models
     explicit ParameterRobotModel() = default;
     explicit ParameterRobotModel(const std::string &yaml_filepath);
     explicit ParameterRobotModel(const RobotParameters &params);
+    explicit ParameterRobotModel(const std::filesystem::path &config_path) : ParameterRobotModel(config_path.string()) {}
     virtual ~ParameterRobotModel() = default;
 
     /**
