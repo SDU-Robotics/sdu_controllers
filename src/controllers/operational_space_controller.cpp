@@ -16,7 +16,8 @@ namespace sdu_controllers::controllers
         Kd_(std::move(Kd)),
         robot_model_(std::move(robot_model))
   {
-    kappa_ = 0;
+    kappa_ = 0.0;
+    Kd_null_ = 5.0;
   }
 
   void OperationalSpaceController::step(
@@ -66,8 +67,7 @@ namespace sdu_controllers::controllers
     Eigen::MatrixXd N = I - J_pinv * J_A;
 
     // Secondary task (Joint Damping to stop drift)
-    double Kd_null = 5.0;
-    Eigen::VectorXd secondary_cmd = -Kd_null * dq; 
+    Eigen::VectorXd secondary_cmd = -Kd_null_ * dq; 
 
     // Combine primary and secondary tasks (see eq. 3.54)
     y_ = y_primary + N * secondary_cmd;
@@ -78,7 +78,8 @@ namespace sdu_controllers::controllers
     Kp_.setZero();
     Kd_.setZero();
     y_.setZero();
-    kappa_ = 0;
+    kappa_ = 0.0;
+    Kd_null_ = 5.0;
   }
 
   VectorXd OperationalSpaceController::get_output()
@@ -89,6 +90,11 @@ namespace sdu_controllers::controllers
   void OperationalSpaceController::set_kappa(double kappa)
   {
     kappa_ = kappa;
+  }
+
+  void OperationalSpaceController::set_Kd_null(double Kd_null)
+  {
+    Kd_null_ = Kd_null;
   }
 
 }  // namespace sdu_controllers::controllers

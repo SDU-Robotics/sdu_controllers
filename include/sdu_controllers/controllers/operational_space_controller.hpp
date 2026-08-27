@@ -51,10 +51,16 @@ namespace sdu_controllers::controllers
      */
     void set_kappa(double kappa);
 
+    /**
+     * Set damping used for maintaining joint positions on parallel joints. 
+     */
+    void set_Kd_null(double Kd_null);
+
   private:
     Eigen::VectorXd y_;
     Eigen::MatrixXd Kp_, Kd_;
     double kappa_;
+    double Kd_null_;
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 
