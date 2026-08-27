@@ -14,6 +14,8 @@ using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
 
+constexpr double pi = 3.14159265358979323846;
+
 int main()
 {
   // Setup writing of output trajectory to csv.
@@ -87,9 +89,9 @@ int main()
     pos_desired[2] += 2;
 
     Vector3d rpy_zyz_desired = rpy_zyz0;
-    rpy_zyz_desired[0] += M_PI / 8;
+    rpy_zyz_desired[0] += pi / 8;
     rpy_zyz_desired[1] += 0;
-    rpy_zyz_desired[2] += M_PI / 2;
+    rpy_zyz_desired[2] += pi / 2;
 
     x_d << pos_desired, rpy_zyz_desired;
     dx_d.setZero();
