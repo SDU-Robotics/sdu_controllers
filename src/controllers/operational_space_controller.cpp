@@ -51,10 +51,26 @@ namespace sdu_controllers::controllers
     kappaI.setIdentity(6, 6);
     kappaI *= kappa_*kappa_; // todo: should be user configurable
 
-    // The following implements damped least-squares, see eq. (3.59)
-    y_ = J_A.transpose() * (J_A * J_A.transpose() + kappaI).fullPivHouseholderQr().solve(
-      ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq
-    );
+    // Explicitly calculate the DLS pseudo-inverse, see eq. (3.59)
+    Eigen::MatrixXd J_pinv = J_A.transpose() * 
+        (J_A * J_A.transpose() + kappaI).fullPivHouseholderQr().solve(Eigen::MatrixXd::Identity(6, 6));
+
+    // Calculate the primary task command
+    Eigen::VectorXd task_cmd = ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq;
+
+    // Project primary task into joint space
+    Eigen::VectorXd y_primary = J_pinv * task_cmd;
+
+    // Calculate the null-space projection matrix: N = I - J_pinv * J_A
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(6, 6);
+    Eigen::MatrixXd N = I - J_pinv * J_A;
+
+    // Secondary task (Joint Damping to stop drift)
+    double Kd_null = 5.0;
+    Eigen::VectorXd secondary_cmd = -Kd_null * dq; 
+
+    // Combine primary and secondary tasks (see eq. 3.54)
+    y_ = y_primary + N * secondary_cmd;
   }
 
   void OperationalSpaceController::reset()
