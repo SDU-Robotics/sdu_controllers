@@ -44,11 +44,7 @@ namespace sdu_controllers::controllers
   {
    public:
     /** Orientation representation used for the error and Jacobian. */
-    enum class OrientationRepresentation
-    {
-      ZYZ,        // ZYZ Euler angles + analytical Jacobian 
-      QUATERNION  // Unit quaternion error + geometric Jacobian 
-    };
+    using OrientationRepresentation = controllers::OrientationRepresentation;
 
     /**
      * @brief Construct an ImpedanceController.

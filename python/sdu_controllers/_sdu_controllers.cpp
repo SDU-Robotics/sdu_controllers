@@ -100,14 +100,34 @@ namespace sdu_controllers
         .def("set_damping_matrix_position", &controllers::AdmittanceControllerPosition::set_damping_matrix_position)
         .def("set_damping_matrix_orientation", &controllers::AdmittanceControllerPosition::set_damping_matrix_orientation);
 
+    // Orientation representation shared by controllers that support ZYZ Euler angles and quaternions
+    nb::enum_<controllers::OrientationRepresentation>(
+        m_controllers, "OrientationRepresentation")
+        .value("ZYZ",        controllers::OrientationRepresentation::ZYZ,
+               "ZYZ Euler angles + analytical Jacobian")
+        .value("QUATERNION", controllers::OrientationRepresentation::QUATERNION,
+               "Unit quaternion error + geometric Jacobian")
+        .export_values();
+
     // Cartesian motion controller
     nb::class_<controllers::OperationalSpaceController>(m_controllers, "OperationalSpaceController")
         .def(
-            nb::init<const Eigen::MatrixXd &, const Eigen::MatrixXd &, std::shared_ptr<models::RobotModel>>(),
+            nb::init<
+                const Eigen::MatrixXd &,
+                const Eigen::MatrixXd &,
+                std::shared_ptr<models::RobotModel>,
+                controllers::OperationalSpaceController::OrientationRepresentation>(),
             nb::arg("Kp"),
             nb::arg("Kd"),
-            nb::arg("robot_model"))
-        .def("step", &controllers::OperationalSpaceController::step)
+            nb::arg("robot_model"),
+            nb::arg("orientation_rep") = controllers::OperationalSpaceController::OrientationRepresentation::ZYZ)
+        .def("step", &controllers::OperationalSpaceController::step,
+            nb::arg("x_d"),
+            nb::arg("dx_d"),
+            nb::arg("ddx_d"),
+            nb::arg("q"),
+            nb::arg("dq"),
+            nb::arg("quat_d") = Eigen::Vector4d(1.0, 0.0, 0.0, 0.0))
         .def("get_output", &controllers::OperationalSpaceController::get_output)
         .def("reset", &controllers::OperationalSpaceController::reset);
 
@@ -130,14 +150,6 @@ namespace sdu_controllers
         .def("reset", &controllers::ForceControlInnerVelocityLoop::reset);
 
     // Impedance controller
-    nb::enum_<controllers::ImpedanceController::OrientationRepresentation>(
-        m_controllers, "OrientationRepresentation")
-        .value("ZYZ",        controllers::ImpedanceController::OrientationRepresentation::ZYZ,
-               "ZYZ Euler angles + analytical Jacobian (singular at theta=0, pi)")
-        .value("QUATERNION", controllers::ImpedanceController::OrientationRepresentation::QUATERNION,
-               "Unit quaternion error + geometric Jacobian (singularity-free)")
-        .export_values();
-
     nb::class_<controllers::ImpedanceController>(m_controllers, "ImpedanceController")
         .def(
             nb::init<

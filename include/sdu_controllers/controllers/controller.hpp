@@ -5,6 +5,16 @@
 namespace sdu_controllers::controllers
 {
   /**
+   * Orientation representation used by controllers that support both ZYZ Euler-angle
+   * and unit-quaternion orientation errors.
+   */
+  enum class OrientationRepresentation
+  {
+    ZYZ,        // ZYZ Euler angles + analytical Jacobian (singular at theta=0, pi)
+    QUATERNION  // Unit quaternion error + geometric Jacobian (singularity-free)
+  };
+
+  /**
    * This class provides a base class for the different controllers. This is useful when
    * dealing with multiple controllers.
    */
