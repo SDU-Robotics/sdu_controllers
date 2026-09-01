@@ -18,7 +18,8 @@ namespace sdu_controllers::controllers
         robot_model_(std::move(robot_model)),
         orientation_rep_(orientation_rep)
   {
-    kappa_ = 0;
+    kappa_ = 0.0;
+    Kd_null_ = 5.0;
   }
 
   void OperationalSpaceController::step(
@@ -32,7 +33,7 @@ namespace sdu_controllers::controllers
     // Eq. (8.114) from page 348, Robotics: Modelling, Planning and Control:
     Eigen::MatrixXd kappaI;
     kappaI.setIdentity(6, 6);
-    kappaI *= kappa_*kappa_; // todo: should be user configurable
+    kappaI *= kappa_ * kappa_; // todo: should be user configurable
 
     if (orientation_rep_ == OrientationRepresentation::ZYZ)
     {
@@ -59,22 +60,39 @@ namespace sdu_controllers::controllers
 
       VectorXd dx_tilde = dx_d - dx_e;
 
-      // The following implements damped least-squares, see eq. (3.59)
-      y_ = J_A.transpose() * (J_A * J_A.transpose() + kappaI).fullPivHouseholderQr().solve(
-        ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq
-      );
+      // Explicitly calculate the DLS pseudo-inverse, see eq. (3.59)
+      Eigen::MatrixXd J_pinv = J_A.transpose() * 
+          (J_A * J_A.transpose() + kappaI).fullPivHouseholderQr().solve(Eigen::MatrixXd::Identity(6, 6));
+
+      // Calculate the primary task command
+      Eigen::VectorXd task_cmd = ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot_A * dq;
+
+      // Project primary task into joint space
+      Eigen::VectorXd y_primary = J_pinv * task_cmd;
+
+      // Calculate the null-space projection matrix: N = I - J_pinv * J_A
+
+      const Eigen::Index n = robot_model_->get_dof();
+      Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n, n);
+      Eigen::MatrixXd N = I - J_pinv * J_A;
+
+      // Secondary task (Joint Damping to stop drift)
+      Eigen::VectorXd secondary_cmd = -Kd_null_ * dq; 
+
+      // Combine primary and secondary tasks (see eq. 3.54)
+      y_ = y_primary + N * secondary_cmd;
     }
     else
     {
       // ---------------------------------------------------------------
       // QUATERNION path - geometric Jacobian, quaternion orientation error
       // ---------------------------------------------------------------
-      MatrixXd J    = robot_model_->get_jacobian(q);
+      MatrixXd J = robot_model_->get_jacobian(q);
       MatrixXd Jdot = robot_model_->get_jacobian_dot(q, dq);
 
-      Matrix4d T   = robot_model_->get_fk_solver().forward_kinematics(q);
+      Matrix4d T = robot_model_->get_fk_solver().forward_kinematics(q);
       Vector3d pos = T.block<3, 1>(0, 3);
-      Matrix3d R   = T.topLeftCorner(3, 3);
+      Matrix3d R = T.topLeftCorner(3, 3);
 
       // Current orientation as unit quaternion
       Quaterniond q_e(R);
@@ -90,8 +108,7 @@ namespace sdu_controllers::controllers
 
       // Orientation error
       double eta_tilde = eta_d * eta_e + eps_d.dot(eps_e);
-      Vector3d eps_tilde = eta_e * eps_d - eta_d * eps_e
-                           - math::skew(eps_d) * eps_e;
+      Vector3d eps_tilde = eta_e * eps_d - eta_d * eps_e - math::skew(eps_d) * eps_e;
 
       // Ensure shortest-arc
       if (eta_tilde < 0.0)
@@ -112,10 +129,31 @@ namespace sdu_controllers::controllers
       dx_tilde << (dx_d.head<3>() - v_e.head<3>()),
                   (dx_d.tail<3>() - v_e.tail<3>());
 
-      // The following implements damped least-squares, see eq. (3.59)
-      y_ = J.transpose() * (J * J.transpose() + kappaI).fullPivHouseholderQr().solve(
-        ddx_d + Kd_ * dx_tilde + Kp_ * x_tilde - Jdot * dq
-      );
+      // Calculate Ko' for the orientation part of the stiffness matrix (see The Role of Euler Parameters In Robot Control Caccavale et al. 1999)
+      Matrix3d E_tilde = eta_tilde * Matrix3d::Identity() - math::skew(eps_tilde);
+      MatrixXd Kp_mark = Kp_;
+      Kp_mark.bottomRightCorner<3, 3>() = 2.0 * E_tilde.transpose() * Kp_.bottomRightCorner<3, 3>();
+
+      // Explicitly calculate the DLS pseudo-inverse, see eq. (3.59)
+      Eigen::MatrixXd J_pinv = J.transpose() * (J * J.transpose() + kappaI).fullPivHouseholderQr().solve(Eigen::MatrixXd::Identity(6, 6));
+
+      // Calculate the primary task command
+      Eigen::VectorXd task_cmd = ddx_d + Kd_ * dx_tilde + Kp_mark * x_tilde - Jdot * dq;
+
+      // Project primary task into joint space
+      Eigen::VectorXd y_primary = J_pinv * task_cmd;
+
+      // Calculate the null-space projection matrix: N = I - J_pinv * J_A
+
+      const Eigen::Index n = robot_model_->get_dof();
+      Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n, n);
+      Eigen::MatrixXd N = I - J_pinv * J;
+
+      // Secondary task (Joint Damping to stop drift)
+      Eigen::VectorXd secondary_cmd = -Kd_null_ * dq; 
+
+      // Combine primary and secondary tasks (see eq. 3.54)
+      y_ = y_primary + N * secondary_cmd;
     }
   }
 
@@ -124,7 +162,8 @@ namespace sdu_controllers::controllers
     Kp_.setZero();
     Kd_.setZero();
     y_.setZero();
-    kappa_ = 0;
+    kappa_ = 0.0;
+    Kd_null_ = 5.0;
   }
 
   VectorXd OperationalSpaceController::get_output()
@@ -135,6 +174,11 @@ namespace sdu_controllers::controllers
   void OperationalSpaceController::set_kappa(double kappa)
   {
     kappa_ = kappa;
+  }
+
+  void OperationalSpaceController::set_Kd_null(double Kd_null)
+  {
+    Kd_null_ = Kd_null;
   }
 
 }  // namespace sdu_controllers::controllers
