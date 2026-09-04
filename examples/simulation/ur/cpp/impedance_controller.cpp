@@ -7,6 +7,7 @@
 #include <sdu_controllers/controllers/impedance_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/math/trajectory_generation.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -17,72 +18,6 @@ using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
 
 constexpr double pi = 3.14159265358979323846;
-
-/**
- * Generate the desired Cartesian position on a circle in the XY plane.
- *
- * @param center     Circle centre (x0, y0, z0) in metres.
- * @param radius     Circle radius in metres.
- * @param omega      Angular velocity (rad/s).
- * @param t          Current time (s).
- * @param ramp_time  Ramp duration (s) for angular speed from 0 to omega.
- * @param pos        Output: desired position (3-vector).
- * @param vel        Output: desired velocity (3-vector).
- * @param acc        Output: desired acceleration (3-vector).
- */
-static void circle_trajectory(
-    const Vector3d &center,
-    double radius,
-    double omega,
-    double t,
-    double ramp_time,
-    Vector3d &pos,
-    Vector3d &vel,
-    Vector3d &acc)
-{
-  // Quintic angular speed ramp: w(t) = omega * (10u^3 - 15u^4 + 6u^5), u=t/ramp_time.
-  // This is C2 continuous (zero accel/jerk at ramp start/end), reducing torque overshoot.
-  double theta = 0.0;
-  double w = omega;
-  double alpha = 0.0;
-
-  if (ramp_time > 0.0 && t < ramp_time)
-  {
-    double u = t / ramp_time;
-    if (u < 0.0)
-    {
-      u = 0.0;
-    }
-    else if (u > 1.0)
-    {
-      u = 1.0;
-    }
-
-    w = omega * (10.0 * u * u * u - 15.0 * u * u * u * u + 6.0 * u * u * u * u * u);
-    alpha = omega * (30.0 * u * u - 60.0 * u * u * u + 30.0 * u * u * u * u) / ramp_time;
-    theta = omega * ramp_time * (2.5 * u * u * u * u - 3.0 * u * u * u * u * u + u * u * u * u * u * u);
-  }
-  else
-  {
-    // Keep phase continuous with ramp profile at t=ramp_time.
-    theta = omega * (t - 0.5 * ramp_time);
-  }
-
-  const double c = std::cos(theta);
-  const double s = std::sin(theta);
-
-  pos << center[0] + radius * c,
-         center[1] + radius * s,
-         center[2];
-
-  vel << -radius * s * w,
-          radius * c * w,
-          0.0;
-
-  acc << -radius * c * w * w - radius * s * alpha,
-         -radius * s * w * w + radius * c * alpha,
-          0.0;
-}
 
 int main()
 {
@@ -176,7 +111,7 @@ int main()
 
     // Desired Cartesian pose, velocity and acceleration
     Vector3d pos_d, dpos_d, ddpos_d;
-    circle_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
+    math::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
 
     VectorXd x_d(6),  dx_d(6),  ddx_d(6);
     x_d   << pos_d,    Vector3d::Zero();   // orientation part unused in QUATERNION mode

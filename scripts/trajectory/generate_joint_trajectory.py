@@ -1,6 +1,10 @@
 import roboticstoolbox as rtb
 import numpy as np
 import math
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 frequency = 500.0
 dt = 1 / frequency
 duration_in_seconds = 6.0
@@ -21,7 +25,7 @@ for i in range(1, len(viapoints)):
     qd_prev = via_traj.qd[-1]
 
 trajectory_np = np.vstack(trajectory)
-np.savetxt("../data/joint_trajectory_safe_new.csv", trajectory_np, delimiter =",")
+np.savetxt(REPO_ROOT / "data/joint_trajectory_safe.csv", trajectory_np, delimiter =",")
 
 
 
@@ -34,4 +38,4 @@ np.savetxt("../data/joint_trajectory_safe_new.csv", trajectory_np, delimiter =",
 #print(traj.qd)
 #print(traj.qdd)
 #traj_comb = np.concatenate((traj.q, traj.qd, traj.qdd), axis=1)
-#np.savetxt("../data/joint_trajectory_safe.csv", traj_comb, delimiter =",")
+#np.savetxt(REPO_ROOT / "data/joint_trajectory_safe.csv", traj_comb, delimiter =",")

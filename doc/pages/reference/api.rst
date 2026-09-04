@@ -7,9 +7,11 @@ This page contains the API documentation of sdu_controllers. The following class
 Controllers:
 
 * :ref:`Controller <controller-api>`
-* :ref:`PDController <pd-controller-api>`
+* :ref:`PIDController <pid-controller-api>`
 * :ref:`AdmittanceControllerPosition <admittance-controller-position-api>`
 * :ref:`OperationalSpaceController <operational-space-controller-api>`
+* :ref:`ImpedanceController <impedance-controller-api>`
+* :ref:`ForceControlInnerVelocityLoop <force-control-inner-velocity-loop-api>`
 
 Math:
 
@@ -37,12 +39,24 @@ Controller
     :project: sdu_controllers
     :members:
 
-.. _pd-controller-api:
+.. _orientation-representation-api:
 
-PDController
-============
+OrientationRepresentation
+==========================
 
-.. doxygenclass:: sdu_controllers::controllers::PDController
+Shared by :ref:`OperationalSpaceController <operational-space-controller-api>` and
+:ref:`ImpedanceController <impedance-controller-api>` to select between ZYZ Euler-angle
+and unit-quaternion orientation error/Jacobian.
+
+.. doxygenenum:: sdu_controllers::controllers::OrientationRepresentation
+    :project: sdu_controllers
+
+.. _pid-controller-api:
+
+PIDController
+=============
+
+.. doxygenclass:: sdu_controllers::controllers::PIDController
     :project: sdu_controllers
     :members:
 
@@ -62,6 +76,24 @@ OperationalSpaceController
 ==========================
 
 .. doxygenclass:: sdu_controllers::controllers::OperationalSpaceController
+    :project: sdu_controllers
+    :members:
+
+.. _impedance-controller-api:
+
+ImpedanceController
+====================
+
+.. doxygenclass:: sdu_controllers::controllers::ImpedanceController
+    :project: sdu_controllers
+    :members:
+
+.. _force-control-inner-velocity-loop-api:
+
+ForceControlInnerVelocityLoop
+==============================
+
+.. doxygenclass:: sdu_controllers::controllers::ForceControlInnerVelocityLoop
     :project: sdu_controllers
     :members:
 

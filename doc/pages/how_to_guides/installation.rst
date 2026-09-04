@@ -69,7 +69,7 @@ These dependencies are only required for specific features or examples:
 
 
 Debian/Ubuntu install
---------------------
+---------------------
 
 On debian-based linux distributions like Ubuntu, you can install the
 dependencies with:

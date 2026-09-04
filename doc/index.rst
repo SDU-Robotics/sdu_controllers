@@ -11,11 +11,11 @@ sdu_controllers
 .. |Docs badge| image:: https://readthedocs.org/projects/sdu_controllers/badge/
    :target: https://sdu-controllers.readthedocs.io/
 
-.. figure:: _static/joint_motion_control.svg
+.. .. figure:: _static/joint_motion_control.svg
    :width: 90%
    :class: only-light
 
-.. figure:: _static/joint_motion_control.svg
+.. .. figure:: _static/joint_motion_control.svg
    :width: 90%
    :class: only-dark
 
@@ -25,34 +25,51 @@ developed and maintained by the `SDU Robotics
 Python bindings and a MATLAB Simulink interface is provided making it possible to use it as a Python library or
 in MATLAB Simulink with very little overhead.
 
----------
 
 In this documentation
 ---------------------
 
-..  grid:: 1 1 2 2
+.. grid:: 2
+    :gutter: 3
 
-   ..  grid-item:: :doc:`Tutorial <pages/tutorial/index>`
+    .. grid-item-card:: :octicon:`mortar-board;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Tutorials
+        :link: pages/tutorial/index
+        :link-type: doc
+        :class-title: sd-text-primary sd-font-weight-bold
 
-       **Start here**: a hands-on introduction to sdu_controllers for new users
+        **Start here:** A hands-on introduction to sdu_controllers for new users.
 
-   ..  grid-item:: :doc:`How-to guides <pages/how_to_guides/index>`
+    .. grid-item-card:: :octicon:`tools;1.2em;sd-text-primary sd-mr-2 sd-align-middle` How-to guides
+        :link: pages/how_to_guides/index
+        :link-type: doc
+        :class-title: sd-text-primary sd-font-weight-bold
 
-      **Step-by-step guides** covering common tasks and key functionalities
+        **Step-by-step guides** covering common tasks and key functionalities.
 
-.. grid:: 1 1 2 2
-   :reverse:
+    .. grid-item-card::  :octicon:`light-bulb;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Explanation
+        :link: pages/explanation/index
+        :link-type: doc
+        :class-title: sd-text-primary sd-font-weight-bold
 
-   .. grid-item:: :doc:`Reference <pages/reference/index>`
+        **Discussion and clarification** of key topics
 
-      **Technical information** - specifications, APIs, architecture
+    .. grid-item-card::  :octicon:`book;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Reference
+        :link: pages/reference/index
+        :link-type: doc
+        :class-title: sd-text-primary sd-font-weight-bold
 
-   .. grid-item:: :doc:`Explanation <pages/explanation/index>`
-
-      **Discussion and clarification** of key topics
+        **Technical information** - specifications, APIs, architecture
 
 ---------
 
+Acknowledgements
+----------------
+
+This work has been carried out within the framework of the EUROfusion Consortium, funded by the European Union 
+via the Euratom Research and Training Programme (Grant Agreement No 101052200 — EUROfusion). 
+Views and opinions expressed are however those of the author(s) only and do not necessarily 
+reflect those of the European Union or the European Commission. Neither the European Union nor 
+the European Commission can be held responsible for them.
 
 .. toctree::
    :hidden:

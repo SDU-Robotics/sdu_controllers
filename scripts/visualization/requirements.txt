@@ -1,0 +1,4 @@
+viser>=0.2
+robot_descriptions>=1.10
+yourdfpy>=0.0.56
+numpy

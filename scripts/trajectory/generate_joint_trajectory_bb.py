@@ -1,8 +1,11 @@
 import csv
 import math
+from pathlib import Path
 
 import numpy as np
 import roboticstoolbox as rtb
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 frequency = 1000.0
 dt = 1 / frequency
@@ -18,7 +21,7 @@ robot_dof = 7
 # t_array = np.linspace(0.0, trajectory_duration, num=trajectory_samples)
 trajectory_in = []
 
-with open("../data/eurofusion_robot_trajectory.csv") as csv_file:
+with open(REPO_ROOT / "data/eurofusion_robot_trajectory.csv") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=",")
     line_count = 0
     for row in csv_reader:
@@ -49,4 +52,4 @@ for i in range(0, len(trajectory_np)):
 traj_comb = np.concatenate((np.vstack(np.array(time_vec)), trajectory_np), axis=1)
 
 print(traj_comb)
-np.savetxt("../data/joint_trajectory_safe_bb.csv", traj_comb, delimiter=",")
+np.savetxt(REPO_ROOT / "data/joint_trajectory_safe_bb.csv", traj_comb, delimiter=",")

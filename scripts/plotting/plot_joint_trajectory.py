@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 def set_size(width, fraction=1.5):
     """Set figure dimensions to avoid scaling in LaTeX.
 
@@ -36,14 +40,14 @@ def set_size(width, fraction=1.5):
     return fig_dim
 
 from sympy.printing.pretty.pretty_symbology import line_width
-plt.style.use('latex_plot.mplstyle')
+plt.style.use(REPO_ROOT / 'scripts/plotting/latex_plot.mplstyle')
 
 offset = 1
 robot_dof = 6
 trajectory_in = []
 trajectory_out = []
 
-with open('../data/joint_trajectory_safe.csv') as csv_file_in:
+with open(REPO_ROOT / 'data/joint_trajectory_safe.csv') as csv_file_in:
     csv_reader_in = csv.reader(csv_file_in, delimiter=',')
     line_count = 0
     for row in csv_reader_in:
@@ -54,7 +58,7 @@ with open('../data/joint_trajectory_safe.csv') as csv_file_in:
         trajectory_in.append(q)
 
 
-with open('../build/examples/hardware/ur/output.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/hardware/ur/output.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:

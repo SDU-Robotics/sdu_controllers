@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,6 +7,8 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 from spatialmath import base as smb
 from spatialmath.base.symbolic import symbol
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 robot = rtb.models.DH.UR5()
 
@@ -59,5 +62,5 @@ rtb.xplot(t, np.array(acc), labels="acc_x acc_y acc_z domega_x domega_y domega_z
 plt.show()
 
 traj_comb = np.concatenate((np.array(pos), np.array(vel), np.array(acc)), axis=1)
-np.savetxt("../data/cartesian_trajectory_safe.csv", traj_comb, delimiter=",")
-print("successfully saved ../data/cartesian_trajectory_safe.csv")
+np.savetxt(REPO_ROOT / "data/cartesian_trajectory_safe.csv", traj_comb, delimiter=",")
+print(f"successfully saved {REPO_ROOT / 'data/cartesian_trajectory_safe.csv'}")

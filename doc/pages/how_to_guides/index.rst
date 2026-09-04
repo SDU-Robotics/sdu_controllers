@@ -8,5 +8,8 @@ Currently the following How-to guides are available.
    :maxdepth: 1
 
    installation
+   generate_circular_trajectory
+   custom_trajectory
+   visualize_with_viser
 
 

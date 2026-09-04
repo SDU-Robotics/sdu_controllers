@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 def set_size(width, fraction=1.5):
     """Set figure dimensions to avoid scaling in LaTeX.
 
@@ -36,12 +40,12 @@ def set_size(width, fraction=1.5):
     return fig_dim
 
 from sympy.printing.pretty.pretty_symbology import line_width
-plt.style.use('latex_plot.mplstyle')
+plt.style.use(REPO_ROOT / 'scripts/plotting/latex_plot.mplstyle')
 
 trajectory_in = []
 trajectory_out = []
 
-with open('../data/cartesian_trajectory_safe.csv') as csv_file:
+with open(REPO_ROOT / 'data/cartesian_trajectory_safe.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
@@ -50,7 +54,7 @@ with open('../data/cartesian_trajectory_safe.csv') as csv_file:
             pos.append(float(row[i]))
         trajectory_in.append(pos)
 
-with open('../build/examples/output_cartesian.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/output_cartesian.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:

@@ -3,7 +3,8 @@ __all__ = (
     "models",
     "controllers",
     "math",
-    "kinematics"
+    "kinematics",
+    "common"
 )
 
 import numpy as _np
@@ -17,6 +18,8 @@ from ._sdu_controllers.controllers import PIDController as _original_PIDControll
 from ._sdu_controllers import kinematics
 from ._sdu_controllers import math
 from ._sdu_controllers import utils
+
+from . import common
 
 # Add the module's config directory to ConfigFolder search paths
 import pathlib as _pathlib

@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import matplotlib as mpl
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 mpl.rcParams.update({
     "pgf.texsystem": "pdflatex",
     'font.family': 'serif',
@@ -51,14 +55,14 @@ def set_size(width, fraction=1.5):
     return fig_dim
 
 from sympy.printing.pretty.pretty_symbology import line_width
-#plt.style.use('latex_plot.mplstyle')
+#plt.style.use(REPO_ROOT / 'scripts/plotting/latex_plot.mplstyle')
 
 robot_dof = 7
 time = []
 trajectory_in = []
 trajectory_out = []
 
-with open('../data/joint_trajectory_safe_bb.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/output_eurofusion_joint.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
@@ -66,16 +70,16 @@ with open('../data/joint_trajectory_safe_bb.csv') as csv_file:
         time.append(float(row[0]))
         # read q
         q = []
-        for i in range(0, robot_dof):
-            q.append(float(row[1+i]))
+        for i in range(7, 2*robot_dof):
+            q.append(float(row[i]))
         trajectory_in.append(q)
 
-with open('../build/examples/output_eurofusion_joint.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/output_eurofusion_joint.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
         q = []
-        for i in range(0, robot_dof):
+        for i in range(2*robot_dof, (2*robot_dof)+7):
             q.append(float(row[i]))
         trajectory_out.append(q)
 
@@ -94,8 +98,8 @@ plt.subplots_adjust(top=0.845,
                     wspace=0.2)
 print(len(trajectory_in_arr))
 print(len(trajectory_out_arr))
-ax.plot(time_arr, trajectory_in_arr, label='q_d', linewidth=1)
-ax.plot(time_arr, trajectory_out_arr, '--', label='q_out', linewidth=1)
+ax.plot(trajectory_in_arr, label='q_d', linewidth=1)
+ax.plot(trajectory_out_arr, '--', label='q_out', linewidth=1)
 ax.set_xlabel('Time [s]')
 ax.set_ylabel('Joint positions [rad]')
 fig.legend(['$q_d[0]$', '$q_d[1]$', '$q_d[2]$', '$q_d[3]$', '$q_d[4]$', '$q_d[5]$', '$q_d[6]$', '$q_{out}[0]$', '$q_{out}[1]$', '$q_{out}[2]$', '$q_{out}[3]$', '$q_{out}[4]$', '$q_{out}[5]$', '$q_{out}[6]$'], loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax.transAxes)

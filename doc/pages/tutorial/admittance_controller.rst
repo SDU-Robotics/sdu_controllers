@@ -1,3 +1,5 @@
+.. _admittance_controller:
+
 Admittance Controller
 =====================
 
@@ -22,7 +24,7 @@ The controller is following this trajectory, when at (0.3, 0.4) a force pointing
 The reaction of the controller to this disturbance is plotted in blue.
 
 The C++ code in this example generates the trajectories and writes them into a csv file.
-They can then be plotted using the plot_trajectory.py script in the scripts/admittance_controller folder.
+They can then be plotted using the :code:`scripts/plotting/plot_admittance_trajectory.py` script.
 
 .. _admittance-circle-ur-example:
 

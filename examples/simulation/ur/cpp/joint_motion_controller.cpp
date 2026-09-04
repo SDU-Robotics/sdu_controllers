@@ -1,19 +1,18 @@
 #include <Eigen/Dense>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/pid_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-#include <vector>
 
 using namespace csv;
 using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
+
+constexpr double pi = 3.14159265358979323846;
 
 int main()
 {
@@ -23,13 +22,20 @@ int main()
   auto csv_writer = make_csv_writer(output_filestream);
 
   // Initialize robot model and parameters
-
   auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
+  const double total_t = 10.0;  // seconds
+  const size_t steps = static_cast<size_t>(total_t * freq);
+
+  // Sinusoidal joint trajectory: q_d(t) = q0 + amplitude * sin(omega * t), same on every joint.
+  const double amplitude = 0.1;  // rad
+  const double traj_freq = 0.2;  // Hz
+  const double omega = 2.0 * pi * traj_freq;
+
   double Kp_value = 1000.0;
   double Ki_value = 100.0;
-  double Kd_value = 2 * sqrt(Kp_value) * 0;
+  double Kd_value = 2 * sqrt(Kp_value);
   double N_value = 1;
   uint16_t ROBOT_DOF = robot_model->get_dof();
   VectorXd Kp_vec = VectorXd::Ones(ROBOT_DOF) * Kp_value;
@@ -44,74 +50,55 @@ int main()
 
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
-  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  //math::ForwardDynamics fwd_dyn(robot_model);
 
-  VectorXd q_d(ROBOT_DOF);
-  VectorXd dq_d(ROBOT_DOF);
-  VectorXd ddq_d(ROBOT_DOF);
+  VectorXd q0(ROBOT_DOF);
+  q0 << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
 
-  VectorXd q(ROBOT_DOF);
-  VectorXd dq(ROBOT_DOF);
-  q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
-  dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-
+  VectorXd q = q0;
+  VectorXd dq = VectorXd::Zero(ROBOT_DOF);
   Vector<double, 6> he = VectorXd::Zero(6);
 
-  // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("joint_trajectory_safe.csv"));
-
-  // Offline safety verification of the input trajectory.
-  //  - checks joint position, velocity and acceleration limits.
   safety::SafetyVerifier safety_verifier(robot_model);
-  bool is_trajectory_safe = safety_verifier.verify_trajectory_safety(input_trajectory);
-  size_t j = 0.0;
-  if (is_trajectory_safe)
+
+  // Control loop
+  for (size_t step = 0; step < steps; step++)
   {
-    // Control loop
-    for (const std::vector<double>& trajectory_point : input_trajectory)
+    double t = step * dt;
+
+    // Desired
+    VectorXd q_d = (q0.array() + amplitude * std::sin(omega * t)).matrix();
+    VectorXd dq_d = VectorXd::Ones(ROBOT_DOF) * (amplitude * omega * std::cos(omega * t));
+    VectorXd ddq_d = VectorXd::Ones(ROBOT_DOF) * (-amplitude * omega * omega * std::sin(omega * t));
+
+    // Online safety verification of the desired sample.
+    //  - checks joint position, velocity and acceleration limits.
+    if (!safety_verifier.check_joint_pos_limits(q_d) || !safety_verifier.check_joint_vel_limits(dq_d) ||
+        !safety_verifier.check_joint_acc_limits(ddq_d))
     {
-      // Desired
-      for (Index i = 0; i < q_d.size(); i++)
-      {
-        q_d[i] = trajectory_point[i];
-        dq_d[i] = trajectory_point[i+ROBOT_DOF];
-        ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
-      }
-
-      // Add noise to q and dq
-      VectorXd q_meas = q;
-      VectorXd dq_meas = dq;
-      //add_noise_to_vector(q_meas, 0.0, 0.001);
-      //add_noise_to_vector(dq_meas, 0.0, 0.001);
-
-      // Controller
-      VectorXd u_ff = ddq_d; // acceleration as feedforward.
-      // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
-      pid_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
-      VectorXd y = pid_controller.get_output();
-      std::cout << "y: " << y << std::endl;
-
-      VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
-      std::cout << "tau: " << tau << std::endl;
-
-      // Simulation
-      VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
-      // integrate to get velocity
-      dq += ddq * dt;
-      // integrate to get position
-      q += dq * dt;
-
-      std::cout << "q:" << q << std::endl;
-      VectorXd temp(1 + q.size());
-      temp << j * dt, q;
-      csv_writer << eigen_to_std_vector(temp);
-      j++;
+      std::cerr << "desired joint trajectory is not safe!" << std::endl;
+      break;
     }
-    output_filestream.close();
+
+    // Controller
+    VectorXd u_ff = ddq_d; // acceleration as feedforward.
+    // VectorXd u_ff = robot_model->get_gravity(q); // feedforward with gravity compensation.
+    pid_controller.step(q_d, dq_d, u_ff, q, dq);
+    VectorXd y = pid_controller.get_output();
+    VectorXd tau = robot_model->inverse_dynamics(q, dq, y, he);
+
+    // Simulation of the resulting motion, used here to validate the tracking performance.
+    VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
+    // integrate to get velocity
+    dq += ddq * dt;
+    // integrate to get position
+    q += dq * dt;
+
+    VectorXd row(1 + 3 * ROBOT_DOF);
+    row << t, q, q_d, tau;
+    csv_writer << eigen_to_std_vector(row);
   }
-  else
-  {
-    std::cerr << "input trajectory is not safe!" << std::endl;
-  }
+  output_filestream.close();
+
+  std::cout << "Simulation complete." << std::endl;
+  return 0;
 }

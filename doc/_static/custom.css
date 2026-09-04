@@ -59,5 +59,24 @@ html[data-theme="dark"] .sphinx-tabs-tab[aria-selected="true"] {
 
 .navbar-icon-links {
     padding-top: 0.0rem !important;
-    padding-bottom: 0.0rem !important;
+    padding-bottom: 0.0rem !important;  
 }
+
+/* remove gradient overlay that sphinx-book-theme adds over raw html blocks */
+div.highlight video,
+div[class*="highlight"] video,
+.bd-content video {
+    position: relative;
+    z-index: 1;
+}
+
+div.highlight::after,
+div[class*="highlight"]::after {
+    display: none !important;
+}
+
+/* remove the native browser gradient shadow on the HTML5 video controls bar */
+video::-webkit-media-controls-panel {
+    background-image: none !important;
+}
+

@@ -3,6 +3,9 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import math
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 def get_circle_target(timestep, radius=0.075, freq=0.1):
     delta_x = radius - radius * np.cos((2 * np.pi * freq * timestep))
@@ -43,7 +46,7 @@ while t < 10.0:
 
 env.close()
 traj_comb = np.concatenate((np.array(time_vec), np.array(traj)), axis=1)
-np.savetxt("../examples/data/franka_cartesian_trajectory_circle.csv", traj_comb, delimiter =",")
+np.savetxt(REPO_ROOT / "examples/data/franka_cartesian_trajectory_circle.csv", traj_comb, delimiter =",")
 
 # import roboticstoolbox as rtb
 # import spatialmath as sm
@@ -99,5 +102,5 @@ np.savetxt("../examples/data/franka_cartesian_trajectory_circle.csv", traj_comb,
 # plt.show()
 
 # traj_comb = np.concatenate((np.array(pos), np.array(vel), np.array(acc)), axis=1)
-# np.savetxt("../examples/data/cartesian_trajectory_safe.csv", traj_comb, delimiter =",")
-# print("successfully saved ../examples/data/cartesian_trajectory_safe.csv")
+# np.savetxt(REPO_ROOT / "examples/data/cartesian_trajectory_safe.csv", traj_comb, delimiter =",")
+# print(f"successfully saved {REPO_ROOT / 'examples/data/cartesian_trajectory_safe.csv'}")

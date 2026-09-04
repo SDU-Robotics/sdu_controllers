@@ -10,47 +10,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
 import sdu_controllers
-
-
-# ---------------------------------------------------------------------------
-# Trajectory helpers
-# ---------------------------------------------------------------------------
-
-def circle_trajectory(center: np.ndarray, radius: float, omega: float, t: float, ramp_time: float):
-    """Return desired Cartesian position, velocity and acceleration on a circle
-    in the XY plane centred at *center* at time *t*."""
-    # Quintic angular speed ramp: w(t) = omega * (10u^3 - 15u^4 + 6u^5), u=t/ramp_time.
-    # This is C2 continuous (zero accel/jerk at ramp start/end), reducing torque overshoot.
-    if ramp_time > 0.0 and t < ramp_time:
-        u = np.clip(t / ramp_time, 0.0, 1.0)
-        w = omega * (10.0 * u ** 3 - 15.0 * u ** 4 + 6.0 * u ** 5)
-        alpha = omega * (30.0 * u ** 2 - 60.0 * u ** 3 + 30.0 * u ** 4) / ramp_time
-        theta = omega * ramp_time * (2.5 * u ** 4 - 3.0 * u ** 5 + u ** 6)
-    else:
-        w = omega
-        alpha = 0.0
-        # Keep phase continuous with ramp profile at t=ramp_time.
-        theta = omega * (t - 0.5 * ramp_time)
-
-    c = np.cos(theta)
-    s = np.sin(theta)
-
-    pos = np.array([
-        center[0] + radius * c,
-        center[1] + radius * s,
-        center[2],
-    ])
-    vel = np.array([
-        -radius * s * w,
-         radius * c * w,
-         0.0,
-    ])
-    acc = np.array([
-        -radius * c * w ** 2 - radius * s * alpha,
-        -radius * s * w ** 2 + radius * c * alpha,
-         0.0,
-    ])
-    return pos, vel, acc
+from sdu_controllers.common import circular_trajectory
 
 
 def rotation_to_zyz(R: np.ndarray) -> np.ndarray:
@@ -158,7 +118,7 @@ def main():
         t = step * dt
 
         # Desired pose, velocity and acceleration
-        pos_d, dpos_d, ddpos_d = circle_trajectory(center, radius, omega, t, ramp_time)
+        pos_d, dpos_d, ddpos_d = circular_trajectory(center, radius, omega, t, ramp_time)
 
         # Small sinusoidal orientation command in yaw.
         yaw_d = orient_amp_rad * np.sin(orient_omega * t)

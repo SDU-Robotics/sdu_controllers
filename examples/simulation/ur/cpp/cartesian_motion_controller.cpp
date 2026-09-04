@@ -4,6 +4,7 @@
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/math/forward_dynamics.hpp>
 #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/math/trajectory_generation.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
@@ -13,6 +14,8 @@ using namespace csv;
 using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
+
+constexpr double pi = 3.14159265358979323846;
 
 int main()
 {
@@ -25,6 +28,14 @@ int main()
   auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
   double freq = 500.0;
   double dt = 1.0 / freq;
+  const double total_t = 4.0;   // seconds (two full circles)
+  const size_t steps = static_cast<size_t>(total_t * freq);
+
+  // Circle parameters
+  const double radius = 0.05;               // 5 cm
+  const double circle_freq = 0.5;            // Hz
+  const double omega = 2.0 * pi * circle_freq;
+  const double ramp_time = 0.3;              // s
 
   double Kp_pos_value = 16250.0;
   double Kp_orient_value = 16250.0;
@@ -48,9 +59,8 @@ int main()
   Kd.block<3, 3>(0,0) = Kd_pos_vec.asDiagonal();
   Kd.block<3, 3>(3,3) = Kd_orient_vec.asDiagonal();
 
+  // ZYZ mode (default): x_d is [position(3), ZYZ angles(3)].
   controllers::OperationalSpaceController osc_controller(Kp, Kd, robot_model);
-  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  //math::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd x_d(6);
   VectorXd dx_d(6);
@@ -62,21 +72,24 @@ int main()
   q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
   dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
-  // Read input trajectory from file
-  std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file(utils::data_path("cartesian_trajectory_safe.csv"));
+  // Circle centre and fixed orientation derived from the initial end-effector pose.
+  Matrix4d T0 = robot_model->get_fk_solver().forward_kinematics(q);
+  Vector3d center = T0.block<3, 1>(0, 3);
+  center[0] -= radius;   // shift so the trajectory starts at the robot's initial position
+  Vector3d rot_zyz_d = T0.topLeftCorner<3, 3>().eulerAngles(2, 1, 2);
 
   // Control loop
-  for (size_t j=0; j<input_trajectory.size(); j++)  // (const std::vector<double>& trajectory_point : input_trajectory)
+  for (size_t step = 0; step < steps; ++step)
   {
-    // Desired
-    for (Index i = 0; i < x_d.size(); i++)
-    {
-      x_d[i] = input_trajectory[j][i];
-      dx_d[i] = input_trajectory[j][i+6];
-      ddx_d[i] = input_trajectory[j][i+12];
-    }
+    const double t = step * dt;
 
-    std::cout << "x_d: " << x_d << std::endl;
+    // Desired Cartesian pose, velocity and acceleration
+    Vector3d pos_d, dpos_d, ddpos_d;
+    math::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
+
+    x_d << pos_d, rot_zyz_d;
+    dx_d << dpos_d, Vector3d::Zero();
+    ddx_d << ddpos_d, Vector3d::Zero();
 
     // Add noise to q and dq
     VectorXd q_meas = q;
@@ -87,9 +100,7 @@ int main()
     // Controller
     osc_controller.step(x_d, dx_d, ddx_d, q_meas, dq_meas);
     VectorXd y = osc_controller.get_output();
-    std::cout << "y: " << y << std::endl;
     VectorXd tau = robot_model->inverse_dynamics(q_meas, dq_meas, y, he);
-    std::cout << "tau: " << tau << std::endl;
 
     // Simulation
     VectorXd ddq = robot_model->forward_dynamics(q, dq, tau);
@@ -98,17 +109,14 @@ int main()
     // integrate to get position
     q += dq * dt;
 
-
-    std::cout << "q:" << q << std::endl;
     MatrixXd T = robot_model->get_fk_solver().forward_kinematics(q);
     VectorXd pos = T.block<3, 1>(0, 3);
-    std::cout << "pos:" << pos << std::endl;
     Matrix3d rot_mat = T.block<3,3>(0, 0);
     Vector3d rpy_zyz = rot_mat.eulerAngles(2, 1, 2); // ZYZ representation
-    std::cout << "rpy_zyz:" << rpy_zyz << std::endl;
     VectorXd temp(q.size()+pos.size()+rpy_zyz.size());
     temp << q, pos, rpy_zyz;
     csv_writer << eigen_to_std_vector(temp);
   }
   output_filestream.close();
+  std::cout << "Simulation complete. Output written to output_cartesian.csv" << std::endl;
 }

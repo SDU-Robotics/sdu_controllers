@@ -1,0 +1,7 @@
+font.size:    11.0
+font.family: serif
+font.serif: Computer Modern
+axes.titlesize: medium
+figure.titlesize: medium
+text.usetex: True
+text.latex.preamble: \usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]

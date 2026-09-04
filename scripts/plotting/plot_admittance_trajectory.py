@@ -1,16 +1,20 @@
 import csv
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 ref_traj = []
 adm_traj = []
 
-with open('../../build/examples/output_admittance_reference.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/output_admittance_reference.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
         ref_traj.append([float(row[0]), float(row[1])])
 
-with open('../../build/examples/output_admittance.csv') as csv_file:
+with open(REPO_ROOT / 'build/examples/output_admittance.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
         adm_traj.append([float(row[0]), float(row[1])])

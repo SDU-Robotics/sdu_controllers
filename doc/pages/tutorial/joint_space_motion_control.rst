@@ -3,11 +3,10 @@
 **************************
 Joint-space motion control
 **************************
-sdu_controllers implements a joint-space motion controller with inverse dynamics control
-as described on page 330 in :cite:t:`2009:Siciliano`. By using this controller you can make
-a robot follow an arbitrary joint-space trajectory that is defined within the limits of
-the robots. This page contains two examples, in the :ref:`first example <ur5e_joint_space_control>`
-we use the Universal Robots UR5e 6 DOF robot manipulator and in the
+sdu_controllers implements a joint-space motion controller with inverse dynamics control,
+which lets a robot follow an arbitrary joint-space trajectory within the robot's limits.
+This page contains two examples, in the :ref:`first example <ur5e_joint_space_control>` we
+use the Universal Robots UR5e 6 DOF robot manipulator and in the
 :ref:`second example <bb_robot_joint_space_control>` the more advanced 7 DOF breeding
 blanket handling robot.
 
@@ -19,55 +18,25 @@ blanket handling robot.
    :width: 90%
    :class: only-dark
 
-The dynamic model of an n-joint robot
-manipulator given by the Euler-Lagrange equation can be written as:
-
-.. math::
-
-   B(q)\ddot{q} + C(q, \dot{q})\dot{q} + F\dot{q} + g(q) = u
-
-where :math:`B(q)` is the inertia tensor, :math:`C(q, \dot{q})` is a matrix containing
-Coriolis and centrifugal terms, :math:`g(q)` is the gravity vector, and :math:`u` is the
-actuator torque. By taking the control :math:`u` as a function of the manipulator state
-in the form:
-
-.. math::
-
-   u = B(q)y + C(q, \dot{q})\dot{q} + F\dot{q} + g(q)
-
-then the system can be described as
-
-.. math::
-
-   \ddot{q} = y
-
-where :math:`y` is our auxiliary input signal.
-
-We can then choose to have PD-control acting on the desired joint positions :math:`q_{d}` and joint velocities :math:`\dot{q}_{d}`
-like the following:
-
-.. math::
-
-   y = u_{ff} + K_{P}(q_{d} - q) + K_{D}(\dot{q}_{d} - \dot{q})
-
-here the acceleration is used as feed-forward :math:`u_{ff} = \ddot{q}`.
-
-.. note::
-    You can also choose the gravity vector as feed-forward so that :math:`u_{ff} = g(q)`,
-    which will make the controller compensate the gravity forces.
+.. seealso::
+   :ref:`Joint-space (inverse dynamics) control <explanation-joint-space>` for the theory
+   behind this controller, including the derivation of the control law and how the
+   forward dynamics simulation used below works.
 
 .. _ur5e_joint_space_control:
 
 UR5e robot joint-space control
 ------------------------------
-With the trajectory generated we can now try to run the joint motion control. You can choose to make your own
-example with a :code:`.cpp` or :code:`.py` file or feel free to simply use the one available under
+This example combines the three building blocks from :ref:`Getting started <getting-started>`:
+a :code:`URRobotModel` of the UR5e, a :code:`PIDController`, and the sinusoidal reference
+:math:`q_d(t) = q_0 + a\sin(\omega t)` evaluated inside the control loop. You can choose to
+make your own example with a :code:`.cpp` or :code:`.py` file or simply use the one available under
 
-:code:`examples/ur_examples/joint_motion_controller.cpp`
+:code:`examples/simulation/ur/cpp/joint_motion_controller.cpp`
 
 or
 
-:code:`examples/ur_examples/python/joint_motion_controller.py`.
+:code:`examples/simulation/ur/python/joint_motion_controller.py`.
 
 The code for joint-space motion control is listed here in C++ and Python:
 
@@ -76,123 +45,121 @@ The code for joint-space motion control is listed here in C++ and Python:
    .. code-tab:: c++
 
         #include <Eigen/Dense>
-        #include <fstream>
-        #include <iostream>
-        #include <sdu_controllers/controllers/pd_controller.hpp>
-        #include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-        #include <sdu_controllers/models/ur_robot.hpp>
+        #include <cmath>
+        #include <sdu_controllers/controllers/pid_controller.hpp>
         #include <sdu_controllers/models/ur_robot_model.hpp>
-        #include <sdu_controllers/utils/utility.hpp>
+
+        constexpr double pi = 3.14159265358979323846;
 
         // Initialize robot model and parameters
-        auto robot_model = std::make_shared<models::URRobotModel>(URRobot::RobotType::UR5e);
+        auto robot_model = std::make_shared<models::URRobotModel>(models::URRobotModel::RobotType::ur5e);
+        double dt = 1.0 / 500.0;
         double Kp_val = 1000.0; // Proportional gain
-        double Kd_val = 2 * sqrt(Kp_value); // Derivative gain
+        double Kd_val = 2 * sqrt(Kp_val); // Derivative gain
         double N_val = 1; // Feed-forward gain
         uint16_t ROBOT_DOF = robot_model->get_dof();
         VectorXd Kp_vec = VectorXd::Ones(ROBOT_DOF) * Kp_val;
         VectorXd Kd_vec = VectorXd::Ones(ROBOT_DOF) * Kd_val;
         VectorXd N_vec = VectorXd::Ones(ROBOT_DOF) * N_val;
 
-        controllers::PDController pd_controller(Kp_vec.asDiagonal(), Kd_vec.asDiagonal(), N_vec.asDiagonal());
-        math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+        VectorXd u_max(ROBOT_DOF);
+        u_max << 150.0, 150.0, 150.0, 28.0, 28.0, 28.0;
+        controllers::PIDController pid_controller(Kp_vec.asDiagonal(), VectorXd::Zero(ROBOT_DOF).asDiagonal(),
+          Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, -u_max, u_max);
 
-        VectorXd q_d(ROBOT_DOF);
-        VectorXd dq_d(ROBOT_DOF);
-        VectorXd ddq_d(ROBOT_DOF);
+        // Sinusoidal joint trajectory parameters
+        VectorXd q0(ROBOT_DOF);
+        q0 << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
+        double amplitude = 0.2; // [rad]
+        double omega = 2.0 * pi * 0.1; // [rad/s], 0.1 Hz
 
-        VectorXd q(ROBOT_DOF);
-        VectorXd dq(ROBOT_DOF);
-        q << 0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0;
-        dq << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-
-        // Read input trajectory from file
-        std::vector<std::vector<double>> input_trajectory = get_trajectory_from_file("../../examples/data/joint_trajectory_safe.csv");
+        VectorXd q = q0;
+        VectorXd dq = VectorXd::Zero(ROBOT_DOF);
+        Vector<double, 6> he = VectorXd::Zero(6);
 
         // Control loop
-        for (const std::vector<double>& trajectory_point : input_trajectory)
+        for (size_t step = 0; step < num_steps; step++)
         {
-          // Desired
-          for (Index i = 0; i < q_d.size(); i++)
-          {
-            q_d[i] = trajectory_point[i];
-            dq_d[i] = trajectory_point[i+ROBOT_DOF];
-            ddq_d[i] = trajectory_point[i+(2*ROBOT_DOF)];
-          }
+          double t = step * dt;
 
-          VectorXd q_meas = q;
-          VectorXd dq_meas = dq;
+          // Desired
+          VectorXd q_d = (q0.array() + amplitude * std::sin(omega * t)).matrix();
+          VectorXd dq_d = VectorXd::Ones(ROBOT_DOF) * (amplitude * omega * std::cos(omega * t));
+          VectorXd ddq_d = VectorXd::Ones(ROBOT_DOF) * (-amplitude * omega * omega * std::sin(omega * t));
 
           // Controller
           VectorXd u_ff = ddq_d; // acceleration as feedforward.
-          // VectorXd u_ff = robot_model->get_gravity(q_meas); // feedforward with gravity compensation.
-          pd_controller.step(q_d, dq_d, u_ff, q_meas, dq_meas);
-          VectorXd y = pd_controller.get_output();
-          VectorXd tau = inv_dyn_jnt_space.inverse_dynamics(y, q_meas, dq_meas);
+          // VectorXd u_ff = robot_model->get_gravity(q); // feedforward with gravity compensation.
+          pid_controller.step(q_d, dq_d, u_ff, q, dq);
+          VectorXd y = pid_controller.get_output();
+          VectorXd tau = robot_model->inverse_dynamics(q, dq, y, he);
           std::cout << "tau: " << tau << std::endl;
         }
 
    .. code-tab:: py
 
         import numpy as np
-        from numpy import genfromtxt
         import sdu_controllers
 
-        joint_traj = genfromtxt('examples/data/joint_trajectory_safe.csv', delimiter=',')
-        Kp_val = 100.0  # Proportional gain
-        Kd_val = 2 * np.sqrt(Kp_val) # Derivative gain
-        N_val = 1 # Feed-forward gain
+        PI = 3.14159265358979323846
 
-        Kp = np.diag([Kp_val, Kp_val, Kp_val, Kp_val, Kp_val, Kp_val])
-        Kd = np.diag([Kd_val, Kd_val, Kd_val, Kd_val, Kd_val, Kd_val])
-        N = np.diag([N_val, N_val, N_val, N_val, N_val, N_val])
+        dt = 1.0 / 500.0
+        Kp_val = 1000.0  # Proportional gain
+        Kd_val = 2 * np.sqrt(Kp_val)  # Derivative gain
+        N_val = 1  # Feed-forward gain
 
-        ur_robot = sdu_controllers.URRobotModel()
-        pd_controller = sdu_controllers.PDController(Kp, Kd, N)
-        inv_dyn_jnt_space = sdu_controllers.InverseDynamicsJointSpace(ur_robot)
+        robot_model = sdu_controllers.models.URRobotModel(sdu_controllers.models.RobotType.ur5e)
+        dof = robot_model.get_dof()
 
-        q = np.array([0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0])
-        dq = np.zeros(6)
+        Kp = np.eye(dof) * Kp_val
+        Kd = np.eye(dof) * Kd_val
+        N = np.eye(dof) * N_val
+        u_max = np.array([150.0, 150.0, 150.0, 28.0, 28.0, 28.0])
 
-        for joint_q in joint_traj:
-            q_d = np.array(joint_q[0:6])
-            dq_d = np.array(joint_q[6:12])
-            ddq_d = np.array(joint_q[12:18])
+        pid_controller = sdu_controllers.controllers.PIDController(Kp, np.zeros((dof, dof)), Kd, N, dt, -u_max, u_max)
+
+        # Sinusoidal joint trajectory parameters
+        q0 = np.array([0.0, -1.5707, -1.5707, -1.5707, 1.5707, 0.0])
+        amplitude = 0.2  # [rad]
+        omega = 2.0 * PI * 0.1  # [rad/s], 0.1 Hz
+
+        q = q0.copy()
+        dq = np.zeros(dof)
+        he = np.zeros(6)
+
+        for step in range(num_steps):
+            t = step * dt
+
+            q_d = q0 + amplitude * np.sin(omega * t)
+            dq_d = np.full(dof, amplitude * omega * np.cos(omega * t))
+            ddq_d = np.full(dof, -amplitude * omega * omega * np.sin(omega * t))
 
             u_ff = ddq_d
-            # u_ff = ur_robot.get_gravity(q_meas); // feedforward with gravity compensation.
-            pd_controller.step(q_d, dq_d, u_ff, q, dq)
-            y = pd_controller.get_output()
-            tau = inv_dyn_jnt_space.inverse_dynamics(y, q, dq)
+            # u_ff = robot_model.get_gravity(q)  # feedforward with gravity compensation.
+            pid_controller.step(q_d, dq_d, u_ff, q, dq)
+            y = pid_controller.get_output()
+            tau = robot_model.inverse_dynamics(q, dq, y, he)
             print('tau:', tau)
 
-You have to provide gains for the PD controller using the variables :code:`Kp_val` and :code:`Kd_val`
-and optionally a feed-forward gain using the variable :code:`N_val`.
+You have to provide gains for the PID controller using the variables :code:`Kp_val` and
+:code:`Kd_val`, and optionally a feed-forward gain using the variable :code:`N_val`. The
+amplitude and frequency of the sinusoid (:code:`amplitude` and the :code:`0.1` Hz used in
+:code:`omega`) can be tuned to make the tracking test more or less demanding.
 
 If you plot the output joint torques from the variable :code:`tau`, you should get something similar
 to the following figure:
 
-.. figure:: ../../_static/joint_pd_control_output_torque_light.svg
+.. figure:: ../../_static/joint_motion_control_output.svg
    :width: 90%
-   :class: only-light
 
-.. figure:: ../../_static/joint_pd_control_output_torque_dark.svg
+To check whether the output torques produce a robot movement that tracks the sinusoidal
+reference, the example scripts also simulate the resulting motion using forward dynamics
+and compare it against :math:`q_d(t)`; see
+:ref:`Joint-space (inverse dynamics) control <explanation-joint-space>` for details on how
+this simulation works. In the following figure you can see the comparison of :math:`q` and :math:`q_d`.
+
+.. figure:: ../../_static/joint_tracking_output.svg
    :width: 90%
-   :class: only-dark
-
-In order to check whether the output torques produces a robot movement that ressembles the input trajectory, a
-simulation can be performed by using forward dynamics to calculate an output trajectory based on the output torques :math:`u`. This
-output trajectory can then be compared with the input trajectory.
-
-The forward dynamics can be calculated using Eq. (7.115), from page 293 in :cite:t:`2009:Siciliano`:
-
-.. math::
-
-  \ddot{q} = \mathbf{B}^{-1}(q) \left(\tau - \mathbf{C}(q)\dot{q} -\mathbf{\tau}_{g}\right)
-
-this gives us the acceleration :math:`\ddot{q}`, which can be integrated to yield the velocity
-:math:`\dot{q}`, which can also be integrated to yield the position :math:`q`.
-
 
 .. _bb_robot_joint_space_control:
 
@@ -214,3 +181,4 @@ Breeding blanket handling robot joint-space control
 
 
 see additional examples in the :ref:`Examples <examples>` section.
+
