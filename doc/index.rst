@@ -29,36 +29,45 @@ in MATLAB Simulink with very little overhead.
 In this documentation
 ---------------------
 
-.. grid:: 2
-    :gutter: 3
+.. only:: html and not epub
 
-    .. grid-item-card:: :octicon:`mortar-board;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Tutorials
-        :link: pages/tutorial/index
-        :link-type: doc
-        :class-title: sd-text-primary sd-font-weight-bold
+   .. grid:: 2
+      :gutter: 3
 
-        **Start here:** A hands-on introduction to sdu_controllers for new users.
+      .. grid-item-card:: :octicon:`mortar-board;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Tutorials
+         :link: pages/tutorial/index
+         :link-type: doc
+         :class-title: sd-text-primary sd-font-weight-bold
 
-    .. grid-item-card:: :octicon:`tools;1.2em;sd-text-primary sd-mr-2 sd-align-middle` How-to guides
-        :link: pages/how_to_guides/index
-        :link-type: doc
-        :class-title: sd-text-primary sd-font-weight-bold
+         **Start here:** A hands-on introduction to sdu_controllers for new users.
 
-        **Step-by-step guides** covering common tasks and key functionalities.
+      .. grid-item-card:: :octicon:`tools;1.2em;sd-text-primary sd-mr-2 sd-align-middle` How-to guides
+         :link: pages/how_to_guides/index
+         :link-type: doc
+         :class-title: sd-text-primary sd-font-weight-bold
 
-    .. grid-item-card::  :octicon:`light-bulb;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Explanation
-        :link: pages/explanation/index
-        :link-type: doc
-        :class-title: sd-text-primary sd-font-weight-bold
+         **Step-by-step guides** covering common tasks and key functionalities.
 
-        **Discussion and clarification** of key topics
+      .. grid-item-card::  :octicon:`light-bulb;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Explanation
+         :link: pages/explanation/index
+         :link-type: doc
+         :class-title: sd-text-primary sd-font-weight-bold
 
-    .. grid-item-card::  :octicon:`book;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Reference
-        :link: pages/reference/index
-        :link-type: doc
-        :class-title: sd-text-primary sd-font-weight-bold
+         **Discussion and clarification** of key topics
 
-        **Technical information** - specifications, APIs, architecture
+      .. grid-item-card::  :octicon:`book;1.2em;sd-text-primary sd-mr-2 sd-align-middle` Reference
+         :link: pages/reference/index
+         :link-type: doc
+         :class-title: sd-text-primary sd-font-weight-bold
+
+         **Technical information** - specifications, APIs, architecture
+
+.. only:: epub or latex
+
+   * :doc:`Tutorials <pages/tutorial/index>` - A hands-on introduction to sdu_controllers for new users.
+   * :doc:`How-to guides <pages/how_to_guides/index>` - Step-by-step guides covering common tasks and key functionalities.
+   * :doc:`Explanation <pages/explanation/index>` - Discussion and clarification of key topics.
+   * :doc:`Reference <pages/reference/index>` - Technical information, specifications, APIs, and architecture.
 
 ---------
 
