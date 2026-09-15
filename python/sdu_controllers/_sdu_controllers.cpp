@@ -26,7 +26,7 @@ namespace sdu_controllers
   nb::module_ create_robot_models_module(nb::module_ &main_module);
   nb::module_ create_math_module(nb::module_ &main_module);
   nb::module_ create_kinematics_module(nb::module_ &main_module);
-
+  nb::module_ create_hal_module(nb::module_ &main_module);   
   NB_MODULE(_sdu_controllers, m)
   {
     m.doc() = "Python Bindings for sdu_controllers";
@@ -36,6 +36,7 @@ namespace sdu_controllers
     nb::module_ m_math = create_math_module(m);
     nb::module_ m_kinematics = create_kinematics_module(m);
     nb::module_ m_utils = m.def_submodule("utils", "Submodule containing utility functions.");
+    nb::module_ m_hal = create_hal_module(m);
 
     // utils
     nb::class_<utils::ConfigFolder>(m_utils, "ConfigFolder")
