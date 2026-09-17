@@ -2,7 +2,7 @@
 
 These are simple, analytic reference trajectories computed on the fly (no need to
 pre-generate/persist to a file, unlike arbitrary offline-planned trajectories).
-They mirror the C++ helpers in ``sdu_controllers/math/trajectory_generation.hpp``.
+They mirror the C++ helpers in ``sdu_controllers/trajectory/trajectory_generation.hpp``.
 """
 
 import numpy as np

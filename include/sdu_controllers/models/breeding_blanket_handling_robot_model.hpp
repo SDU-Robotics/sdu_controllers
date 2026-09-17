@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <filesystem>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 #include <sdu_controllers/models/robot_parameters.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 #include <sdu_controllers/models/parameter_robot_model.hpp>

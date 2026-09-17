@@ -54,12 +54,12 @@ int main()
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
 
-  //math::RecursiveNewtonEuler rnea(robot_model);
+  //dynamics::RecursiveNewtonEuler rnea(robot_model);
   //Vector3d z0;
   //z0 << 0.0, 0.0, -1.0;
   //rnea.set_z0(z0);
-  //math::InverseDynamicsJointSpace inv_dyn(robot_model);
-  //math::ForwardDynamics fwd_dyn(robot_model);
+  //dynamics::InverseDynamicsJointSpace inv_dyn(robot_model);
+  //dynamics::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);

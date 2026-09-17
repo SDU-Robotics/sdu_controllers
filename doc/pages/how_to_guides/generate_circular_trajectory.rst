@@ -19,7 +19,7 @@ a closed-form position, velocity and acceleration at any time :math:`t` - there 
 to pre-compute it with an external planner and persist it to a CSV file. Instead, every
 tutorial and example calls one shared helper function directly inside the control loop:
 
-* C++: :code:`sdu_controllers::math` in :code:`include/sdu_controllers/math/trajectory_generation.hpp`
+* C++: :code:`sdu_controllers::trajectory` in :code:`include/sdu_controllers/trajectory/trajectory_generation.hpp`
 * Python: :code:`sdu_controllers.common`
 
 Position trajectory
@@ -50,10 +50,10 @@ Usage
 
    .. code-tab:: c++
 
-        #include <sdu_controllers/math/trajectory_generation.hpp>
+        #include <sdu_controllers/trajectory/trajectory_generation.hpp>
 
         Eigen::Vector3d pos_d, vel_d, acc_d;
-        sdu_controllers::math::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, vel_d, acc_d);
+        sdu_controllers::trajectory::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, vel_d, acc_d);
 
    .. code-tab:: py
 
@@ -66,7 +66,7 @@ Orientation excitation (QUATERNION mode)
 To exercise the orientation channel of a controller running in
 :ref:`QUATERNION mode <orientation-representation-api>`, a small sinusoidal yaw oscillation
 about a fixed axis can be added on top of the positional circle using
-:code:`sdu_controllers::math::yaw_oscillation()` (C++) - this returns a desired quaternion
+:code:`sdu_controllers::trajectory::yaw_oscillation()` (C++) - this returns a desired quaternion
 :code:`[w, x, y, z]` together with the corresponding angular velocity/acceleration, ready to
 pass to :code:`ImpedanceController::step()` or :code:`OperationalSpaceController::step()`.
 See :ref:`impedance_control` for a complete example.

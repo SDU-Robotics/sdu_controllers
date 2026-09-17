@@ -5,7 +5,7 @@
 
 #include <sdu_controllers/models/robot_parameters.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 #include <sdu_controllers/models/robot_parameters.hpp>
 #include <Eigen/Dense>
 #include <optional>
@@ -167,7 +167,7 @@ namespace sdu_controllers::models
     std::shared_ptr<kinematics::ForwardKinematics> fk_model_;
 
     // recursive newton euler algorithm
-    std::shared_ptr<math::RecursiveNewtonEuler> rnea_;
+    std::shared_ptr<dynamics::RecursiveNewtonEuler> rnea_;
 
     // inertial
     std::vector<double> mass_;

@@ -4,7 +4,7 @@
 #include <limits>
 #include <iostream>
 #include <sdu_controllers/controllers/impedance_controller.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>

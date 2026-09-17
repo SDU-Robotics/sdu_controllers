@@ -7,9 +7,9 @@ set(sdu_controllers_SOURCES
       controllers/impedance_controller.cpp
       kinematics/forward_kinematics.cpp
       kinematics/dh_kinematics.cpp
-      math/inverse_dynamics_joint_space.cpp
-      math/forward_dynamics.cpp
-      math/rnea.cpp
+      dynamics/inverse_dynamics_joint_space.cpp
+      dynamics/forward_dynamics.cpp
+      dynamics/rnea.cpp
       models/breeding_blanket_handling_robot_model.cpp
       models/ur_robot_model.cpp
       models/regressor_robot_model.cpp

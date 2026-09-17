@@ -13,7 +13,7 @@ Controllers:
 * :ref:`ImpedanceController <impedance-controller-api>`
 * :ref:`ForceControlInnerVelocityLoop <force-control-inner-velocity-loop-api>`
 
-Math:
+Dynamics:
 
 * :ref:`ForwardDynamics <forward-dynamics-api>`
 * :ref:`InverseDynamics <inverse-dynamics-api>`
@@ -102,7 +102,7 @@ ForceControlInnerVelocityLoop
 ForwardDynamics
 ===============
 
-.. doxygenclass:: sdu_controllers::math::ForwardDynamics
+.. doxygenclass:: sdu_controllers::dynamics::ForwardDynamics
     :project: sdu_controllers
     :members:
 
@@ -111,7 +111,7 @@ ForwardDynamics
 InverseDynamics
 ===============
 
-.. doxygenclass:: sdu_controllers::math::InverseDynamics
+.. doxygenclass:: sdu_controllers::dynamics::InverseDynamics
     :project: sdu_controllers
     :members:
 
@@ -120,7 +120,7 @@ InverseDynamics
 InverseDynamicsJointSpace
 =========================
 
-.. doxygenclass:: sdu_controllers::math::InverseDynamicsJointSpace
+.. doxygenclass:: sdu_controllers::dynamics::InverseDynamicsJointSpace
     :project: sdu_controllers
     :members:
 

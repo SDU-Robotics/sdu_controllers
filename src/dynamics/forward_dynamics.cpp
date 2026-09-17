@@ -1,10 +1,10 @@
 #include <iostream>
-#include <sdu_controllers/math/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
 #include <utility>
 
 using namespace Eigen;
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
   ForwardDynamics::ForwardDynamics(std::shared_ptr<models::RobotModel> robot_model) :
         robot_model_(std::move(robot_model))
@@ -25,4 +25,4 @@ namespace sdu_controllers::math
     return ddq;
   }
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics

@@ -5,7 +5,7 @@
 #include <memory>
 #include <sdu_controllers/models/robot_model.hpp>
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
    /**
    *  An implementation of the recursive Newton-Euler algorithm
@@ -65,6 +65,6 @@ namespace sdu_controllers::math
       std::vector<Eigen::Matrix3d> link_inertia_;
   };
 
-} // namespace sdu_controllers::math
+} // namespace sdu_controllers::dynamics
 
 #endif // SDU_CONTROLLERS_RNEA_HPP

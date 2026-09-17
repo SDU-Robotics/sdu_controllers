@@ -5,7 +5,7 @@
 #include <memory>
 #include <sdu_controllers/models/robot_model.hpp>
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
   /**
    * This class implements forward dynamics computing the acceleration due to applied torque. It
@@ -43,6 +43,6 @@ namespace sdu_controllers::math
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics
 
 #endif  // SDU_CONTROLLERS_FORWARD_DYNAMICS_HPP

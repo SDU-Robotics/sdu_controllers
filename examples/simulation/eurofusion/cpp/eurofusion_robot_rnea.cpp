@@ -4,7 +4,7 @@
 #include <sdu_controllers/models/breeding_blanket_handling_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 #include "sdu_controllers/models/robot_model.hpp"
 
 using namespace csv;
@@ -29,9 +29,9 @@ int main()
 
   uint16_t ROBOT_DOF = robot_model->get_dof();
 
-  // math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  // math::ForwardDynamics fwd_dyn(robot_model);
-  // math::RecursiveNewtonEuler rnea(robot_model);
+  // dynamics::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  // dynamics::ForwardDynamics fwd_dyn(robot_model);
+  // dynamics::RecursiveNewtonEuler rnea(robot_model);
 
 
   //Eigen::Vector3d z0;

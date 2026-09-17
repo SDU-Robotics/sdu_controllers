@@ -1,6 +1,6 @@
 #include <Eigen/Geometry>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 
 namespace Eigen {
   namespace indexing {
@@ -9,7 +9,7 @@ namespace Eigen {
   using Eigen::indexing::all;
 }
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
   RecursiveNewtonEuler::RecursiveNewtonEuler(models::RobotModel &robot_model) : robot_model_(robot_model)
   {
@@ -346,4 +346,4 @@ namespace sdu_controllers::math
       }
     }
   }
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics

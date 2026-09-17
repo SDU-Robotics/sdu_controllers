@@ -30,7 +30,7 @@ namespace sdu_controllers::models
     set_robot_parameters(params);
 
     // Initialize RNEA for dynamics
-    rnea_ = std::make_shared<math::RecursiveNewtonEuler>(*this);
+    rnea_ = std::make_shared<dynamics::RecursiveNewtonEuler>(*this);
   }
 
   ParameterRobotModel::ParameterRobotModel(const RobotParameters &params)
@@ -38,7 +38,7 @@ namespace sdu_controllers::models
     // Set the parameters into this ParameterRobotModel instance
     set_robot_parameters(params);
     // Initialize RNEA for dynamics
-    rnea_ = std::make_shared<math::RecursiveNewtonEuler>(*this);
+    rnea_ = std::make_shared<dynamics::RecursiveNewtonEuler>(*this);
   }
 
   std::optional<RobotParameters> ParameterRobotModel::load_parameters_from_yaml(const std::string &filepath)

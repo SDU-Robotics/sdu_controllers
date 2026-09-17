@@ -1,5 +1,6 @@
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
+#include <sdu_controllers/kinematics/jacobian_analytical.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <utility>
 #include <Eigen/src/QR/FullPivHouseholderQR.h>
@@ -52,9 +53,9 @@ namespace sdu_controllers::controllers
 
       VectorXd x_tilde = x_d - x_e;
 
-      MatrixXd J_A = math::jacobian_analytical(q, robot_model_);
+      MatrixXd J_A = kinematics::jacobian_analytical(q, robot_model_);
 
-      MatrixXd Jdot_A = math::jacobian_dot_analytical(q, dq, robot_model_);
+      MatrixXd Jdot_A = kinematics::jacobian_dot_analytical(q, dq, robot_model_);
 
       VectorXd dx_e = J_A * dq;
 

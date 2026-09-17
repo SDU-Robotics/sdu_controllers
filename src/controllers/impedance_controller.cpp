@@ -1,4 +1,5 @@
 #include <sdu_controllers/controllers/impedance_controller.hpp>
+#include <sdu_controllers/kinematics/jacobian_analytical.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <utility>
 
@@ -42,8 +43,8 @@ namespace sdu_controllers::controllers
       VectorXd x_e(6);
       x_e << pos, rot_zyz;
 
-      MatrixXd J_A    = math::jacobian_analytical(q, robot_model_);
-      MatrixXd Jdot_A = math::jacobian_dot_analytical(q, dq, robot_model_);
+      MatrixXd J_A    = kinematics::jacobian_analytical(q, robot_model_);
+      MatrixXd Jdot_A = kinematics::jacobian_dot_analytical(q, dq, robot_model_);
 
       VectorXd x_tilde  = x_d - x_e;
       VectorXd dx_tilde = dx_d - J_A * dq;

@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 #include <sdu_controllers/controllers/impedance_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/math/trajectory_generation.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/trajectory/trajectory_generation.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/utils/utility.hpp>
@@ -111,7 +111,7 @@ int main()
 
     // Desired Cartesian pose, velocity and acceleration
     Vector3d pos_d, dpos_d, ddpos_d;
-    math::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
+    trajectory::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
 
     VectorXd x_d(6),  dx_d(6),  ddx_d(6);
     x_d   << pos_d,    Vector3d::Zero();   // orientation part unused in QUATERNION mode

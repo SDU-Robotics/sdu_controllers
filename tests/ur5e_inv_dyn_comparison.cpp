@@ -2,13 +2,13 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/pid_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
 #include <sdu_controllers/utils/utility.hpp>
-#include <sdu_controllers/math/rnea.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
 
 using namespace csv;
 using namespace Eigen;
@@ -43,10 +43,10 @@ int main()
 
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
+  dynamics::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  dynamics::ForwardDynamics fwd_dyn(robot_model);
 
-  math::RecursiveNewtonEuler rnea(*robot_model);
+  dynamics::RecursiveNewtonEuler rnea(*robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);

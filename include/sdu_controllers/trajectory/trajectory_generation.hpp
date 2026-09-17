@@ -1,11 +1,11 @@
 #pragma once
-#ifndef SDU_CONTROLLERS_MATH_TRAJECTORY_GENERATION_HPP
-#define SDU_CONTROLLERS_MATH_TRAJECTORY_GENERATION_HPP
+#ifndef SDU_CONTROLLERS_TRAJECTORY_TRAJECTORY_GENERATION_HPP
+#define SDU_CONTROLLERS_TRAJECTORY_TRAJECTORY_GENERATION_HPP
 
 #include <Eigen/Dense>
 #include <cmath>
 
-namespace sdu_controllers::math
+namespace sdu_controllers::trajectory
 {
   /**
    * @brief Evaluate a circular Cartesian trajectory (in the XY plane) at time t.
@@ -120,6 +120,6 @@ namespace sdu_controllers::math
     quat_d << q.w(), q.x(), q.y(), q.z();
   }
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::trajectory
 
-#endif  // SDU_CONTROLLERS_MATH_TRAJECTORY_GENERATION_HPP
+#endif  // SDU_CONTROLLERS_TRAJECTORY_TRAJECTORY_GENERATION_HPP

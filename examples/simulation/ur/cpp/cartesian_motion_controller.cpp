@@ -2,9 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
-#include <sdu_controllers/math/trajectory_generation.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/trajectory/trajectory_generation.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
@@ -85,7 +85,7 @@ int main()
 
     // Desired Cartesian pose, velocity and acceleration
     Vector3d pos_d, dpos_d, ddpos_d;
-    math::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
+    trajectory::circular_trajectory(center, radius, omega, t, ramp_time, pos_d, dpos_d, ddpos_d);
 
     x_d << pos_d, rot_zyz_d;
     dx_d << dpos_d, Vector3d::Zero();

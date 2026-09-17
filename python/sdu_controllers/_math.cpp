@@ -6,14 +6,15 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_cartesian_space.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_cartesian_space.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/rnea.hpp>
+#include <sdu_controllers/kinematics/jacobian_analytical.hpp>
 #include <sdu_controllers/math/math.hpp>
 #include <sdu_controllers/math/pose.hpp>
 #include <sdu_controllers/math/pseudoinverse.hpp>
-#include <sdu_controllers/math/rnea.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 
 namespace nb = nanobind;
@@ -102,43 +103,43 @@ namespace sdu_controllers
             "Transform a 3D point using this pose.");
 
     // Core dynamics helpers
-    nb::class_<math::InverseDynamics>(m, "InverseDynamics")
+    nb::class_<dynamics::InverseDynamics>(m, "InverseDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
-        .def("get_robot_model", &math::InverseDynamics::get_robot_model, "Return underlying robot model.");
+        .def("get_robot_model", &dynamics::InverseDynamics::get_robot_model, "Return underlying robot model.");
 
-    nb::class_<math::InverseDynamicsJointSpace, math::InverseDynamics>(m, "InverseDynamicsJointSpace")
+    nb::class_<dynamics::InverseDynamicsJointSpace, dynamics::InverseDynamics>(m, "InverseDynamicsJointSpace")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
         .def(
             "inverse_dynamics",
-            &math::InverseDynamicsJointSpace::inverse_dynamics,
+            &dynamics::InverseDynamicsJointSpace::inverse_dynamics,
             nb::arg("y"),
             nb::arg("q"),
             nb::arg("dq"));
 
     /* TODO: NOT YET IMPLEMENTED
-    nb::class_<math::InverseDynamicsCartesianSpace, math::InverseDynamics>(m, "InverseDynamicsCartesianSpace")
+    nb::class_<dynamics::InverseDynamicsCartesianSpace, dynamics::InverseDynamics>(m, "InverseDynamicsCartesianSpace")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
         .def(
             "inverse_dynamics",
-            &math::InverseDynamicsCartesianSpace::inverse_dynamics,
+            &dynamics::InverseDynamicsCartesianSpace::inverse_dynamics,
             nb::arg("y"),
             nb::arg("x_ee"),
             nb::arg("dx_ee"),
             nb::arg("ddx_ee"));*/
 
-    nb::class_<math::ForwardDynamics>(m, "ForwardDynamics")
+    nb::class_<dynamics::ForwardDynamics>(m, "ForwardDynamics")
         .def(nb::init<std::shared_ptr<models::RobotModel>>(), nb::arg("robot_model"))
-        .def("forward_dynamics", &math::ForwardDynamics::forward_dynamics, nb::arg("q"), nb::arg("dq"), nb::arg("tau"));
+        .def("forward_dynamics", &dynamics::ForwardDynamics::forward_dynamics, nb::arg("q"), nb::arg("dq"), nb::arg("tau"));
 
     // Recursive Newton-Euler Algorithm
-    nb::class_<math::RecursiveNewtonEuler>(m, "RecursiveNewtonEuler")
+    nb::class_<dynamics::RecursiveNewtonEuler>(m, "RecursiveNewtonEuler")
         .def(
             nb::init<models::RobotModel &>(),
             "Initialize the RecursiveNewtonEuler algorithm with a robot model",
             nb::arg("robot_model"))
         .def(
             "inverse_dynamics",
-            &math::RecursiveNewtonEuler::inverse_dynamics,
+            &dynamics::RecursiveNewtonEuler::inverse_dynamics,
             "Compute inverse dynamics: τ = H(q)q̈ + C(q,q̇)q̇ + g(q)",
             nb::arg("q"),
             nb::arg("dq"),
@@ -146,40 +147,40 @@ namespace sdu_controllers
             nb::arg("he"))
         .def(
             "forward_dynamics",
-            &math::RecursiveNewtonEuler::forward_dynamics,
+            &dynamics::RecursiveNewtonEuler::forward_dynamics,
             "Compute forward dynamics: q̈ = H(q)⁻¹(τ - C(q,q̇)q̇ - g(q))",
             nb::arg("q"),
             nb::arg("dq"),
             nb::arg("tau"))
         .def(
             "inertia",
-            &math::RecursiveNewtonEuler::inertia,
+            &dynamics::RecursiveNewtonEuler::inertia,
             "Compute the joint-space inertia matrix H(q)",
             nb::arg("q"))
         .def(
             "velocity_product",
-            &math::RecursiveNewtonEuler::velocity_product,
+            &dynamics::RecursiveNewtonEuler::velocity_product,
             "Compute the velocity product term C(q,q̇)q̇ from the manipulator equation",
             nb::arg("q"),
             nb::arg("dq"))
         .def(
             "gravity",
-            &math::RecursiveNewtonEuler::gravity,
+            &dynamics::RecursiveNewtonEuler::gravity,
             "Compute the gravity forces g(q)",
             nb::arg("q"))
         .def(
             "set_z0",
-            &math::RecursiveNewtonEuler::set_z0,
+            &dynamics::RecursiveNewtonEuler::set_z0,
             "Set the z-axis of the base frame",
             nb::arg("z0"))
         .def(
             "get_reaction_forces_frames",
-            &math::RecursiveNewtonEuler::get_reaction_forces_frames,
+            &dynamics::RecursiveNewtonEuler::get_reaction_forces_frames,
             "Get reaction forces from the most recent inverse dynamics call"
         )
         .def(
             "get_reaction_moments_frames",
-            &math::RecursiveNewtonEuler::get_reaction_moments_frames,
+            &dynamics::RecursiveNewtonEuler::get_reaction_moments_frames,
             "Get reaction moments from the most recent inverse dynamics call"
         );
 
@@ -193,14 +194,14 @@ namespace sdu_controllers
 
     m.def(
         "jacobian_analytical",
-        &math::jacobian_analytical,
+        &kinematics::jacobian_analytical,
         nb::arg("q"),
         nb::arg("robot_model"),
         "Analytical Jacobian using current orientation parametrization (ZYZ Euler).");
 
     m.def(
         "jacobian_dot_analytical",
-        &math::jacobian_dot_analytical,
+        &kinematics::jacobian_dot_analytical,
         nb::arg("q"),
         nb::arg("dq"),
         nb::arg("robot_model"),

@@ -6,7 +6,7 @@
 #include <sdu_controllers/models/robot_model.hpp>
 #include <utility>
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
 
   /**
@@ -32,6 +32,6 @@ namespace sdu_controllers::math
     std::shared_ptr<models::RobotModel> robot_model_;
   };
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics
 
 #endif  // SDU_CONTROLLERS_INVERSE_DYNAMICS_HPP

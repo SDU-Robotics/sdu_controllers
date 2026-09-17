@@ -3,10 +3,10 @@
 #define SDU_CONTROLLERS_INVERSE_DYNAMICS_JOINT_SPACE_HPP
 
 #include <Eigen/Dense>
-#include <sdu_controllers/math/inverse_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics.hpp>
 #include <sdu_controllers/models/robot_model.hpp>
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
 
   /**
@@ -40,6 +40,6 @@ namespace sdu_controllers::math
         const Eigen::VectorXd &dq);
   };
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics
 
 #endif  // SDU_CONTROLLERS_INVERSE_DYNAMICS_JOINT_SPACE_HPP

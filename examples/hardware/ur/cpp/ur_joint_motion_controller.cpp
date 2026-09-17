@@ -4,8 +4,8 @@
 #include <limits>
 #include <iostream>
 #include <sdu_controllers/controllers/pid_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/hal/ur_robot.hpp>
 #include <sdu_controllers/models/ur_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
@@ -16,7 +16,6 @@ using namespace std::chrono;
 using namespace Eigen;
 using namespace sdu_controllers;
 using namespace sdu_controllers::utils;
-using namespace sdu_controllers::math;
 using namespace sdu_controllers::hal;
 
 constexpr double pi = 3.14159265358979323846;
@@ -84,8 +83,8 @@ int main(int argc, char* argv[])
 
   controllers::PIDController pid_controller(Kp_vec.asDiagonal(), Ki_vec.asDiagonal(),
     Kd_vec.asDiagonal(), N_vec.asDiagonal(), dt, u_min, u_max);
-  math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  math::ForwardDynamics fwd_dyn(robot_model);
+  dynamics::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  dynamics::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd q_d(ROBOT_DOF);
   VectorXd dq_d(ROBOT_DOF);

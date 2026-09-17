@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <sdu_controllers/controllers/operational_space_controller.hpp>
-#include <sdu_controllers/math/forward_dynamics.hpp>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/forward_dynamics.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
 #include <sdu_controllers/kinematics/forward_kinematics.hpp>
 #include <sdu_controllers/models/parameter_robot_model.hpp>
 #include <sdu_controllers/safety/safety_verifier.hpp>
@@ -53,8 +53,8 @@ int main()
 
   controllers::OperationalSpaceController osc_controller(Kp, Kd, robot_model);
   osc_controller.set_kappa(1e-2);
-  //math::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
-  //math::ForwardDynamics fwd_dyn(robot_model);
+  //dynamics::InverseDynamicsJointSpace inv_dyn_jnt_space(robot_model);
+  //dynamics::ForwardDynamics fwd_dyn(robot_model);
 
   VectorXd x_d(6);
   VectorXd dx_d(6);

@@ -1,10 +1,10 @@
 #include <iostream>
-#include <sdu_controllers/math/inverse_dynamics_joint_space.hpp>
+#include <sdu_controllers/dynamics/inverse_dynamics_joint_space.hpp>
 #include <utility>
 
 using namespace Eigen;
 
-namespace sdu_controllers::math
+namespace sdu_controllers::dynamics
 {
   InverseDynamicsJointSpace::InverseDynamicsJointSpace(std::shared_ptr<models::RobotModel> robot_model)
       : InverseDynamics(std::move(robot_model))
@@ -33,4 +33,4 @@ namespace sdu_controllers::math
     return tau;
   }
 
-}  // namespace sdu_controllers::math
+}  // namespace sdu_controllers::dynamics
